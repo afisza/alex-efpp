@@ -12,57 +12,51 @@ class Taxonomy_Terms_Field extends Field_Base {
         return 'Taxonomy Terms';
     }
 
-    public function render($item, $item_index, $form) {
-        // $taxonomy = $item['taxonomy_terms_type'] ?? 'category';
-        // $display_type = $item['taxonomy_terms_display'] ?? 'select';
-        // $multiple = in_array($display_type, ['multiselect', 'checkbox']);
+    public function render( $item, $item_index, $form ) {
+        // Ensure the taxonomy name is safely pulled from the $item array
+        $taxonomy = isset( $item['efpp_taxonomy'] ) ? sanitize_key( $item['efpp_taxonomy'] ) : '';
 
-        // $terms = get_terms([
-        //     'taxonomy' => $taxonomy,
-        //     'hide_empty' => false,
-        // ]);
+        // Check if the given taxonomy actually exists before proceeding
+        if ( taxonomy_exists( $taxonomy ) ) {
 
-        // if (is_wp_error($terms) || empty($terms)) {
-        //     echo '<div class="elementor-alert elementor-alert-warning">No terms found for taxonomy: ' . esc_html($taxonomy) . '</div>';
-        //     return;
-        // }
+            // Retrieve all terms from the given taxonomy, even if they are not used
+            $terms = get_terms(
+                array(
+                    'taxonomy'   => $taxonomy,
+                    'hide_empty' => false, // Set to true if you want to exclude unused terms
+                )
+            );
 
-        // $field_name = $form->get_attribute_name($item, $item_index);
+            // Begin rendering the <select> dropdown
+            printf(
+                '<select name="%1$s_term">',
+                esc_attr( $taxonomy )
+            );
 
-        // $label = $item['field_label'] ?? '';
-        // $required = !empty($item['required']) && $item['required'] === 'yes';
-        // $default = $item['field_default'] ?? '';
-        // $default_values = array_map('trim', explode(',', $default));
+            // Optional: Add a default empty option at the top
+            printf(
+                '<option value="">%s</option>',
+                esc_html( 'Select a ' . ucfirst( $taxonomy ) )
+            );
 
-        // echo '<div class="elementor-field-subgroup elementor-dynamic-taxonomy">';
+            // Only loop through the terms if there were no errors and terms were found
+            if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+                foreach ( $terms as $term ) {
+                    printf(
+                        '<option value="%1$d">%2$s</option>',
+                        esc_attr( $term->term_id ),
+                        esc_html( $term->name )
+                    );
+                }
+            }
 
-        // switch ($display_type) {
-        //     case 'select':
-        //     case 'multiselect':
-        //         echo '<select name="' . esc_attr($field_name) . ($multiple ? '[]' : '') . '" ' . ($multiple ? 'multiple' : '') . '>';
-        //         foreach ($terms as $term) {
-        //             $selected = in_array($term->slug, $default_values) ? 'selected' : '';
-        //             echo '<option value="' . esc_attr($term->slug) . '" ' . $selected . '>' . esc_html($term->name) . '</option>';
-        //         }
-        //         echo '</select>';
-        //         break;
+            // Close the <select> element
+            echo '</select>';
 
-        //     case 'radio':
-        //         foreach ($terms as $term) {
-        //             $checked = in_array($term->slug, $default_values) ? 'checked' : '';
-        //             echo '<label><input type="radio" name="' . esc_attr($field_name) . '" value="' . esc_attr($term->slug) . '" ' . $checked . '> ' . esc_html($term->name) . '</label><br>';
-        //         }
-        //         break;
-
-        //     case 'checkbox':
-        //         foreach ($terms as $term) {
-        //             $checked = in_array($term->slug, $default_values) ? 'checked' : '';
-        //             echo '<label><input type="checkbox" name="' . esc_attr($field_name) . '[]" value="' . esc_attr($term->slug) . '" ' . $checked . '> ' . esc_html($term->name) . '</label><br>';
-        //         }
-        //         break;
-        // }
-
-        // echo '</div>';
+        } else {
+            // Display an error message if the taxonomy is invalid
+            echo '<p><em>' . esc_html__( 'Invalid taxonomy selected.', 'your-text-domain' ) . '</em></p>';
+        }
     }
 
     public function update_controls( $widget ) {
@@ -101,11 +95,77 @@ class Taxonomy_Terms_Field extends Field_Base {
                 'condition' => [
 					'field_type' => $this->get_type(),
 				],
+                'render_type' => 'template',
+				'tab'          => 'content',
+				'inner_tab'    => 'form_fields_content_tab',
+				'tabs_wrapper' => 'form_fields_tabs',
             ],
         ];
 
         $control_data['fields'] = $this->inject_field_controls( $control_data['fields'], $field_controls );
 		$widget->update_control( 'form_fields', $control_data );
     }
+
+    	/**
+	 * Field constructor.
+	 *
+	 * Used to add a script to the Elementor editor preview.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 * @return void
+	 */
+	public function __construct() {
+		parent::__construct();
+		add_action( 'elementor/preview/init', [ $this, 'editor_preview_footer' ] );
+	}
+
+	/**
+	 * Elementor editor preview.
+	 *
+	 * Add a script to the footer of the editor preview screen.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 * @return void
+	 */
+	public function editor_preview_footer(): void {
+		add_action( 'wp_footer', [ $this, 'content_template_script' ] );
+	}
+
+	/**
+	 * Content template script.
+	 *
+	 * Add content template alternative, to display the field in Elementor editor.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 * @return void
+	 */
+	public function content_template_script(): void {
+		?>
+		<script>
+		jQuery( document ).ready( () => {
+
+			elementor.hooks.addFilter(
+				'elementor_pro/forms/content_template/field/<?php echo $this->get_type(); ?>',
+				function ( inputField, item, i ) {
+					// const fieldType    = 'tel';
+					// const fieldId      = `form_field_${i}`;
+					// const fieldClass   = `elementor-field-textual elementor-field ${item.css_classes}`;
+					// const inputmode    = 'numeric';
+					// const maxlength    = '19';
+					// const pattern      = '[0-9\s]{19}';
+					// const placeholder  = item['credit-card-placeholder'];
+					// const autocomplete = 'cc-number';
+
+					return `<select></select>`;
+				}, 10, 3
+			);
+
+		});
+		</script>
+		<?php
+	}
 
 }
