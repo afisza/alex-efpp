@@ -4,7 +4,7 @@ use ElementorPro\Modules\Forms\Classes\Action_Base;
 use Elementor\Core\DynamicTags\Manager as TagsManager;
 use Elementor\Core\DynamicTags\Manager as DynamicTagsManager;
 
-$manager = \Elementor\Plugin::$instance->dynamic_tags;
+//$manager = \Elementor\Plugin::$instance->dynamic_tags;
 
 if (!defined('ABSPATH')) exit;
 
@@ -74,6 +74,26 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             ]
         );
 
+        // Pole: Product Type – tylko gdy post_type = 'product'
+        $widget->add_control(
+            'alex_efpp_product_type',
+            [
+                'label' => __('Product Type', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'options' => [
+                    'simple'   => 'Simple',
+                    'grouped'  => 'Grouped',
+                    'external' => 'External/Affiliate',
+                    'variable' => 'Variable',
+                ],
+                'default' => 'simple',
+                'condition' => [
+                    'alex_efpp_post_type' => 'product',
+                    'submit_actions' => $this->get_name(),
+                ],
+            ]
+        );
+
         $widget->add_control(
             'alex_efpp_post_status',
             [
@@ -89,6 +109,20 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         );
 
         $widget->add_control(
+            'alex_efpp_price_field',
+            [
+                'label' => __('Field ID for price', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::TEXT,
+                'placeholder' => 'price',
+                'condition' => [
+                    'alex_efpp_post_type' => 'product',
+                    'submit_actions' => $this->get_name(),
+                ],
+                'ai' => [ 'active' => false ],
+            ]
+        );
+
+        $widget->add_control(
             'alex_efpp_post_title_field',
             [
                 'label' => 'Field ID for Post Title',
@@ -100,15 +134,43 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             ]
         );
 
+        $taxonomies = get_taxonomies(['public' => true], 'objects');
+        $taxonomy_options = [
+            'none' => '-- Select taxonomy --', // ← użyj 'none' zamiast pustego stringa
+        ];
+
+        foreach ($taxonomies as $taxonomy_slug => $taxonomy_obj) {
+            $taxonomy_options[$taxonomy_slug] = $taxonomy_obj->labels->name;
+        }
+
+        $widget->add_control(
+            'alex_efpp_taxonomy',
+            [
+                'label' => __('Taxonomy', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'options' => $taxonomy_options,
+                'default' => 'none',
+                'condition' => [
+                    'submit_actions' => $this->get_name(),
+                ],
+            ]
+        );
+
+
+
         $widget->add_control(
             'alex_efpp_post_category_field',
             [
-                'label' => 'Field ID for Categories',
+                'label' => 'Field ID for Taxonomy',
                 'type' => \Elementor\Controls_Manager::TEXT,
                 'placeholder' => '[field id="category"]',
-                'description' => 'Enter the shortcode of the field that should define the post categories.',
+                'description' => 'Enter the shortcode of the field that should define the post terms.',
                 'dynamic' => [ 'active' => true ],
                 'ai' => [ 'active' => false ],
+                'condition' => [
+                    'alex_efpp_taxonomy!' => 'none', // wyświetl tylko jeśli coś wybrane
+                    'submit_actions' => $this->get_name(),
+                ],
             ]
         );
 
@@ -130,6 +192,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
 
 
     public function run($record, $ajax_handler) {
+        $manager = \Elementor\Plugin::$instance->dynamic_tags;
         $settings = $record->get('form_settings');
         $fields = $record->get('fields');
         //$allowed_role = $settings['alex_efpp_allowed_role'] ?? 'subscriber';
@@ -213,6 +276,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         return;
     }
 
+
     // === CATEGORIES ===
     $cat_source = $settings['alex_efpp_post_category_field'] ?? '';
     $cat_field_id = '';
@@ -223,6 +287,8 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $cat_field_id = $cat_source;
     }
 
+    $taxonomy = $settings['alex_efpp_taxonomy'] ?? 'category';
+
     if (!empty($cat_field_id)) {
         $cat_value = $fields[$cat_field_id]['value'] ?? $manager->tag_text($cat_field_id);
         if (!empty($cat_value)) {
@@ -232,10 +298,10 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             foreach ($cat_names as $cat_name) {
                 if (empty($cat_name)) continue;
 
-                $term = get_term_by('name', $cat_name, 'category');
+                $term = get_term_by('name', $cat_name, $taxonomy);
 
                 if (!$term) {
-                    $new_term = wp_insert_term($cat_name, 'category');
+                    $new_term = wp_insert_term($cat_name, $taxonomy);
                     if (!is_wp_error($new_term)) {
                         $cat_ids[] = $new_term['term_id'];
                     }
@@ -245,9 +311,8 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             }
 
             if (!empty($cat_ids)) {
-                wp_set_post_terms($post_id, $cat_ids, 'category');
+                wp_set_post_terms($post_id, $cat_ids, $taxonomy);
             }
-
         }
     }
 
@@ -265,36 +330,79 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         }
 
 
-        // === FEATURED IMAGE ===
-        $image_source = $settings['alex_efpp_featured_image_field'] ?? '';
-        $image_field_id = '';
+    // === FEATURED IMAGE ===
+    $image_source = $settings['alex_efpp_featured_image_field'] ?? '';
+    $image_field_id = '';
 
-        if (preg_match('/\[field id="([^"]+)"\]/', $image_source, $img_match)) {
-            $image_field_id = $img_match[1];
-        } else {
-            $image_field_id = $image_source;
-        }
+    if (preg_match('/\[field id="([^"]+)"\]/', $image_source, $img_match)) {
+        $image_field_id = $img_match[1];
+    } else {
+        $image_field_id = $image_source;
+    }
 
-        if (!empty($image_field_id)) {
-            $image_url = $fields[$image_field_id]['value'] ?? $manager->tag_text($image_field_id);
+    if (!empty($image_field_id)) {
+        $image_url = $fields[$image_field_id]['value'] ?? $manager->tag_text($image_field_id);
 
-            if (!empty($image_url)) {
-                $attachment_id = $this->media_sideload_image($image_url, $post_id);
-                if ($attachment_id) {
+        if (!empty($image_url)) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/media.php';
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+
+            // Скачиваем временный файл
+            $tmp_file = download_url($image_url);
+
+            if (!is_wp_error($tmp_file)) {
+                $file_array = [
+                    'name'     => basename($image_url),
+                    'tmp_name' => $tmp_file,
+                ];
+
+                // Загружаем файл в медиатеку и прикрепляем к посту
+                $attachment_id = media_handle_sideload($file_array, $post_id);
+
+                if (!is_wp_error($attachment_id)) {
                     set_post_thumbnail($post_id, $attachment_id);
+                } else {
+                    // Удаляем временный файл при ошибке
+                    @unlink($file_array['tmp_name']);
                 }
             }
         }
+    }
 
 
-        // Tags
+
+            // Tags
         if (!empty($fields['tags']['value'])) {
             $tags = array_map('trim', explode(',', $fields['tags']['value']));
             wp_set_post_terms($post_id, $tags, 'post_tag');
         }
+
+        // === WooCommerce: obsługa produktów ===
+        if ($type === 'product') {
+            $price_field_id = $settings['alex_efpp_price_field'] ?? '';
+            $price = '';
+
+            if (!empty($price_field_id)) {
+                $price = $fields[$price_field_id]['value'] ?? $manager->tag_text($price_field_id);
+            }
+
+            $price = is_numeric($price) ? floatval($price) : 0;
+
+            update_post_meta($post_id, '_regular_price', $price);
+            update_post_meta($post_id, '_price', $price);
+
+            $product_type = $settings['alex_efpp_product_type'] ?? 'simple';
+            wp_set_object_terms($post_id, $product_type, 'product_type');
+
+            update_post_meta($post_id, '_stock_status', 'instock');
+
+            do_action('woocommerce_process_product_meta_' . $product_type, $post_id);
+        }
     }
 
     public function on_export($element) {}
+
 
     private function media_sideload_image($file_url, $post_id) {
         if (!function_exists('media_sideload_image')) {
