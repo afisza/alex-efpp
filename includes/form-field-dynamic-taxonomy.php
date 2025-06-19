@@ -22,7 +22,9 @@ class Taxonomy_Terms_Field extends Field_Base {
                 'hide_empty' => false,
             ]);
 
-            echo '<label for="' . esc_attr($field_name) . '">' . esc_html($item['title'] ?? ucfirst($taxonomy)) . '</label>';
+            $taxonomy_label = $item['title'] ?? (taxonomy_exists($taxonomy) ? get_taxonomy($taxonomy)->labels->name : ucfirst($taxonomy));
+            echo '<label for="' . esc_attr($field_name) . '">' . esc_html($taxonomy_label) . '</label>';
+
 
             echo '<div class="elementor-field elementor-select-wrapper">';
 
