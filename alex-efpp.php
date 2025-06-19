@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP
 Description: Publikuje treści z formularza Elementor jako wpis lub CPT.
-Version: 1.0.1
+Version: 1.0.2
 Author: Alex Scar
 */
 
