@@ -276,45 +276,32 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         return;
     }
 
-
-    // === CATEGORIES ===
+    // === TAXONOMY TERMS (SINGLE SELECT from term_id) ===
+    $taxonomy = $settings['alex_efpp_taxonomy'] ?? 'category';
     $cat_source = $settings['alex_efpp_post_category_field'] ?? '';
     $cat_field_id = '';
 
-    if (preg_match('/\[field id="([^"]+)"\]/', $cat_source, $cat_match)) {
-        $cat_field_id = $cat_match[1]; // legacy
+    // Obsługa [field id="..."]
+    if (preg_match('/\[field id="([^"]+)"\]/', $cat_source, $match)) {
+        $cat_field_id = $match[1];
     } else {
         $cat_field_id = $cat_source;
     }
 
-    $taxonomy = $settings['alex_efpp_taxonomy'] ?? 'category';
+    // Debugging
+    error_log("=== EFPP DEBUG ===");
+    error_log("POST_ID: " . $post_id);
+    error_log("TAXONOMY: " . $taxonomy);
+    error_log("CAT FIELD ID: " . $cat_field_id);
+    error_log("CAT FIELD VALUE: " . print_r($fields[$cat_field_id] ?? 'n/a', true));
 
-    if (!empty($cat_field_id)) {
-        $cat_value = $fields[$cat_field_id]['value'] ?? $manager->tag_text($cat_field_id);
-        if (!empty($cat_value)) {
-            $cat_names = array_map('trim', explode(',', $cat_value));
-            $cat_ids = [];
-
-            foreach ($cat_names as $cat_name) {
-                if (empty($cat_name)) continue;
-
-                $term = get_term_by('name', $cat_name, $taxonomy);
-
-                if (!$term) {
-                    $new_term = wp_insert_term($cat_name, $taxonomy);
-                    if (!is_wp_error($new_term)) {
-                        $cat_ids[] = $new_term['term_id'];
-                    }
-                } else {
-                    $cat_ids[] = $term->term_id;
-                }
-            }
-
-            if (!empty($cat_ids)) {
-                wp_set_post_terms($post_id, $cat_ids, $taxonomy);
-            }
+    if (!empty($taxonomy) && !empty($cat_field_id) && taxonomy_exists($taxonomy)) {
+        $term_id = $fields[$cat_field_id]['value'] ?? $manager->tag_text($cat_field_id);
+        if (!empty($term_id)) {
+            wp_set_post_terms($post_id, [(int) $term_id], $taxonomy, false);
         }
     }
+
 
 
         // Save custom fields as post meta
