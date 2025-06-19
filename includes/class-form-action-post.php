@@ -304,17 +304,26 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
 
 
 
-        // Save custom fields as post meta
-        foreach ($fields as $id => $field) {
-            if (in_array($id, [$title_field_id, 'content', 'image', 'category', 'tags'])) continue;
+    // Save custom fields as post meta
+    foreach ($fields as $id => $field) {
+        // Pomijamy systemowe pola (tytuł, treść, obraz, itd.)
+        if (in_array($id, ['title', 'content', 'image_url', 'tags', 'category'])) continue;
 
-            $value = $field['value'];
-            if (strpos($value, ',') !== false) {
-                $value = array_map('trim', explode(',', $value));
-            }
+        $value = $field['value'];
 
-            update_post_meta($post_id, $id, $value);
+        // Jeśli pole to checkbox lub select z wieloma wartościami – rozbij na tablicę
+        if (
+            isset($field['type']) &&
+            in_array($field['type'], ['checkbox', 'select']) &&
+            is_string($value) &&
+            strpos($value, ',') !== false
+        ) {
+            $value = array_map('trim', explode(',', $value));
         }
+
+        update_post_meta($post_id, $id, $value);
+    }
+
 
 
     // === FEATURED IMAGE ===
