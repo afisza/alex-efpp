@@ -4,15 +4,15 @@
         if (widgetType !== 'form') return;
 
         const tryRenderHint = (retries = 20) => {
-            console.log('[EFPP] tryRenderHint called. Retries left:', retries);
+            //console.log('[EFPP] tryRenderHint called. Retries left:', retries);
 
             const settings = model.get('settings');
             const formFields = settings?.get('form_fields'); // Backbone.Collection
             const efppTitleControl = view.$el.find('[data-setting="alex_efpp_post_title_field"]');
 
-            console.log('[EFPP] formFields:', formFields);
-            console.log('[EFPP] formFields.models:', formFields?.models);
-            console.log('[EFPP] efppTitleControl found:', efppTitleControl.length > 0);
+            //console.log('[EFPP] formFields:', formFields);
+            //console.log('[EFPP] formFields.models:', formFields?.models);
+            //console.log('[EFPP] efppTitleControl found:', efppTitleControl.length > 0);
 
             if (!efppTitleControl.length || !formFields || !formFields.models?.length) {
                 if (retries > 0) {
@@ -50,6 +50,6 @@
         };
 
         tryRenderHint();
-        console.log('[EFPP] admin-hint.js loaded');
+        //console.log('[EFPP] admin-hint.js loaded');
     });
 })(jQuery);

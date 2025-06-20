@@ -65,7 +65,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $widget->add_control(
             'alex_efpp_post_mode',
             [
-                'label' => __('Post Mode', 'alex-efpp'),
+                'label' => __('Action', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::SELECT,
                 'default' => 'create',
                 'options' => [
@@ -77,6 +77,40 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 ],
             ]
         );
+
+        $widget->add_control(
+            'alex_efpp_redirect_after_submit',
+            [
+                'label' => __('Redirect to post after submit', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Yes', 'alex-efpp'),
+                'label_off' => __('No', 'alex-efpp'),
+                'return_value' => 'yes',
+                'default' => 'no',
+                'condition' => [
+                    'submit_actions' => $this->get_name(),
+                    'alex_efpp_post_mode' => 'update',
+                ],
+            ]
+        );
+
+        $widget->add_control(
+        'alex_efpp_redirect_after_submit_create',
+        [
+            'label' => __('Redirect to new post after submit', 'alex-efpp'),
+            'type' => \Elementor\Controls_Manager::SWITCHER,
+            'label_on' => __('Yes', 'alex-efpp'),
+            'label_off' => __('No', 'alex-efpp'),
+            'return_value' => 'yes',
+            'default' => 'no',
+            'condition' => [
+                'submit_actions' => $this->get_name(),
+                'alex_efpp_post_mode' => 'create',
+            ],
+        ]
+    );
+
+
 
 
         $widget->add_control(
@@ -185,7 +219,9 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 'default' => 'none',
                 'condition' => [
                     'submit_actions' => $this->get_name(),
+                    'alex_efpp_post_type!' => 'page',
                 ],
+                'ai' => [ 'active' => false ],
             ]
         );
 
@@ -203,6 +239,8 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 'condition' => [
                     'alex_efpp_taxonomy!' => 'none', // wyświetl tylko jeśli coś wybrane
                     'submit_actions' => $this->get_name(),
+                    'alex_efpp_post_type!' => 'page',
+                    'alex_efpp_taxonomy!' => 'none',
                 ],
             ]
         );
@@ -294,40 +332,70 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
     }
 
 
-    $content = $fields['content']['value'] ?? '';
+    $content = isset($fields['content']) ? $fields['content']['value'] : '';
     $type    = $settings['alex_efpp_post_type'] ?? 'post';
     $status  = $settings['alex_efpp_post_status'] ?? 'draft';
 
+        // === CREATE or UPDATE ===
     $post_data = [
-    'post_type'    => $type,
-    'post_status'  => $status,
-    'post_title'   => sanitize_text_field($title),
-    'post_content' => wp_kses_post($content),
+        'post_type'    => $type,
+        'post_status'  => $status,
+        'post_title'   => sanitize_text_field($title),
+        'post_content' => wp_kses_post($content),
     ];
 
-    // === CREATE ===
-    if ($post_mode === 'create') {
-        $post_id = wp_insert_post($post_data);
-    }
-
-    // === UPDATE ===
     if ($post_mode === 'update') {
         $post_id_field = $settings['alex_efpp_post_id_field'] ?? 'post_id';
         $update_post_id = $fields[$post_id_field]['value'] ?? null;
 
         if (!empty($update_post_id) && get_post_status($update_post_id)) {
-            $post_data['ID'] = (int)$update_post_id;
+            $post_data['ID'] = (int) $update_post_id;
             $post_id = wp_update_post($post_data);
         } else {
             $ajax_handler->add_error_message(__('Post ID is missing or invalid.', 'alex-efpp'));
             return;
         }
+    } else {
+        $post_id = wp_insert_post($post_data);
+
+        if (is_wp_error($post_id)) {
+            $ajax_handler->add_error_message(__('Error saving post.', 'alex-efpp'));
+            return;
+        }
+
+        // Redirect if enabled
+        if (!empty($settings['alex_efpp_redirect_after_submit_create']) && $settings['alex_efpp_redirect_after_submit_create'] === 'yes') {
+            $ajax_handler->add_success_message(__('Zapisano. Trwa przekierowanie do nowego wpisu...', 'alex-efpp'));
+            $ajax_handler->add_response_data('redirect_url', get_permalink($post_id));
+        } elseif (!empty($settings['alex_efpp_reload_after_submit']) && $settings['alex_efpp_reload_after_submit'] === 'yes') {
+            $ajax_handler->add_success_message(__('Zapisano. Trwa odświeżanie strony...', 'alex-efpp'));
+        }
     }
 
+
+    // globalne sprawdzenie błędu
     if (is_wp_error($post_id)) {
-        $ajax_handler->add_error_message(__('Error creating post.', 'alex-efpp'));
+        $ajax_handler->add_error_message(__('Error saving post.', 'alex-efpp'));
         return;
     }
+
+    // redirect lub reload
+    if ($post_mode === 'update') {
+        if (!empty($settings['alex_efpp_redirect_after_submit']) && $settings['alex_efpp_redirect_after_submit'] === 'yes') {
+            $ajax_handler->add_success_message(__('Zapisano. Trwa przekierowanie...', 'alex-efpp'));
+            $ajax_handler->add_response_data('redirect_url', get_permalink($post_id));
+        } elseif (!empty($settings['alex_efpp_reload_after_submit']) && $settings['alex_efpp_reload_after_submit'] === 'yes') {
+            $ajax_handler->add_success_message(__('Zapisano. Trwa odświeżanie strony...', 'alex-efpp'));
+        }
+    }
+
+    // Reload if enabled
+    if (!empty($settings['alex_efpp_reload_after_submit']) && $settings['alex_efpp_reload_after_submit'] === 'yes') {
+        $ajax_handler->add_success_message(__('Zapisano. Trwa odświeżanie strony...', 'alex-efpp'));
+        // Ustawiamy aktualny adres strony jako redirect_url
+        $ajax_handler->add_response_data( 'redirect_url', get_permalink($post_id) );
+    }
+
 
     // === TAXONOMY TERMS (SINGLE SELECT from term_id) ===
     $taxonomy = $settings['alex_efpp_taxonomy'] ?? 'category';
@@ -348,10 +416,21 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
     error_log("CAT FIELD ID: " . $cat_field_id);
     error_log("CAT FIELD VALUE: " . print_r($fields[$cat_field_id] ?? 'n/a', true));
 
-    if (!empty($taxonomy) && !empty($cat_field_id) && taxonomy_exists($taxonomy)) {
-        $term_id = $fields[$cat_field_id]['value'] ?? $manager->tag_text($cat_field_id);
+    if (!empty($taxonomy) && taxonomy_exists($taxonomy)) {
+        $term_id = null;
+
+        if (!empty($cat_field_id)) {
+            $term_id = $fields[$cat_field_id]['value'] ?? $manager->tag_text($cat_field_id);
+        }
+
         if (!empty($term_id)) {
             wp_set_post_terms($post_id, [(int) $term_id], $taxonomy, false);
+        } else {
+            // Add to default category if field is empty
+            $default_term = get_option('default_category');
+            if ($taxonomy === 'category' && $default_term) {
+                wp_set_post_terms($post_id, [(int) $default_term], 'category', false);
+            }
         }
     }
 
@@ -360,7 +439,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
     // Save custom fields as post meta
     foreach ($fields as $id => $field) {
         // Pomijamy systemowe pola (tytuł, treść, obraz, itd.)
-        if (in_array($id, ['title', 'content', 'image_url', 'tags', 'category'])) continue;
+        if (in_array($id, ['title', 'content', 'image_url', 'tags', 'category', 'post_id', 'price', 'postname'])) continue;
 
         $value = $field['value'];
 
@@ -374,8 +453,17 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             $value = array_map('trim', explode(',', $value));
         }
 
+        // Nie nadpisuj, jeśli pole jest puste, a w meta już coś istnieje
+        if (
+            ($value === '' || is_null($value)) &&
+            metadata_exists('post', $post_id, $id)
+        ) {
+            continue;
+        }
+
         update_post_meta($post_id, $id, $value);
     }
+
 
 
 
