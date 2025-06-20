@@ -471,44 +471,41 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
     $image_source = $settings['alex_efpp_featured_image_field'] ?? '';
     $image_field_id = '';
 
+    // Obsługa dynamic tag / shortcode
     if (preg_match('/\[field id="([^"]+)"\]/', $image_source, $img_match)) {
         $image_field_id = $img_match[1];
     } else {
         $image_field_id = $image_source;
     }
 
-    if (!empty($image_field_id)) {
-        $image_url = $fields[$image_field_id]['value'] ?? $manager->tag_text($image_field_id);
+    // 💡 NEW: próbujemy odczytać pole ręcznie z $_POST jeśli nie ma go w fields[]
+    $image_url = '';
+    if (isset($fields[$image_field_id]['value']) && !empty($fields[$image_field_id]['value'])) {
+        $image_url = $fields[$image_field_id]['value'];
+    } elseif (!empty($_POST[$image_field_id])) {
+        $image_url = sanitize_text_field($_POST[$image_field_id]);
+    }
 
-        if (!empty($image_url)) {
-            require_once ABSPATH . 'wp-admin/includes/file.php';
-            require_once ABSPATH . 'wp-admin/includes/media.php';
-            require_once ABSPATH . 'wp-admin/includes/image.php';
+    if (!empty($image_url)) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/media.php';
+        require_once ABSPATH . 'wp-admin/includes/image.php';
 
-            // Скачиваем временный файл
-            $tmp_file = download_url($image_url);
+        // Ściągamy obraz i przypisujemy
+        $tmp_file = download_url($image_url);
 
-            if (!is_wp_error($tmp_file)) {
-                $file_array = [
-                    'name'     => basename($image_url),
-                    'tmp_name' => $tmp_file,
-                ];
+        if (!is_wp_error($tmp_file)) {
+            $file_array = [
+                'name'     => basename($image_url),
+                'tmp_name' => $tmp_file,
+            ];
 
-                // Загружаем файл в медиатеку и прикрепляем к посту
-                $attachment_id = media_handle_sideload($file_array, $post_id);
+            $attachment_id = media_handle_sideload($file_array, $post_id);
 
-                if (!is_wp_error($attachment_id)) {
-                    // usuń poprzedni thumbnail jeśli istnieje
-                    $old_thumbnail_id = get_post_thumbnail_id($post_id);
-                    if (!empty($old_thumbnail_id)) {
-                        wp_delete_attachment($old_thumbnail_id, true);
-                    }
-
-                    set_post_thumbnail($post_id, $attachment_id);
-                } else {
-                    // Удаляем временный файл при ошибке
-                    @unlink($file_array['tmp_name']);
-                }
+            if (!is_wp_error($attachment_id)) {
+                set_post_thumbnail($post_id, $attachment_id);
+            } else {
+                @unlink($file_array['tmp_name']); // Czyścimy w razie błędu
             }
         }
     }
