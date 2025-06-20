@@ -15,7 +15,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
     }
 
     public function get_label() {
-        return 'Alex EFPP – Create Post';
+        return 'EFPP – Create/Update Post';
     }
 
     public function register_settings_section($widget) {
@@ -56,6 +56,22 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 'options' => $role_options,
                 'default' => 'subscriber',
                 'label_block' => true,
+                'condition' => [
+                    'submit_actions' => $this->get_name(),
+                ],
+            ]
+        );
+
+        $widget->add_control(
+            'alex_efpp_post_mode',
+            [
+                'label' => __('Post Mode', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'default' => 'create',
+                'options' => [
+                    'create' => __('Create Post', 'alex-efpp'),
+                    'update' => __('Update Post', 'alex-efpp'),
+                ],
                 'condition' => [
                     'submit_actions' => $this->get_name(),
                 ],
@@ -107,6 +123,23 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 'default' => 'draft',
             ]
         );
+
+        $widget->add_control(
+        'alex_efpp_post_id_field',
+        [
+            'label' => __('Post ID form field', 'alex-efpp'),
+            'type' => \Elementor\Controls_Manager::TEXT,
+            'default' => 'post_id',
+            'placeholder' => 'post_id',
+            'description' => __('Used only in "Update" mode.', 'alex-efpp'),
+            'condition' => [
+                'alex_efpp_post_mode' => 'update',
+                'submit_actions' => $this->get_name(),
+            ],
+            'ai' => [ 'active' => false ],
+        ]
+    );
+
 
         $widget->add_control(
             'alex_efpp_price_field',
@@ -194,6 +227,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
     public function run($record, $ajax_handler) {
         $manager = \Elementor\Plugin::$instance->dynamic_tags;
         $settings = $record->get('form_settings');
+        $post_mode = $settings['alex_efpp_post_mode'] ?? 'create';
         $fields = $record->get('fields');
         //$allowed_role = $settings['alex_efpp_allowed_role'] ?? 'subscriber';
         $allowed_roles = $settings['alex_efpp_allowed_role'] ?? ['subscriber'];
@@ -264,12 +298,31 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
     $type    = $settings['alex_efpp_post_type'] ?? 'post';
     $status  = $settings['alex_efpp_post_status'] ?? 'draft';
 
-    $post_id = wp_insert_post([
-        'post_type'    => $type,
-        'post_status'  => $status,
-        'post_title'   => sanitize_text_field($title),
-        'post_content' => wp_kses_post($content),
-    ]);
+    $post_data = [
+    'post_type'    => $type,
+    'post_status'  => $status,
+    'post_title'   => sanitize_text_field($title),
+    'post_content' => wp_kses_post($content),
+    ];
+
+    // === CREATE ===
+    if ($post_mode === 'create') {
+        $post_id = wp_insert_post($post_data);
+    }
+
+    // === UPDATE ===
+    if ($post_mode === 'update') {
+        $post_id_field = $settings['alex_efpp_post_id_field'] ?? 'post_id';
+        $update_post_id = $fields[$post_id_field]['value'] ?? null;
+
+        if (!empty($update_post_id) && get_post_status($update_post_id)) {
+            $post_data['ID'] = (int)$update_post_id;
+            $post_id = wp_update_post($post_data);
+        } else {
+            $ajax_handler->add_error_message(__('Post ID is missing or invalid.', 'alex-efpp'));
+            return;
+        }
+    }
 
     if (is_wp_error($post_id)) {
         $ajax_handler->add_error_message(__('Error creating post.', 'alex-efpp'));
