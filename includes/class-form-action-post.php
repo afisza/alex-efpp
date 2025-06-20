@@ -498,6 +498,12 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 $attachment_id = media_handle_sideload($file_array, $post_id);
 
                 if (!is_wp_error($attachment_id)) {
+                    // usuń poprzedni thumbnail jeśli istnieje
+                    $old_thumbnail_id = get_post_thumbnail_id($post_id);
+                    if (!empty($old_thumbnail_id)) {
+                        wp_delete_attachment($old_thumbnail_id, true);
+                    }
+
                     set_post_thumbnail($post_id, $attachment_id);
                 } else {
                     // Удаляем временный файл при ошибке
