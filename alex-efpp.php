@@ -52,6 +52,12 @@ class Alex_EFPP {
         if (class_exists('\Taxonomy_Terms_Field')) {
             $fields_manager->register(new \Taxonomy_Terms_Field());
         }
+
+        // Pole Featured Image Upload + Preview
+        require_once plugin_dir_path(__FILE__) . 'includes/form-field-featured-image.php';
+        if (class_exists('\EFPP_Featured_Image_Field')) {
+            $fields_manager->register(new \EFPP_Featured_Image_Field());
+        }
     }
 
 }

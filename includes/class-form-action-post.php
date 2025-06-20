@@ -410,11 +410,11 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
     }
 
     // Debugging
-    error_log("=== EFPP DEBUG ===");
-    error_log("POST_ID: " . $post_id);
-    error_log("TAXONOMY: " . $taxonomy);
-    error_log("CAT FIELD ID: " . $cat_field_id);
-    error_log("CAT FIELD VALUE: " . print_r($fields[$cat_field_id] ?? 'n/a', true));
+    //error_log("=== EFPP DEBUG ===");
+    //error_log("POST_ID: " . $post_id);
+    //error_log("TAXONOMY: " . $taxonomy);
+    //error_log("CAT FIELD ID: " . $cat_field_id);
+    //error_log("CAT FIELD VALUE: " . print_r($fields[$cat_field_id] ?? 'n/a', true));
 
     if (!empty($taxonomy) && taxonomy_exists($taxonomy)) {
         $term_id = null;
@@ -509,6 +509,48 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     // Удаляем временный файл при ошибке
                     @unlink($file_array['tmp_name']);
                 }
+            }
+        }
+    }
+
+
+        // === EFPP FEATURED IMAGE ===
+    $image_field_id = 'efpp_featured_image'; // ID pola formularza – musi być identyczny jak w form config
+    $image_url = '';
+
+    if (!empty($fields[$image_field_id]['value'])) {
+        $image_url = esc_url_raw($fields[$image_field_id]['value']);
+    }
+
+    if (!empty($image_url)) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/media.php';
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+
+        // Pobieramy ID poprzedniego obrazka wyróżniającego
+        $prev_thumbnail_id = get_post_thumbnail_id($post_id);
+
+        // Pobieramy i zapisujemy nowy obrazek
+        $tmp_file = download_url($image_url);
+        if (!is_wp_error($tmp_file)) {
+            $file_array = [
+                'name'     => basename($image_url),
+                'tmp_name' => $tmp_file,
+            ];
+
+            $attachment_id = media_handle_sideload($file_array, $post_id);
+
+            if (!is_wp_error($attachment_id)) {
+                set_post_thumbnail($post_id, $attachment_id);
+
+                // Usuwamy poprzedni obrazek (jeśli istnieje i nie jest taki sam)
+                if ($prev_thumbnail_id && $prev_thumbnail_id !== $attachment_id) {
+                    wp_delete_attachment($prev_thumbnail_id, true);
+                }
+
+            } else {
+                // Błąd – usuwamy plik tymczasowy
+                @unlink($file_array['tmp_name']);
             }
         }
     }
