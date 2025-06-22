@@ -12,8 +12,8 @@ class Taxonomy_Terms_Field extends Field_Base {
         return 'Taxonomy Terms';
     }
 
-    public function render( $item, $item_index, $form ) {
-        $taxonomy = isset( $item['efpp_taxonomy'] ) ? sanitize_key( $item['efpp_taxonomy'] ) : '';
+    public function render($item, $item_index, $form) {
+        $taxonomy = isset($item['efpp_taxonomy']) ? sanitize_key($item['efpp_taxonomy']) : '';
         $field_name = isset($item['custom_id']) && !empty($item['custom_id']) ? $item['custom_id'] : $taxonomy;
 
         $taxonomy_label = $item['title']
@@ -21,11 +21,6 @@ class Taxonomy_Terms_Field extends Field_Base {
                 ? get_taxonomy($taxonomy)->labels->name
                 : ucfirst(str_replace('_', ' ', $taxonomy))
             );
-
-        echo sprintf(
-            '<div class="elementor-field-type-taxonomy_terms elementor-field-group elementor-column elementor-field-group-%1$s elementor-col-100">',
-            esc_attr($field_name)
-        );
 
         echo sprintf(
             '<label for="form-field-%1$s" class="elementor-field-label">%2$s</label>',
@@ -60,9 +55,8 @@ class Taxonomy_Terms_Field extends Field_Base {
 
         printf(
             '<option value="">%s</option>',
-            esc_html( sprintf( $label_template, $taxonomy_term_label ) )
+            esc_html( sprintf($label_template, $taxonomy_term_label) )
         );
-
 
         if (taxonomy_exists($taxonomy)) {
             $terms = get_terms([
@@ -82,7 +76,6 @@ class Taxonomy_Terms_Field extends Field_Base {
         }
 
         echo '</select>';
-        echo '</div>';
         echo '</div>';
     }
 
@@ -190,7 +183,7 @@ class Taxonomy_Terms_Field extends Field_Base {
                         options += `<option value="${term.id}">${term.name}</option>`;
                     });
 
-                    return `<div class="elementor-field-type-taxonomy_terms elementor-field-group elementor-column elementor-field-group-${fieldName} elementor-col-100">
+                    return `<div class="elementor-field-type-taxonomy_terms elementor-column elementor-field-group-${fieldName} elementor-col-100">
                         <label for="${fieldId}" class="elementor-field-label">${fieldLabel}</label>
                         <div class="elementor-field elementor-select-wrapper">
                             <select id="${fieldId}" name="form_fields[${fieldName}]" class="elementor-field-textual elementor-select">
