@@ -13,63 +13,104 @@ class Dynamic_Choose_Field extends Field_Base {
     }
 
     public function render($item, $item_index, $form) {
-        $source_type = $item['source_type'] ?? 'acf';
-        $field_name = $item['field_name'] ?? '';
-        $input_type = $item['input_type'] ?? 'select';
+        $source_type = $item['efpp_dc_source_type'] ?? 'acf';
+        $input_type = $item['efpp_dc_input_type'] ?? 'select';
+
+        switch ($source_type) {
+            case 'acf':
+                $acf_field_group_post_id = $item['efpp_dc_acf_field_group_post_id'];
+                $field_name = $item['efpp_dc_acf_field_name'];
+
+                if (function_exists('acf_get_fields')) {
+                    $field_group_key = get_post_field('post_name', $acf_field_group_post_id);
+
+                    $fields = acf_get_fields($field_group_key );
+
+                    $options = [];
+
+                    if ($fields) {
+                        foreach ($fields as $field) {
+                            error_log( "field\n" . print_r( $field, true ) . "\n" );
+                            if ($field['name'] === $field_name && $field['type'] === $input_type) {
+                                $options = $field['choices'];
+                                break;
+                            }
+                        }
+                    }
+
+                }
+                break;
+
+            case 'jetengine':
+
+                break;
+            
+            default:
+                # code...
+                break;
+        }
 
         // TODO: logika pobierania wartości z metadanych ACF/JetEngine
-        $values = [];
 
-        if ($source_type === 'acf' && function_exists('get_field_object')) {
-            $field_object = get_field_object($field_name);
-            if ($field_object && !empty($field_object['choices'])) {
-                $values = $field_object['choices'];
-            }
-        }
 
-        if ($source_type === 'jetengine' && function_exists('jet_engine')) {
-            $meta_boxes = jet_engine()->meta_boxes->meta_boxes ?? [];
-            foreach ($meta_boxes as $group) {
-                if (isset($group['fields'])) {
-                    foreach ($group['fields'] as $field) {
-                        if ($field['name'] === $field_name && isset($field['options'])) {
-                            $values = $field['options'];
-                            break 2;
-                        }
-                    }
-                }
-            }
+        // if ($source_type === 'jetengine' && function_exists('jet_engine')) {
+            // $meta_boxes = jet_engine()->meta_boxes->meta_boxes ?? [];
+            // foreach ($meta_boxes as $group) {
+                // if (isset($group['fields'])) {
+                    // foreach ($group['fields'] as $field) {
+                        // if ($field['name'] === $field_name && isset($field['options'])) {
+                            // $values = $field['options'];
+                            // break 2;
+                        // }
+                    // }
+                // }
+            // }
 
-            // Dodatkowo: CPT field fallback
-            $post_types = jet_engine()->post_types->post_types ?? [];
-            foreach ($post_types as $type) {
-                if (isset($type['fields'])) {
-                    foreach ($type['fields'] as $field) {
-                        if ($field['name'] === $field_name && isset($field['options'])) {
-                            $values = $field['options'];
-                            break 2;
-                        }
-                    }
-                }
-            }
-        }
+            // // Dodatkowo: CPT field fallback
+            // $post_types = jet_engine()->post_types->post_types ?? [];
+            // foreach ($post_types as $type) {
+                // if (isset($type['fields'])) {
+                    // foreach ($type['fields'] as $field) {
+                        // if ($field['name'] === $field_name && isset($field['options'])) {
+                            // $values = $field['options'];
+                            // break 2;
+                        // }
+                    // }
+                // }
+            // }
+        // }
 
         echo '<label for="form-field-' . esc_attr($field_name) . '" class="elementor-field-label">' . esc_html($item['title'] ?? 'Dynamic Field') . '</label>';
         echo '<div class="elementor-field elementor-select-wrapper">';
 
         if ($input_type === 'select') {
-            echo '<select 
-                name="form_fields[' . esc_attr($field_name) . ']" 
-                id="form-field-' . esc_attr($field_name) . '" 
-                class="elementor-field-textual elementor-select efpp-dynamic-select" 
-                data-field-type="efpp-dynamic-choose">
-            ';
 
-            echo '<option value="">Wybierz</option>';
-            foreach ($values as $val => $label) {
-                echo '<option value="' . esc_attr($val) . '">' . esc_html($label) . '</option>';
-            }
-            echo '</select>';
+        }
+
+        switch ($input_type) {
+            case 'select':
+                echo '<select 
+                    name="form_fields[' . esc_attr($field_name) . ']" 
+                    id="form-field-' . esc_attr($field_name) . '" 
+                    class="elementor-field-textual elementor-select efpp-dynamic-select" 
+                    data-field-type="efpp-dynamic-choose">
+                ';
+
+                echo '<option value="">Wybierz</option>';
+                    foreach ($options as $value => $label) {
+                        echo '<option value="' . esc_attr($value) . '">' . esc_html($label) . '</option>';
+                    }
+                echo '</select>';
+                break;
+            
+            case 'radio':
+
+                break;
+ 
+ 
+            case 'checkboxes':
+
+                break;
         }
 
         echo '</div>';
@@ -82,8 +123,8 @@ class Dynamic_Choose_Field extends Field_Base {
         error_log('EFPP: update_controls działa.');
 
         $field_controls = [
-            'source_type' => [
-                'name' => 'source_type',
+            'efpp_dc_source_type' => [
+                'name' => 'efpp_dc_source_type',
                 'label' => esc_html__('Source', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::SELECT,
                 'options' => [
@@ -98,7 +139,8 @@ class Dynamic_Choose_Field extends Field_Base {
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
             ],
-            'acf_field_group' => [
+            'efpp_dc_acf_field_group_post_id' => [
+                'name' => 'efpp_dc_acf_field_group_post_id',
 				'label'     => esc_html__( 'ACF Fields Group', 'alex-efpp' ),
 				'label_block' => true,
 				'type'      => \Elementor\Controls_Manager::SELECT2,
@@ -134,38 +176,35 @@ class Dynamic_Choose_Field extends Field_Base {
 
 					return $options;
 				} )(),
-				'condition' => [
-					'use_custom_query' => 'yes',
-				],
                 'tabs_wrapper' => 'form_fields_tabs',
                 'inner_tab' => 'form_fields_content_tab',
                 'tab' => 'content',
                 'condition' => [
                     'field_type' => $this->get_type(),
-                    'source_type' => 'acf',
+                    'efpp_dc_source_type' => 'acf',
                 ],
             ],
-            'acf_field_name' => [
-                'name' => 'field_name',
+            'efpp_dc_acf_field_name' => [
+                'name' => 'efpp_dc_acf_field_name',
                 'label' => esc_html__( 'Field name', 'alex-efpp' ),
                 'type' => \Elementor\Controls_Manager::TEXT,
                 'placeholder' => 'e.g. car_brand',
                 'condition' => [
                     'field_type' => $this->get_type(),
-                    'source_type' => 'acf',
+                    'efpp_dc_source_type' => 'acf',
                 ],
                 'tab' => 'content',
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
             ],
-            'input_type' => [
-                'name' => 'input_type',
-                'label' => esc_html__('Input Type', 'alex-efpp'),
+            'efpp_dc_input_type' => [
+                'name' => 'efpp_dc_input_type',
+                'label' => esc_html__('Field Type', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::SELECT,
                 'options' => [
                     'select' => 'Select',
                     'radio' => 'Radio',
-                    'checkbox' => 'Checkbox',
+                    'checkboxes' => 'Checkbox',
                 ],
                 'default' => 'select',
                 'condition' => [
