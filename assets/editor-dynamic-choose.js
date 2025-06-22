@@ -1,11 +1,16 @@
 jQuery(function ($) {
-  $(document).on('focus', '.elementor-control[data-setting="field_group"] select', function () {
-    const $select = $(this);
+  $(document).on('focus', '.elementor-repeater-row-controls select[data-setting="field_group"]', function () {
     console.log('EFPP: field_group select focused');
 
+    const $select = $(this);
+
+    // zapobiegaj dublowaniu
     if ($select.find('option').length > 1) return;
 
-    const $sourceSelect = $('.elementor-control[data-setting="source_type"] select');
+    const $sourceSelect = $select
+      .closest('.elementor-repeater-row-controls')
+      .find('select[data-setting="source_type"]');
+
     const sourceType = $sourceSelect.val() || 'acf';
     console.log('EFPP: używamy sourceType =', sourceType);
 
@@ -23,8 +28,6 @@ jQuery(function ($) {
       } else {
         console.warn('EFPP: AJAX response error', res);
       }
-    }).fail(function (xhr) {
-      console.error('EFPP: AJAX failed', xhr.responseText);
     });
   });
 });
