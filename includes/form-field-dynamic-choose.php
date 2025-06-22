@@ -59,11 +59,11 @@ class Dynamic_Choose_Field extends Field_Base {
 
         if ($input_type === 'select') {
             echo '<select 
-    name="form_fields[' . esc_attr($field_name) . ']" 
-    id="form-field-' . esc_attr($field_name) . '" 
-    class="elementor-field-textual elementor-select efpp-dynamic-select" 
-    data-field-type="efpp-dynamic-choose">
-';
+                name="form_fields[' . esc_attr($field_name) . ']" 
+                id="form-field-' . esc_attr($field_name) . '" 
+                class="elementor-field-textual elementor-select efpp-dynamic-select" 
+                data-field-type="efpp-dynamic-choose">
+            ';
 
             echo '<option value="">Wybierz</option>';
             foreach ($values as $val => $label) {
@@ -98,29 +98,61 @@ class Dynamic_Choose_Field extends Field_Base {
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
             ],
+            'acf_field_group' => [
+				'label'     => esc_html__( 'ACF Fields Group', 'alex-efpp' ),
+				'label_block' => true,
+				'type'      => \Elementor\Controls_Manager::SELECT2,
+				'options'   => ( function() {
+					$options = array();
 
-            'field_group' => [
-                'name' => 'field_group',
-                'label' => esc_html__('Field Group / MetaBox', 'alex-efpp'),
-                'type' => \Elementor\Controls_Manager::SELECT,
-                'options' => [],
-                'condition' => [
-                    'field_type' => $this->get_type(),
-                ],
-                'label_block' => true,
-                'multiple' => false,
+					// Define the WP_Query arguments
+					$args = array(
+						'post_type'      => 'acf-field-group', // Replace with your post type
+						'posts_per_page' => -1,              // Get all posts
+						'post_status'    => 'publish',       // Only published posts
+					);
+
+					// Initialize WP_Query
+					$query = new WP_Query( $args );
+
+					// Check if there are posts available
+					if ( $query->have_posts() ) {
+						// $options[''] = esc_html__( 'Select Query', 'admin' );
+
+						// Loop through the posts and set them in the options array
+						while ( $query->have_posts() ) {
+							$query->the_post();
+							$options[ get_the_ID() ] = get_the_title(); // Set post ID as the key and post title as the value
+						}
+					} else {
+						// If no posts found, set a default message
+						$options[''] = esc_html__( 'No Field Groups Found', 'alex-efpp' );
+					}
+
+					// Restore original Post Data
+					wp_reset_postdata();
+
+					return $options;
+				} )(),
+				'condition' => [
+					'use_custom_query' => 'yes',
+				],
                 'tabs_wrapper' => 'form_fields_tabs',
                 'inner_tab' => 'form_fields_content_tab',
                 'tab' => 'content',
+                'condition' => [
+                    'field_type' => $this->get_type(),
+                    'source_type' => 'acf',
+                ],
             ],
-
-            'field_name' => [
+            'acf_field_name' => [
                 'name' => 'field_name',
-                'label' => esc_html__('Field name', 'alex-efpp'),
+                'label' => esc_html__( 'Field name', 'alex-efpp' ),
                 'type' => \Elementor\Controls_Manager::TEXT,
                 'placeholder' => 'e.g. car_brand',
                 'condition' => [
                     'field_type' => $this->get_type(),
+                    'source_type' => 'acf',
                 ],
                 'tab' => 'content',
                 'inner_tab' => 'form_fields_content_tab',
