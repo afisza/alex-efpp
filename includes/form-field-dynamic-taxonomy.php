@@ -16,17 +16,15 @@ class Taxonomy_Terms_Field extends Field_Base {
         $taxonomy = isset($item['efpp_taxonomy']) ? sanitize_key($item['efpp_taxonomy']) : '';
         $field_name = isset($item['custom_id']) && !empty($item['custom_id']) ? $item['custom_id'] : $taxonomy;
 
-        $taxonomy_label = $item['title']
-            ?? ( taxonomy_exists($taxonomy)
-                ? get_taxonomy($taxonomy)->labels->name
-                : ucfirst(str_replace('_', ' ', $taxonomy))
-            );
+        $custom_label = trim($item['title'] ?? '');
 
-        echo sprintf(
-            '<label for="form-field-%1$s" class="elementor-field-label">%2$s</label>',
-            esc_attr($field_name),
-            esc_html($taxonomy_label)
-        );
+        if (!empty($custom_label)) {
+            echo sprintf(
+                '<label for="form-field-%1$s" class="elementor-field-label">%2$s</label>',
+                esc_attr($field_name),
+                esc_html($custom_label)
+            );
+        }
 
         echo '<div class="elementor-field elementor-select-wrapper">';
 

@@ -55,7 +55,11 @@ class Dynamic_Choose_Field extends Field_Base {
         }
 
 
-        echo '<label for="form-field-' . esc_attr($field_name) . '" class="elementor-field-label">' . esc_html($item['title'] ?? 'Dynamic Field') . '</label>';
+        $label = trim($item['title'] ?? '');
+
+        if ( ! empty($label) ) {
+            echo '<label for="form-field-' . esc_attr($field_name) . '" class="elementor-field-label">' . esc_html($label) . '</label>';
+        }
         
         switch ($input_type) {
             case 'select':
@@ -76,15 +80,34 @@ class Dynamic_Choose_Field extends Field_Base {
                 break;
             
             case 'radio':
-                echo '<div class="elementor-field elementor-select-wrapper">';
-
+                echo '<div class="elementor-field-subgroup elementor-field-type-radio">';
+                foreach ($options as $value => $label) {
+                    echo '<label class="elementor-field-option">';
+                    echo '<input 
+                        type="radio" 
+                        name="form_fields[' . esc_attr($field_name) . ']" 
+                        value="' . esc_attr($value) . '" 
+                        class="elementor-field elementor-radio" 
+                    >';
+                    echo '<span>' . esc_html($label) . '</span>';
+                    echo '</label>';
+                }
                 echo '</div>';
                 break;
- 
- 
-            case 'checkboxes':
-                echo '<div class="elementor-field elementor-select-wrapper">';
 
+            case 'checkboxes':
+                echo '<div class="elementor-field-subgroup elementor-field-type-checkbox">';
+                foreach ($options as $value => $label) {
+                    echo '<label class="elementor-field-option">';
+                    echo '<input 
+                        type="checkbox" 
+                        name="form_fields[' . esc_attr($field_name) . '][]" 
+                        value="' . esc_attr($value) . '" 
+                        class="elementor-field elementor-checkbox" 
+                    >';
+                    echo '<span>' . esc_html($label) . '</span>';
+                    echo '</label>';
+                }
                 echo '</div>';
                 break;
         }
