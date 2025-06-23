@@ -16,6 +16,7 @@ class Dynamic_Choose_Field extends Field_Base {
         $source_type = $item['efpp_dc_source_type'] ?? 'acf';
         $input_type = $item['efpp_dc_input_type'] ?? 'select';
 
+
         switch ($source_type) {
             case 'acf':
                 $acf_field_group_post_id = $item['efpp_dc_acf_field_group_post_id'];
@@ -30,7 +31,6 @@ class Dynamic_Choose_Field extends Field_Base {
 
                     if ($fields) {
                         foreach ($fields as $field) {
-                            error_log( "field\n" . print_r( $field, true ) . "\n" );
                             if ($field['name'] === $field_name && $field['type'] === $input_type) {
                                 $options = $field['choices'];
                                 break;
@@ -42,7 +42,11 @@ class Dynamic_Choose_Field extends Field_Base {
                 break;
 
             case 'jetengine':
-
+                $field_name = explode( '|', $item['efpp_dc_jet_engine_field'], 1 )[0];
+                if (function_exists('jet_engine')) {
+                    $jet_engine_field = $item['efpp_dc_jet_engine_field'];
+                    $options = $this->get_jet_engine_meta_field_options( $jet_engine_field );
+                }
                 break;
             
             default:
@@ -50,70 +54,41 @@ class Dynamic_Choose_Field extends Field_Base {
                 break;
         }
 
-        // TODO: logika pobierania wartości z metadanych ACF/JetEngine
-
-
-        // if ($source_type === 'jetengine' && function_exists('jet_engine')) {
-            // $meta_boxes = jet_engine()->meta_boxes->meta_boxes ?? [];
-            // foreach ($meta_boxes as $group) {
-                // if (isset($group['fields'])) {
-                    // foreach ($group['fields'] as $field) {
-                        // if ($field['name'] === $field_name && isset($field['options'])) {
-                            // $values = $field['options'];
-                            // break 2;
-                        // }
-                    // }
-                // }
-            // }
-
-            // // Dodatkowo: CPT field fallback
-            // $post_types = jet_engine()->post_types->post_types ?? [];
-            // foreach ($post_types as $type) {
-                // if (isset($type['fields'])) {
-                    // foreach ($type['fields'] as $field) {
-                        // if ($field['name'] === $field_name && isset($field['options'])) {
-                            // $values = $field['options'];
-                            // break 2;
-                        // }
-                    // }
-                // }
-            // }
-        // }
 
         echo '<label for="form-field-' . esc_attr($field_name) . '" class="elementor-field-label">' . esc_html($item['title'] ?? 'Dynamic Field') . '</label>';
-        echo '<div class="elementor-field elementor-select-wrapper">';
-
-        if ($input_type === 'select') {
-
-        }
-
+        
         switch ($input_type) {
             case 'select':
-                echo '<select 
-                    name="form_fields[' . esc_attr($field_name) . ']" 
-                    id="form-field-' . esc_attr($field_name) . '" 
-                    class="elementor-field-textual elementor-select efpp-dynamic-select" 
-                    data-field-type="efpp-dynamic-choose">
-                ';
+                echo '<div class="elementor-field elementor-select-wrapper">';
+                    echo '<select 
+                        name="form_fields[' . esc_attr($field_name) . ']" 
+                        id="form-field-' . esc_attr($field_name) . '" 
+                        class="elementor-field-textual elementor-select efpp-dynamic-select" 
+                        data-field-type="efpp-dynamic-choose">
+                    ';
 
-                echo '<option value="">Wybierz</option>';
-                    foreach ($options as $value => $label) {
-                        echo '<option value="' . esc_attr($value) . '">' . esc_html($label) . '</option>';
-                    }
-                echo '</select>';
+                    echo '<option value="">Wybierz</option>';
+                        foreach ($options as $value => $label) {
+                            echo '<option value="' . esc_attr($value) . '">' . esc_html($label) . '</option>';
+                        }
+                    echo '</select>';
+                echo '</div>';
                 break;
             
             case 'radio':
+                echo '<div class="elementor-field elementor-select-wrapper">';
 
+                echo '</div>';
                 break;
  
  
             case 'checkboxes':
+                echo '<div class="elementor-field elementor-select-wrapper">';
 
+                echo '</div>';
                 break;
         }
 
-        echo '</div>';
     }
 
     public function update_controls($widget) {
@@ -121,6 +96,18 @@ class Dynamic_Choose_Field extends Field_Base {
 
         if (is_wp_error($control_data)) return;
         error_log('EFPP: update_controls działa.');
+
+
+        ob_start();
+            ?>
+            <#
+                jQuery(document).off('change.efpp', '.efpp-remote-render select') // namespaced for safety
+                    .on('change.efpp', '.efpp-remote-render select', function() {
+                        elementor.getPanelView().currentPageView.model.renderRemoteServer();
+                    });
+            #>
+            <?php
+        $script = ob_get_clean();
 
         $field_controls = [
             'efpp_dc_source_type' => [
@@ -135,6 +122,7 @@ class Dynamic_Choose_Field extends Field_Base {
                 'condition' => [
                     'field_type' => $this->get_type(),
                 ],
+                'classes' => 'efpp-remote-render',
                 'tab' => 'content',
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
@@ -176,6 +164,7 @@ class Dynamic_Choose_Field extends Field_Base {
 
 					return $options;
 				} )(),
+                'classes' => 'efpp-remote-render',
                 'tabs_wrapper' => 'form_fields_tabs',
                 'inner_tab' => 'form_fields_content_tab',
                 'tab' => 'content',
@@ -193,6 +182,22 @@ class Dynamic_Choose_Field extends Field_Base {
                     'field_type' => $this->get_type(),
                     'efpp_dc_source_type' => 'acf',
                 ],
+                'classes' => 'efpp-remote-render',
+                'tab' => 'content',
+                'inner_tab' => 'form_fields_content_tab',
+                'tabs_wrapper' => 'form_fields_tabs',
+            ],
+            'efpp_dc_jet_engine_field' => [
+                'name' => 'efpp_dc_jet_engine_field',
+                'label' => esc_html__('Meta Field', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'groups' => $this->get_jet_engine_meta_fields_with_options_for_select(),
+                'default' => '',
+                'condition' => [
+                    'field_type' => $this->get_type(),
+                    'efpp_dc_source_type' => 'jetengine',
+                ],
+                'classes' => 'efpp-remote-render',
                 'tab' => 'content',
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
@@ -210,6 +215,21 @@ class Dynamic_Choose_Field extends Field_Base {
                 'condition' => [
                     'field_type' => $this->get_type(),
                 ],
+                'classes' => 'efpp-remote-render',
+                'tab' => 'content',
+                'inner_tab' => 'form_fields_content_tab',
+                'tabs_wrapper' => 'form_fields_tabs',
+            ],
+            'efpp_dc_reload_widget_script' => [
+                'label' => 'Test',
+                'name' => 'efpp_dc_reload_widget_script',
+                'type' => \Elementor\Controls_Manager::RAW_HTML,
+
+                // 'raw' => '<# window.efppControlRemoteRender("form") #>',
+                'raw' => $script,
+                'condition' => [
+                    'field_type' => $this->get_type(),
+                ],
                 'tab' => 'content',
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
@@ -224,4 +244,55 @@ class Dynamic_Choose_Field extends Field_Base {
         $field_name = $item['field_name'] ?? '';
         return $submitted_data[$field_name] ?? '';
     }
+
+    private function get_jet_engine_meta_fields_with_options_for_select() {
+        $options = array();
+        
+        if (function_exists('jet_engine') && jet_engine()->meta_boxes) {
+            $meta_boxes = jet_engine()->meta_boxes->get_registered_fields();
+            $post_types = get_post_types( array(), 'objects' );
+
+            foreach ( $meta_boxes as $meta_box_name => $meta_box_fields ) {
+                foreach( $meta_box_fields as $field ) {
+                    if ( in_array( $field['type'], ['select', 'radio', 'checkbox'] ) ) {
+                        $options[ $meta_box_name ]['label'] = $post_types[ $meta_box_name ]->labels->name;
+
+                        $option_value = $meta_box_name . '|' . $field['name'];
+                        $option_label = $field['title'];
+
+                        $options[ $meta_box_name ]['options'][ $option_value ] = $option_label;
+                    }
+                }
+            }
+
+
+        }
+
+        return $options;
+    }
+
+    private function get_jet_engine_meta_field_options( $jet_engine_field ) {
+        $jet_engine_field_args = explode( '|', $jet_engine_field, 2 );
+        $meta_fields_group_name = $jet_engine_field_args[0];
+        $meta_field_name = $jet_engine_field_args[1];
+        $options = array();
+
+        if (function_exists('jet_engine') && jet_engine()->meta_boxes) {
+
+            $meta_boxes = jet_engine()->meta_boxes->get_registered_fields();
+            $meta_fields_group = $meta_boxes[ $meta_fields_group_name ];
+
+            foreach( $meta_fields_group as $meta_field ) {
+                if ( $meta_field['name'] === $meta_field_name ) {
+                    $options = $meta_field['options'];
+                    break;
+                }
+            }
+            
+            $options = array_column( $options, 'value', 'key' );
+        }
+
+        return $options;
+    }
+
 }
