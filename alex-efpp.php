@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP
 Description: Publikuje treści z formularza Elementor jako wpis lub CPT.
-Version: 1.0.2
+Version: 1.0.2.1
 Author: Alex Scar
 */
 
@@ -11,13 +11,23 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class Alex_EFPP {
 
     public function __construct() {
+        // Rejestracja akcji formularza: publikacja posta
         add_action('elementor_pro/forms/actions/register', [$this, 'register_action']);
-        add_action('elementor/editor/after_enqueue_scripts', [$this, 'enqueue_editor_hint']);
+
+        // Rejestracja akcji formularza: rejestracja / aktualizacja użytkownika
+        add_action('elementor_pro/forms/actions/register', [$this, 'register_user_action']);
+
+        // Dodanie własnych pól formularza do Elementora
         add_action('elementor_pro/forms/fields/register', [$this, 'register_efpp_form_fields']);
+
+        // Załaduj JS w edytorze
+        add_action('elementor/editor/after_enqueue_scripts', [$this, 'enqueue_editor_hint']);
+
+        // Załaduj CSS na froncie
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_styles']);
 
+        // AJAX
         require_once plugin_dir_path(__FILE__) . 'includes/ajax.php';
-
     }
 
     public function enqueue_frontend_styles() {
@@ -27,11 +37,6 @@ class Alex_EFPP {
             [],
             '1.0'
         );
-    }
-
-    public function register_action($actions) {
-        require_once plugin_dir_path(__FILE__) . 'includes/class-form-action-post.php';
-        $actions->register(new \Alex_EFPP_Form_Action_Post());
     }
 
     public function enqueue_editor_hint() {
@@ -68,8 +73,16 @@ class Alex_EFPP {
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('alex_efpp_dynamic_fields'),
         ]);
+    }
 
+    public function register_action($actions) {
+        require_once plugin_dir_path(__FILE__) . 'includes/class-form-action-post.php';
+        $actions->register(new \Alex_EFPP_Form_Action_Post());
+    }
 
+    public function register_user_action($actions) {
+        require_once plugin_dir_path(__FILE__) . 'includes/form-action-register-user.php';
+        $actions->register(new \EFPP_Form_Action_Register_User());
     }
 
     public function register_efpp_form_fields($fields_manager) {
