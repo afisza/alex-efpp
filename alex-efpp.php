@@ -21,7 +21,7 @@ class Alex_EFPP {
         add_action('elementor_pro/forms/fields/register', [$this, 'register_efpp_form_fields']);
 
         // Załaduj JS w edytorze
-        add_action('elementor/editor/after_enqueue_scripts', [$this, 'enqueue_editor_hint']);
+        add_action('elementor/editor/after_enqueue_scripts', [$this, 'enqueue_editor_scripts']);
 
         // Załaduj CSS na froncie
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_styles']);
@@ -39,40 +39,44 @@ class Alex_EFPP {
         );
     }
 
-    public function enqueue_editor_hint() {
-        wp_enqueue_script(
-            'alex-efpp-admin-hint',
-            plugin_dir_url(__FILE__) . 'assets/admin-hint.js',
-            ['jquery'],
-            '1.0',
-            true
-        );
-
+    public function enqueue_editor_scripts() {
         wp_enqueue_script(
             'alex-efpp-editor',
-            plugin_dir_url(__FILE__) . 'assets/editor-taxonomy.js',
-            ['jquery'],
+            plugin_dir_url(__FILE__) . 'assets/editor.js',
+            [],
             '1.0',
             true
         );
 
-        wp_localize_script('alex-efpp-editor', 'AlexEFPP', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('alex_efpp_taxonomy_filter'),
-        ]);
+        // wp_localize_script('alex-efpp-editor', 'efppEditor', [
+        //     'ajax_url' => admin_url('admin-ajax.php'),
+        // ]);
 
-        wp_enqueue_script(
-            'alex-efpp-dynamic-choose-editor',
-            plugin_dir_url(__FILE__) . 'assets/editor-dynamic-choose.js',
-            ['jquery'],
-            '1.0',
-            true
-        );
+        // wp_enqueue_script(
+        //     'alex-efpp-editor',
+        //     plugin_dir_url(__FILE__) . 'assets/editor-taxonomy.js',
+        //     ['jquery'],
+        //     '1.0',
+        //     true
+        // );
 
-        wp_localize_script('alex-efpp-dynamic-choose-editor', 'AlexEFPP', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('alex_efpp_dynamic_fields'),
-        ]);
+        // wp_localize_script('alex-efpp-editor', 'AlexEFPP', [
+        //     'ajax_url' => admin_url('admin-ajax.php'),
+        //     'nonce'    => wp_create_nonce('alex_efpp_taxonomy_filter'),
+        // ]);
+
+        // wp_enqueue_script(
+        //     'alex-efpp-dynamic-choose-editor',
+        //     plugin_dir_url(__FILE__) . 'assets/editor-dynamic-choose.js',
+        //     ['jquery'],
+        //     '1.0',
+        //     true
+        // );
+
+        // wp_localize_script('alex-efpp-dynamic-choose-editor', 'AlexEFPP', [
+        //     'ajax_url' => admin_url('admin-ajax.php'),
+        //     'nonce'    => wp_create_nonce('alex_efpp_dynamic_fields'),
+        // ]);
     }
 
     public function register_action($actions) {

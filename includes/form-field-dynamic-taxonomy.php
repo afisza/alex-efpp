@@ -18,13 +18,13 @@ class Taxonomy_Terms_Field extends Field_Base {
 
         $custom_label = trim($item['title'] ?? '');
 
-        if (!empty($custom_label)) {
-            echo sprintf(
-                '<label for="form-field-%1$s" class="elementor-field-label">%2$s</label>',
-                esc_attr($field_name),
-                esc_html($custom_label)
-            );
-        }
+        // if (!empty($custom_label)) {
+        //     echo sprintf(
+        //         '<label for="form-field-%1$s" class="elementor-field-label">%2$s</label>',
+        //         esc_attr($field_name),
+        //         esc_html($custom_label)
+        //     );
+        // }
 
         echo '<div class="elementor-field elementor-select-wrapper">';
 
@@ -127,79 +127,27 @@ class Taxonomy_Terms_Field extends Field_Base {
     }
 
     public function content_template_script(): void {
-        $taxonomy_labels = [];
-        $taxonomies = get_taxonomies(['public' => true], 'objects');
-        foreach ($taxonomies as $slug => $tax_obj) {
-            $taxonomy_labels[$slug] = $tax_obj->labels->name;
-        }
         ?>
         <script>
-        jQuery(document).ready(() => {
-            const taxonomyLabels = <?php echo json_encode($taxonomy_labels, JSON_UNESCAPED_UNICODE); ?>;
+            jQuery( document ).ready( () => {
 
-            elementor.hooks.addFilter(
-                'elementor_pro/forms/content_template/field/<?php echo $this->get_type(); ?>',
-                function (inputField, item, i) {
-                    const fieldId    = `form_field_${i}`;
-                    const fieldName  = typeof item.custom_id === 'string' ? item.custom_id.trim() : '';
-                    const taxonomySlug = item.efpp_taxonomy || 'taxonomy';
-                    const taxonomyLabel = taxonomyLabels[taxonomySlug] || taxonomySlug.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                    const fieldLabel = item.title || taxonomyLabel;
+                elementor.hooks.addFilter(
+                    'elementor_pro/forms/content_template/field/<?php echo $this->get_type(); ?>',
+                    function ( inputField, item, i ) {
+                        const fieldType    = 'tel';
+                        const fieldId      = `form_field_${i}`;
+                        const fieldClass   = `elementor-field-textual elementor-field ${item.css_classes}`;
+                        const inputmode    = 'numeric';
+                        const maxlength    = '19';
+                        const pattern      = '[0-9\s]{19}';
+                        const placeholder  = item['credit-card-placeholder'];
+                        const autocomplete = 'cc-number';
 
-                    if (!fieldName) {
-                        return `<div class="elementor-field-group">
-                            <label for="${fieldId}" class="elementor-field-label">${fieldLabel}</label>
-                            <div class="elementor-field elementor-select-wrapper">
-                                <select id="${fieldId}" name="form_fields[taxonomy]" class="elementor-field-textual elementor-select" disabled>
-                                    <option>Select taxonomy</option>
-                                </select>
-                            </div>
-                        </div>`;
-                    }
+                        return `<input type="${fieldType}" id="${fieldId}" class="${fieldClass}" inputmode="${inputmode}" maxlength="${maxlength}" pattern="${pattern}" placeholder="${placeholder}" autocomplete="${autocomplete}">`;
+                    }, 10, 3
+                );
 
-                    const mockTerms = [
-                        { id: 1, name: 'Term 1' },
-                        { id: 2, name: 'Term 2' },
-                        { id: 3, name: 'Term 3' }
-                    ];
-
-                    let labelTemplate = 'Select a %s';
-                    const locale = document.documentElement.lang;
-
-                    if (locale.startsWith('pl')) {
-                        labelTemplate = 'Wybierz %s';
-                    } else if (locale.startsWith('uk')) {
-                        labelTemplate = 'Оберіть %s';
-                    } else if (locale.startsWith('ru')) {
-                        labelTemplate = 'Выберите %s';
-                    }
-
-                    const selectPlaceholder = labelTemplate.replace('%s', taxonomyLabel);
-                    let options = `<option value="">${selectPlaceholder}</option>`;
-
-                    mockTerms.forEach(term => {
-                        options += `<option value="${term.id}">${term.name}</option>`;
-                    });
-
-                    return `<div class="elementor-field-type-taxonomy_terms elementor-column elementor-field-group-${fieldName} elementor-col-100">
-                        <label for="${fieldId}" class="elementor-field-label">${fieldLabel}</label>
-                        <div class="elementor-field elementor-select-wrapper">
-                            <select id="${fieldId}" name="form_fields[${fieldName}]" class="elementor-field-textual elementor-select">
-                                ${options}
-                            </select>
-                        </div>
-                    </div>`;
-                },
-                10,
-                3
-            );
-
-            elementor.settings.page.model.on('change', function(model) {
-                if (model.changed && model.changed.efpp_taxonomy) {
-                    elementor.reloadPreview();
-                }
             });
-        });
         </script>
         <?php
     }
