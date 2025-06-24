@@ -152,9 +152,38 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 'options' => [
                     'draft' => 'Draft',
                     'publish' => 'Published',
+                    'future' => 'Scheduled',
                     'pending' => 'Pending Review',
                 ],
                 'default' => 'draft',
+            ]
+        );
+
+        $widget->add_control(
+            'alex_efpp_post_date_field',
+            [
+                'label' => __('Field ID for Date', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::TEXT,
+                'placeholder' => 'data',
+                'description' => __('Enter the field ID that provides the post date (Y-m-d).', 'alex-efpp'),
+                'condition' => [
+                    'submit_actions' => $this->get_name(),
+                    'alex_efpp_post_status' => 'future',
+                ],
+            ]
+        );
+
+        $widget->add_control(
+            'alex_efpp_post_time_field',
+            [
+                'label' => __('Field ID for Time', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::TEXT,
+                'placeholder' => 'czas',
+                'description' => __('Enter the field ID that provides the post time (HH:mm).', 'alex-efpp'),
+                'condition' => [
+                    'submit_actions' => $this->get_name(),
+                    'alex_efpp_post_status' => 'future',
+                ],
             ]
         );
 
@@ -306,7 +335,8 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             }
         }
 
-        // Dalej kontynuuj tworzenie posta...
+        // Create post...
+
 
     // === TITLE ===
     $title_source = $settings['alex_efpp_post_title_field'] ?? '';
@@ -336,13 +366,37 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
     $type    = $settings['alex_efpp_post_type'] ?? 'post';
     $status  = $settings['alex_efpp_post_status'] ?? 'draft';
 
+    // === POST DATE from custom date & time fields ===
+        $post_date = current_time('mysql'); // fallback: teraz
+
+        $date_field_id = $settings['alex_efpp_post_date_field'] ?? '';
+        $time_field_id = $settings['alex_efpp_post_time_field'] ?? '';
+
+        $date = !empty($date_field_id) ? ($fields[$date_field_id]['value'] ?? '') : '';
+        $time = !empty($time_field_id) ? ($fields[$time_field_id]['value'] ?? '') : '';
+
+        if ($date && $time) {
+            $datetime = strtotime($date . ' ' . $time);
+            if ($datetime) {
+                $post_date = date('Y-m-d H:i:s', $datetime);
+            }
+        }
+
         // === CREATE or UPDATE ===
     $post_data = [
         'post_type'    => $type,
         'post_status'  => $status,
         'post_title'   => sanitize_text_field($title),
         'post_content' => wp_kses_post($content),
+        'post_date'    => $post_date,
+        'post_date_gmt'=> get_gmt_from_date($post_date),
+
     ];
+
+    if (!empty($post_date)) {
+        $post_date['post_date'] = $post_date;
+        $post_date['post_date_gmt'] = get_gmt_from_date($post_date);
+    }
 
     if ($post_mode === 'update') {
         $post_id_field = $settings['alex_efpp_post_id_field'] ?? 'post_id';
@@ -409,12 +463,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $cat_field_id = $cat_source;
     }
 
-    // Debugging
-    //error_log("=== EFPP DEBUG ===");
-    //error_log("POST_ID: " . $post_id);
-    //error_log("TAXONOMY: " . $taxonomy);
-    //error_log("CAT FIELD ID: " . $cat_field_id);
-    //error_log("CAT FIELD VALUE: " . print_r($fields[$cat_field_id] ?? 'n/a', true));
 
     if (!empty($taxonomy) && taxonomy_exists($taxonomy)) {
         $term_id = null;
