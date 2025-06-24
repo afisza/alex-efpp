@@ -52,7 +52,7 @@ if ( ! class_exists( 'EFPP_Featured_Image_Field' ) ) {
             $label = trim($item['title'] ?? '');
             ?>
 
-            <div class="elementor-field-type-<?php echo esc_attr($this->get_type()); ?> elementor-field-group elementor-column elementor-col-100 elementor-field-group-<?php echo esc_attr($field_name); ?>">
+            <div class="elementor-field-type-<?php echo esc_attr($this->get_type()); ?> elementor-column elementor-col-100 elementor-field-group-<?php echo esc_attr($field_name); ?>">
                 <?php if (!empty($label)) : ?>
                     <label for="<?php echo esc_attr($field_id); ?>" class="elementor-field-label"><?php echo esc_html($label); ?></label>
                 <?php endif; ?>
@@ -65,7 +65,7 @@ if ( ! class_exists( 'EFPP_Featured_Image_Field' ) ) {
                             <img src="" class="efpp-preview" style="display: none;" />
                         <?php endif; ?>
 
-                        <div class="efpp-instructions"><?php _e('Click or drag to add an image', 'alex-efpp'); ?></div>
+                        <div class="efpp-instructions"><?php _e('Click or Drag to add an image', 'alex-efpp'); ?></div>
                         <button type="button" class="efpp-remove-image" style="<?php echo $field_value ? '' : 'display:none;'; ?>">×</button>
                     </div>
 
