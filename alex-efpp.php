@@ -28,6 +28,9 @@ class Alex_EFPP {
 
         // AJAX
         require_once plugin_dir_path(__FILE__) . 'includes/ajax.php';
+
+        require_once plugin_dir_path(__FILE__) . 'includes/form-field-icons-extension.php';
+
     }
 
     public function enqueue_frontend_styles() {

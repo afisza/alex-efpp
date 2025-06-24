@@ -12,71 +12,6 @@ class Taxonomy_Terms_Field extends Field_Base {
         return 'Taxonomy Terms';
     }
 
-    public function render($item, $item_index, $form) {
-        $taxonomy = isset($item['efpp_taxonomy']) ? sanitize_key($item['efpp_taxonomy']) : '';
-        $field_name = isset($item['custom_id']) && !empty($item['custom_id']) ? $item['custom_id'] : $taxonomy;
-
-        $custom_label = trim($item['title'] ?? '');
-
-        // if (!empty($custom_label)) {
-        //     echo sprintf(
-        //         '<label for="form-field-%1$s" class="elementor-field-label">%2$s</label>',
-        //         esc_attr($field_name),
-        //         esc_html($custom_label)
-        //     );
-        // }
-
-        echo '<div class="elementor-field elementor-select-wrapper">';
-
-        printf(
-            '<select name="form_fields[%s]" id="form-field-%s" class="elementor-field-textual elementor-select" required>',
-            esc_attr($field_name),
-            esc_attr($field_name)
-        );
-
-        // Gettext + fallback tłumaczenia
-        $label_template = __( 'Select a %s', 'alex-efpp' );
-        if ( $label_template === 'Select a %s' ) {
-            $locale = get_locale();
-            if ( str_starts_with( $locale, 'pl' ) ) {
-                $label_template = 'Wybierz %s';
-            } elseif ( str_starts_with( $locale, 'uk' ) ) {
-                $label_template = 'Оберіть %s';
-            } elseif ( str_starts_with( $locale, 'ru' ) ) {
-                $label_template = 'Выберите %s';
-            }
-        }
-
-        $taxonomy_term_label = taxonomy_exists($taxonomy)
-            ? get_taxonomy($taxonomy)->labels->name
-            : ucfirst(str_replace('_', ' ', $taxonomy));
-
-        printf(
-            '<option value="">%s</option>',
-            esc_html( sprintf($label_template, $taxonomy_term_label) )
-        );
-
-        if (taxonomy_exists($taxonomy)) {
-            $terms = get_terms([
-                'taxonomy'   => $taxonomy,
-                'hide_empty' => false,
-            ]);
-
-            if (!is_wp_error($terms) && !empty($terms)) {
-                foreach ($terms as $term) {
-                    printf(
-                        '<option value="%d">%s</option>',
-                        esc_attr($term->term_id),
-                        esc_html($term->name)
-                    );
-                }
-            }
-        }
-
-        echo '</select>';
-        echo '</div>';
-    }
-
     public function update_controls( $widget ) {
         $control_data = \Elementor\Plugin::$instance->controls_manager->get_control_from_stack( $widget->get_unique_name(), 'form_fields' );
 
@@ -102,6 +37,7 @@ class Taxonomy_Terms_Field extends Field_Base {
                 'condition' => [
                     'field_type' => $this->get_type(),
                 ],
+                'classes' => 'efpp-remote-render',
                 'tab' => 'content',
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
@@ -110,6 +46,85 @@ class Taxonomy_Terms_Field extends Field_Base {
 
         $control_data['fields'] = $this->inject_field_controls($control_data['fields'], $field_controls);
         $widget->update_control('form_fields', $control_data);
+    }
+
+    public function render($item, $item_index, $form) {
+        $taxonomy = isset($item['efpp_taxonomy']) ? sanitize_key($item['efpp_taxonomy']) : '';
+        $field_name = !empty($item['custom_id']) ? $item['custom_id'] : $taxonomy;
+        $field_id = 'form-field-' . esc_attr($field_name);
+        $label = trim($item['title'] ?? '');
+        $required = !empty($item['required']) ? 'required' : '';
+        $data_attr = sprintf(' data-fields-repeater-item-id="%s"', esc_attr($item['_id']));
+
+
+        if (!empty($label)) {
+            printf('<label for="%s" class="elementor-field-label">%s</label>', esc_attr($field_id), esc_html($label));
+        }
+
+        echo '<div class="elementor-field elementor-select-wrapper"' . $data_attr . '>';
+        echo '<div class="select-caret-down-wrapper">';
+        echo '<svg aria-hidden="true" class="e-font-icon-svg e-eicon-caret-down" viewBox="0 0 571.4 571.4" xmlns="http://www.w3.org/2000/svg"><path d="M571 393Q571 407 561 418L311 668Q300 679 286 679T261 668L11 418Q0 407 0 393T11 368 36 357H536Q550 357 561 368T571 393Z"></path></svg>';
+        echo '</div>';
+
+        printf(
+            '<select name="form_fields[%s]" id="%s" class="elementor-field-textual elementor-select efpp-dynamic-select" %s>',
+            esc_attr($field_name),
+            esc_attr($field_id),
+            $required
+        );
+
+        $taxonomy_label = taxonomy_exists($taxonomy)
+            ? get_taxonomy($taxonomy)->labels->name
+            : ucfirst(str_replace('_', ' ', $taxonomy));
+
+        // Placeholder na podstawie języka
+        $label_template = __('Select a %s', 'alex-efpp');
+        if ($label_template === 'Select a %s') {
+            $locale = get_locale();
+            if (str_starts_with($locale, 'pl')) $label_template = 'Wybierz %s';
+            elseif (str_starts_with($locale, 'uk')) $label_template = 'Оберіть %s';
+            elseif (str_starts_with($locale, 'ru')) $label_template = 'Выберите %s';
+        }
+
+        printf('<option value="">%s</option>', esc_html(sprintf($label_template, $taxonomy_label)));
+
+        if (taxonomy_exists($taxonomy)) {
+            $terms = get_terms(['taxonomy' => $taxonomy, 'hide_empty' => false]);
+            if (!is_wp_error($terms)) {
+                foreach ($terms as $term) {
+                    printf('<option value="%s">%s</option>', esc_attr($term->slug), esc_html($term->name));
+                }
+            }
+        }
+
+        echo '</select></div>';
+
+        //CACHE
+        if ( Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+            ?>
+            <script>
+                var fieldItemId = "<?php echo esc_js($item['_id']); ?>";
+                var field = jQuery('div[data-fields-repeater-item-id="' + fieldItemId + '"');
+
+                if (typeof window.efppFieldsCache === 'undefined') {
+                    window.efppFieldsCache = [];
+                }
+
+                if (typeof window.efppFieldsCache[fieldItemId] === 'undefined') {
+                    window.efppFieldsCache[fieldItemId] = {};
+                }
+
+                var fieldParentClone = jQuery(field).parent().clone();
+                jQuery(fieldParentClone).find('label.elementor-field-label').remove();
+                jQuery(fieldParentClone).find('script').remove();
+
+                var fieldParentCloneHtml = jQuery(fieldParentClone).html();
+
+                window.efppFieldsCache[fieldItemId].html = fieldParentCloneHtml;
+            </script>
+            <?php
+        }
+
     }
 
     public function get_value( $item, $submitted_data ) {
@@ -129,24 +144,23 @@ class Taxonomy_Terms_Field extends Field_Base {
     public function content_template_script(): void {
         ?>
         <script>
-            jQuery( document ).ready( () => {
-
+            jQuery(document).ready(() => {
                 elementor.hooks.addFilter(
                     'elementor_pro/forms/content_template/field/<?php echo $this->get_type(); ?>',
-                    function ( inputField, item, i ) {
-                        const fieldType    = 'tel';
-                        const fieldId      = `form_field_${i}`;
-                        const fieldClass   = `elementor-field-textual elementor-field ${item.css_classes}`;
-                        const inputmode    = 'numeric';
-                        const maxlength    = '19';
-                        const pattern      = '[0-9\s]{19}';
-                        const placeholder  = item['credit-card-placeholder'];
-                        const autocomplete = 'cc-number';
+                    function (inputField, item, i) {
+                        if (typeof window.efppFieldsCache === 'undefined') {
+                            window.efppFieldsCache = [];
+                        }
 
-                        return `<input type="${fieldType}" id="${fieldId}" class="${fieldClass}" inputmode="${inputmode}" maxlength="${maxlength}" pattern="${pattern}" placeholder="${placeholder}" autocomplete="${autocomplete}">`;
+                        if (typeof window.efppFieldsCache[item._id] === 'undefined') {
+                            window.efppFieldsCache[item._id] = {};
+                        }
+
+                        var fieldHtml = window.efppFieldsCache[item._id].html;
+
+                        return fieldHtml;
                     }, 10, 3
                 );
-
             });
         </script>
         <?php
