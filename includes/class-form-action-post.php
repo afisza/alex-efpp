@@ -701,7 +701,10 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             $form_field = $map['form_field_id'] ?? '';
             if (!$form_field || !$type) continue;
 
-            $value = $fields[$form_field]['value'] ?? $manager->tag_text($form_field);
+            //$value = $fields[$form_field]['value'] ?? $manager->tag_text($form_field);
+            $field_data = $fields[$form_field] ?? [];
+            $value = $field_data['raw_value'] ?? ($field_data['value'] ?? $manager->tag_text($form_field));
+
 
             switch ($type) {
                 case 'title':
@@ -732,9 +735,18 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 case 'taxonomy':
                     $taxonomy = $map['taxonomy_slug'] ?? '';
                     if ($taxonomy && taxonomy_exists($taxonomy) && !empty($value)) {
-                        $term = get_term_by('slug', $value, $taxonomy);
-                        if ($term && !is_wp_error($term)) {
-                            $post_terms[$taxonomy] = [ (int) $term->term_id ];
+                        $values = is_array($value) ? $value : array_map('trim', explode(',', $value));
+
+                        $term_ids = [];
+                        foreach ($values as $slug) {
+                            $term = get_term_by('slug', $slug, $taxonomy);
+                            if ($term && !is_wp_error($term)) {
+                                $term_ids[] = (int) $term->term_id;
+                            }
+                        }
+
+                        if (!empty($term_ids)) {
+                            $post_terms[$taxonomy] = $term_ids;
                         }
                     }
                     break;
