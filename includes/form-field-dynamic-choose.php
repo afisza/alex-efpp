@@ -12,159 +12,10 @@ class Dynamic_Choose_Field extends Field_Base {
         return 'Dynamic Choose';
     }
 
-    public function render($item, $item_index, $form) {
-        $source_type = $item['efpp_dc_source_type'] ?? 'acf';
-        $input_type = $item['efpp_dc_input_type'] ?? 'select';
-
-
-        switch ($source_type) {
-            case 'acf':
-                // $acf_field_group_post_id = $item['efpp_dc_acf_field_group_post_id'];
-                // $field_name = $item['efpp_dc_acf_field_name'];
-
-                // if (function_exists('acf_get_fields')) {
-                //     $field_group_key = get_post_field('post_name', $acf_field_group_post_id);
-
-                //     $fields = acf_get_fields($field_group_key );
-
-                //     $options = [];
-
-                //     if ($fields) {
-                //         foreach ($fields as $field) {
-                //             if ($field['name'] === $field_name && $field['type'] === $input_type) {
-                //                 $options = $field['choices'];
-                //                 break;
-                //             }
-                //         }
-                //     }
-
-                // }
-
-                
-                $field_name = explode( ':', $item['efpp_dc_acf_field'], 1 )[0];
-                $acf_field = $item['efpp_dc_acf_field'];
-                $options = $this->get_acf_meta_field_options( $acf_field );
-                break;
-
-            case 'jetengine':
-                $field_name = explode( '|', $item['efpp_dc_jet_engine_field'], 1 )[0];
-                if (function_exists('jet_engine')) {
-                    $jet_engine_field = $item['efpp_dc_jet_engine_field'];
-                    $options = $this->get_jet_engine_meta_field_options( $jet_engine_field );
-                }
-                break;
-            
-            default:
-                # code...
-                break;
-        }
-
-
-        $label = trim($item['title'] ?? '');
-
-        if ( ! empty($label) ) {
-            echo '<label for="form-field-' . esc_attr($field_name) . '" class="elementor-field-label">' . esc_html($label) . '</label>';
-        }
-        
-        switch ($input_type) {
-            case 'select':
-                echo '<div class="elementor-field elementor-select-wrapper" data-fields-repeater-item-id="' . $item['_id'] . '">';
-                echo '<div class="select-caret-down-wrapper"><svg aria-hidden="true" class="e-font-icon-svg e-eicon-caret-down" viewBox="0 0 571.4 571.4" xmlns="http://www.w3.org/2000/svg"><path d="M571 393Q571 407 561 418L311 668Q300 679 286 679T261 668L11 418Q0 407 0 393T11 368 36 357H536Q550 357 561 368T571 393Z"></path></svg></div>';
-                    echo '<select 
-                        name="form_fields[' . esc_attr($field_name) . ']" 
-                        id="form-field-' . esc_attr($field_name) . '" 
-                        class="elementor-field-textual elementor-select efpp-dynamic-select" 
-                        data-field-type="efpp-dynamic-choose">
-                    ';
-
-                    echo '<option value="">Wybierz</option>';
-                        foreach ($options as $value => $label) {
-                            echo '<option value="' . esc_attr($value) . '">' . esc_html($label) . '</option>';
-                        }
-                    echo '</select>';
-                echo '</div>';
-                break;
-            
-            case 'radio':
-                echo '<div class="elementor-field-subgroup"  data-fields-repeater-item-id="' . $item['_id'] . '">';
-                    foreach ($options as $value => $label) {
-                        echo '<span class="elementor-field-option">';
-                        
-                            $field_id = 'form-field-field_' . $item['_id'] . '-' . $item_index;
-                            echo '<input
-                                id="'. $field_id . '"
-                                type="radio" 
-                                name="form_fields[' . esc_attr( $field_name ) . ']" 
-                                value="' . esc_attr( $value ) . '" 
-                            >&nbsp;';
-
-                            echo '<label for="' . $field_id . '">';
-                                echo esc_html( $label );
-                            echo '</label>';
-
-                        echo '</span>';
-                    }
-                echo '</div>';
-                break;
-
-            case 'checkboxes':
-                echo '<div class="elementor-field-subgroup"  data-fields-repeater-item-id="' . $item['_id'] . '">';
-                    foreach ($options as $value => $label) {
-                        echo '<span class="elementor-field-option">';
-                        
-                            $field_id = 'form-field-field_' . $item['_id'] . '-' . $item_index;
-                            echo '<input
-                                id="'. $field_id . '"
-                                type="checkbox" 
-                                name="form_fields[' . esc_attr( $field_name ) . ']" 
-                                value="' . esc_attr( $value ) . '" 
-                                class="elementor-field elementor-checkbox"
-                            >&nbsp;';
-
-                            echo '<label for="' . $field_id . '">';
-                                echo esc_html( $label );
-                            echo '</label>';
-
-                        echo '</span>';
-                    }
-                echo '</div>';
-                break;
-        }
-
-        if ( Elementor\Plugin::$instance->editor->is_edit_mode() ) {
-            ?>
-            <script>
-                var fieldItemId = "<?php echo $item['_id']; ?>";
-                var field = jQuery('div[data-fields-repeater-item-id="' + fieldItemId + '"');
-
-                if (typeof window.efppFieldsCache === 'undefined') {
-                    window.efppFieldsCache = [];
-                }
-
-                if (typeof window.efppFieldsCache[fieldItemId] === 'undefined') {
-                    window.efppFieldsCache[fieldItemId] = {};
-                }
-
-                var fieldParentClone = jQuery(field).parent().clone();
-                jQuery(fieldParentClone).find('label.elementor-field-label').remove();
-                jQuery(fieldParentClone).find('script').remove();
-
-                var fieldParentCloneHtml = jQuery(fieldParentClone).html();
-
-                window.efppFieldsCache[fieldItemId].html = fieldParentCloneHtml;
-            </script>
-            <?php
-        }
-
-    }
-
     public function update_controls($widget) {
         $control_data = \Elementor\Plugin::$instance->controls_manager->get_control_from_stack($widget->get_unique_name(), 'form_fields');
 
         if (is_wp_error($control_data)) return;
-
-
-
 
         $field_controls = [
             'efpp_dc_source_type' => [
@@ -238,12 +89,164 @@ class Dynamic_Choose_Field extends Field_Base {
         $widget->update_control('form_fields', $control_data);
     }
 
+    public function render($item, $item_index, $form) {
+        $source_type = $item['efpp_dc_source_type'] ?? 'acf';
+        $input_type = $item['efpp_dc_input_type'] ?? 'select';
+
+
+        switch ($source_type) {
+            case 'acf':
+                // $acf_field_group_post_id = $item['efpp_dc_acf_field_group_post_id'];
+                // $field_name = $item['efpp_dc_acf_field_name'];
+
+                // if (function_exists('acf_get_fields')) {
+                //     $field_group_key = get_post_field('post_name', $acf_field_group_post_id);
+
+                //     $fields = acf_get_fields($field_group_key );
+
+                //     $options = [];
+
+                //     if ($fields) {
+                //         foreach ($fields as $field) {
+                //             if ($field['name'] === $field_name && $field['type'] === $input_type) {
+                //                 $options = $field['choices'];
+                //                 break;
+                //             }
+                //         }
+                //     }
+
+                // }
+
+                
+                $field_name = explode( ':', $item['efpp_dc_acf_field'], 1 )[0];
+                $acf_field = $item['efpp_dc_acf_field'];
+                $options = $this->get_acf_meta_field_options( $acf_field );
+                break;
+
+            case 'jetengine':
+                $field_name = explode( '|', $item['efpp_dc_jet_engine_field'], 1 )[0];
+                if (function_exists('jet_engine')) {
+                    $jet_engine_field = $item['efpp_dc_jet_engine_field'];
+                    $options = $this->get_jet_engine_meta_field_options( $jet_engine_field );
+                }
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+
+
+        $label = trim($item['title'] ?? '');
+
+        if ( ! empty($label) ) {
+            echo '<label for="form-field-' . esc_attr($field_name) . '" class="elementor-field-label">' . esc_html($label) . '</label>';
+        }
+        
+        switch ($input_type) {
+            case 'select':
+                echo '<div class="elementor-field elementor-select-wrapper" data-fields-repeater-item-id="' . $item['_id'] . '">';
+                echo '<div class="select-caret-down-wrapper"><svg aria-hidden="true" class="e-font-icon-svg e-eicon-caret-down" viewBox="0 0 571.4 571.4" xmlns="http://www.w3.org/2000/svg"><path d="M571 393Q571 407 561 418L311 668Q300 679 286 679T261 668L11 418Q0 407 0 393T11 368 36 357H536Q550 357 561 368T571 393Z"></path></svg></div>';
+                    echo '<select 
+                        name="form_fields[' . esc_attr($field_name) . ']" 
+                        id="form-field-' . esc_attr($field_name) . '" 
+                        class="elementor-field-textual elementor-select efpp-dynamic-select" 
+                        data-field-type="efpp-dynamic-choose">
+                    ';
+
+                    echo '<option value="">Wybierz</option>';
+                        foreach ( $options as $value => $label ) {
+                            echo '<option value="' . esc_attr($value) . '">' . esc_html($label) . '</option>';
+                        }
+                    echo '</select>';
+                echo '</div>';
+                break;
+            
+            case 'radio':
+                echo '<div class="elementor-field-subgroup"  data-fields-repeater-item-id="' . $item['_id'] . '">';
+                    $index = 0;
+                    foreach ( $options as $value => $label ) {
+                        echo '<span class="elementor-field-option">';
+                        
+                            $field_id = 'form-field-field_' . $item['_id'] . '-' . $index;
+                            echo '<input
+                                id="'. $field_id . '"
+                                type="radio" 
+                                name="form_fields[' . esc_attr( $field_name ) . ']" 
+                                value="' . esc_attr( $value ) . '" 
+                            >&nbsp;';
+
+                            echo '<label for="' . $field_id . '">';
+                                echo esc_html( $label );
+                            echo '</label>';
+
+                        echo '</span>';
+                        $index++;
+                    }
+                echo '</div>';
+                break;
+
+            case 'checkboxes':
+                echo '<div class="elementor-field-subgroup"  data-fields-repeater-item-id="' . $item['_id'] . '">';
+                    $index = 0;
+                    foreach ( $options as $value => $label ) {
+                        echo '<span class="elementor-field-option">';
+                        
+                            $field_id = 'form-field-field_' . $item['_id'] . '-' . $index;
+                            echo '<input
+                                id="'. $field_id . '"
+                                type="checkbox" 
+                                name="form_fields[' . esc_attr( $field_name ) . ']" 
+                                value="' . esc_attr( $value ) . '" 
+                                class="elementor-field elementor-checkbox"
+                            >&nbsp;';
+
+                            echo '<label for="' . $field_id . '">';
+                                echo esc_html( $label );
+                            echo '</label>';
+
+                        echo '</span>';
+                        $index++;
+                    }
+
+                echo '</div>';
+                break;
+        }
+
+        if ( Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+            ?>
+            <script>
+                var fieldItemId = "<?php echo $item['_id']; ?>";
+                var field = jQuery('div[data-fields-repeater-item-id="' + fieldItemId + '"');
+
+                if (typeof window.efppFieldsCache === 'undefined') {
+                    window.efppFieldsCache = [];
+                }
+
+                if (typeof window.efppFieldsCache[fieldItemId] === 'undefined') {
+                    window.efppFieldsCache[fieldItemId] = {};
+                }
+
+                var fieldParentClone = jQuery(field).parent().clone();
+                jQuery(fieldParentClone).find('label.elementor-field-label').remove();
+                jQuery(fieldParentClone).find('script').remove();
+
+                var fieldParentCloneHtml = jQuery(fieldParentClone).html();
+
+                window.efppFieldsCache[fieldItemId].html = fieldParentCloneHtml;
+            </script>
+            <?php
+        }
+
+    }
+
+
     public function get_value($item, $submitted_data) {
         $field_name = $item['field_name'] ?? '';
         return $submitted_data[$field_name] ?? '';
     }
 
-        public function __construct() {
+    public function __construct() {
         parent::__construct();
         add_action('elementor/preview/init', [ $this, 'editor_preview_footer' ]);
     }
