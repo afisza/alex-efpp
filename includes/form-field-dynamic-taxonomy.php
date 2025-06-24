@@ -42,6 +42,24 @@ class Taxonomy_Terms_Field extends Field_Base {
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
             ],
+            'efpp_taxonomy_input_type' => [
+            'name' => 'efpp_taxonomy_input_type',
+            'label' => esc_html__('Field Type', 'alex-efpp'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => [
+                'select' => 'Select',
+                'radio' => 'Radio',
+                'checkboxes' => 'Checkbox',
+            ],
+            'default' => 'select',
+            'condition' => [
+                'field_type' => $this->get_type(),
+            ],
+            'classes' => 'efpp-remote-render',
+            'tab' => 'content',
+            'inner_tab' => 'form_fields_content_tab',
+            'tabs_wrapper' => 'form_fields_tabs',
+        ],
         ];
 
         $control_data['fields'] = $this->inject_field_controls($control_data['fields'], $field_controls);
@@ -54,53 +72,88 @@ class Taxonomy_Terms_Field extends Field_Base {
         $field_id = 'form-field-' . esc_attr($field_name);
         $label = trim($item['title'] ?? '');
         $required = !empty($item['required']) ? 'required' : '';
-        $data_attr = sprintf(' data-fields-repeater-item-id="%s"', esc_attr($item['_id']));
+        $type = $item['efpp_taxonomy_input_type'] ?? 'select';
 
-
+        // Label
         if (!empty($label)) {
             printf('<label for="%s" class="elementor-field-label">%s</label>', esc_attr($field_id), esc_html($label));
         }
 
-        echo '<div class="elementor-field elementor-select-wrapper"' . $data_attr . '>';
-        echo '<div class="select-caret-down-wrapper">';
-        echo '<svg aria-hidden="true" class="e-font-icon-svg e-eicon-caret-down" viewBox="0 0 571.4 571.4" xmlns="http://www.w3.org/2000/svg"><path d="M571 393Q571 407 561 418L311 668Q300 679 286 679T261 668L11 418Q0 407 0 393T11 368 36 357H536Q550 357 561 368T571 393Z"></path></svg>';
-        echo '</div>';
-
-        printf(
-            '<select name="form_fields[%s]" id="%s" class="elementor-field-textual elementor-select efpp-dynamic-select" %s>',
-            esc_attr($field_name),
-            esc_attr($field_id),
-            $required
-        );
-
+        // Placeholder
         $taxonomy_label = taxonomy_exists($taxonomy)
             ? get_taxonomy($taxonomy)->labels->name
             : ucfirst(str_replace('_', ' ', $taxonomy));
 
-        // Placeholder na podstawie języka
         $label_template = __('Select a %s', 'alex-efpp');
-        if ($label_template === 'Select a %s') {
-            $locale = get_locale();
-            if (str_starts_with($locale, 'pl')) $label_template = 'Wybierz %s';
-            elseif (str_starts_with($locale, 'uk')) $label_template = 'Оберіть %s';
-            elseif (str_starts_with($locale, 'ru')) $label_template = 'Выберите %s';
-        }
+        $locale = get_locale();
+        if (str_starts_with($locale, 'pl')) $label_template = 'Wybierz %s';
+        elseif (str_starts_with($locale, 'uk')) $label_template = 'Оберіть %s';
+        elseif (str_starts_with($locale, 'ru')) $label_template = 'Выберите %s';
 
-        printf('<option value="">%s</option>', esc_html(sprintf($label_template, $taxonomy_label)));
+        $terms = taxonomy_exists($taxonomy)
+            ? get_terms(['taxonomy' => $taxonomy, 'hide_empty' => false])
+            : [];
 
-        if (taxonomy_exists($taxonomy)) {
-            $terms = get_terms(['taxonomy' => $taxonomy, 'hide_empty' => false]);
-            if (!is_wp_error($terms)) {
+        if (is_wp_error($terms) || empty($terms)) return;
+
+        $wrapper_attr = sprintf('data-fields-repeater-item-id="%s"', esc_attr($item['_id']));
+
+        switch ($type) {
+            case 'radio':
+            case 'checkboxes':
+                echo '<div class="elementor-field-subgroup" ' . $wrapper_attr . '>';
+                $index = 0;
+                foreach ($terms as $term) {
+                    echo '<span class="elementor-field-option">';
+                    $option_id = 'form-field-' . $field_name . '-' . $index;
+
+                    printf(
+                        '<input id="%s" type="%s" name="form_fields[%s]%s" value="%s" %s class="elementor-field elementor-%s" />',
+                        esc_attr($option_id),
+                        $type === 'checkboxes' ? 'checkbox' : 'radio',
+                        esc_attr($field_name),
+                        $type === 'checkboxes' ? '[]' : '',
+                        esc_attr($term->slug),
+                        $required,
+                        $type
+                    );
+
+                    printf(
+                        '<label for="%s">%s</label>',
+                        esc_attr($option_id),
+                        esc_html($term->name)
+                    );
+                    echo '</span>';
+                    $index++;
+                }
+                echo '</div>';
+                break;
+
+            case 'select':
+            default:
+                echo '<div class="elementor-field elementor-select-wrapper" ' . $wrapper_attr . '>';
+                echo '<div class="select-caret-down-wrapper">';
+                echo '<svg aria-hidden="true" class="e-font-icon-svg e-eicon-caret-down" viewBox="0 0 571.4 571.4" xmlns="http://www.w3.org/2000/svg"><path d="M571 393Q571 407 561 418L311 668Q300 679 286 679T261 668L11 418Q0 407 0 393T11 368 36 357H536Q550 357 561 368T571 393Z"></path></svg>';
+                echo '</div>';
+
+                printf(
+                    '<select name="form_fields[%s]" id="%s" class="elementor-field-textual elementor-select efpp-dynamic-select" %s>',
+                    esc_attr($field_name),
+                    esc_attr($field_id),
+                    $required
+                );
+                printf('<option value="">%s</option>', esc_html(sprintf($label_template, $taxonomy_label)));
+
                 foreach ($terms as $term) {
                     printf('<option value="%s">%s</option>', esc_attr($term->slug), esc_html($term->name));
                 }
-            }
+
+                echo '</select></div>';
+                break;
         }
 
-        echo '</select></div>';
-
-        //CACHE
-        if ( Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+        // === Elementor Editor Preview Support ===
+        if (Elementor\Plugin::$instance->editor->is_edit_mode()) {
             ?>
             <script>
                 var fieldItemId = "<?php echo esc_js($item['_id']); ?>";
@@ -119,12 +172,10 @@ class Taxonomy_Terms_Field extends Field_Base {
                 jQuery(fieldParentClone).find('script').remove();
 
                 var fieldParentCloneHtml = jQuery(fieldParentClone).html();
-
                 window.efppFieldsCache[fieldItemId].html = fieldParentCloneHtml;
             </script>
             <?php
         }
-
     }
 
     public function get_value( $item, $submitted_data ) {

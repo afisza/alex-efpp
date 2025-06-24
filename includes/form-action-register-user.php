@@ -226,7 +226,7 @@ class EFPP_Form_Action_Register_User extends Action_Base {
                         'placeholder' => 'field_name',
                     ],
                 ],
-                'title_field' => '{{ meta_key }}',
+                'title_field' => '{{ field_type }}: {{ form_field_id }}',
             ]
         );
 

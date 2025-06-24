@@ -15,7 +15,17 @@
       frame.on('select', function () {
         const attachment = frame.state().get('selection').first().toJSON();
         wrapper.find('.efpp-preview').attr('src', attachment.url).show();
-        input.val(attachment.url);
+        if (!input.length) {
+          console.warn('EFPP: input[type=hidden] not found');
+          return;
+        }
+          if (!input.attr('name')) {
+          const fallbackName = wrapper.data('field-name');
+          input.attr('name', 'form_fields[' + fallbackName + ']');
+        }
+        input.val(attachment.url).trigger('change');
+        console.log('Set image URL:', attachment.url);
+
         wrapper.find('.efpp-drop-zone').addClass('has-image');
         wrapper.find('.efpp-remove-image').show();
       });
