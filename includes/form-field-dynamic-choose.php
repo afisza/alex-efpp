@@ -19,26 +19,31 @@ class Dynamic_Choose_Field extends Field_Base {
 
         switch ($source_type) {
             case 'acf':
-                $acf_field_group_post_id = $item['efpp_dc_acf_field_group_post_id'];
-                $field_name = $item['efpp_dc_acf_field_name'];
+                // $acf_field_group_post_id = $item['efpp_dc_acf_field_group_post_id'];
+                // $field_name = $item['efpp_dc_acf_field_name'];
 
-                if (function_exists('acf_get_fields')) {
-                    $field_group_key = get_post_field('post_name', $acf_field_group_post_id);
+                // if (function_exists('acf_get_fields')) {
+                //     $field_group_key = get_post_field('post_name', $acf_field_group_post_id);
 
-                    $fields = acf_get_fields($field_group_key );
+                //     $fields = acf_get_fields($field_group_key );
 
-                    $options = [];
+                //     $options = [];
 
-                    if ($fields) {
-                        foreach ($fields as $field) {
-                            if ($field['name'] === $field_name && $field['type'] === $input_type) {
-                                $options = $field['choices'];
-                                break;
-                            }
-                        }
-                    }
+                //     if ($fields) {
+                //         foreach ($fields as $field) {
+                //             if ($field['name'] === $field_name && $field['type'] === $input_type) {
+                //                 $options = $field['choices'];
+                //                 break;
+                //             }
+                //         }
+                //     }
 
-                }
+                // }
+
+                
+                $field_name = explode( ':', $item['efpp_dc_acf_field'], 1 )[0];
+                $acf_field = $item['efpp_dc_acf_field'];
+                $options = $this->get_acf_meta_field_options( $acf_field );
                 break;
 
             case 'jetengine':
@@ -148,8 +153,6 @@ class Dynamic_Choose_Field extends Field_Base {
 
                 window.efppFieldsCache[fieldItemId].html = fieldParentCloneHtml;
             </script>
-
-
             <?php
         }
 
@@ -181,57 +184,12 @@ class Dynamic_Choose_Field extends Field_Base {
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
             ],
-            'efpp_dc_acf_field_group_post_id' => [
-                'name' => 'efpp_dc_acf_field_group_post_id',
-				'label'     => esc_html__( 'ACF Fields Group', 'alex-efpp' ),
-				'label_block' => true,
-				'type'      => \Elementor\Controls_Manager::SELECT2,
-				'options'   => ( function() {
-					$options = array();
-
-					// Define the WP_Query arguments
-					$args = array(
-						'post_type'      => 'acf-field-group', // Replace with your post type
-						'posts_per_page' => -1,              // Get all posts
-						'post_status'    => 'publish',       // Only published posts
-					);
-
-					// Initialize WP_Query
-					$query = new WP_Query( $args );
-
-					// Check if there are posts available
-					if ( $query->have_posts() ) {
-						// $options[''] = esc_html__( 'Select Query', 'admin' );
-
-						// Loop through the posts and set them in the options array
-						while ( $query->have_posts() ) {
-							$query->the_post();
-							$options[ get_the_ID() ] = get_the_title(); // Set post ID as the key and post title as the value
-						}
-					} else {
-						// If no posts found, set a default message
-						$options[''] = esc_html__( 'No Field Groups Found', 'alex-efpp' );
-					}
-
-					// Restore original Post Data
-					wp_reset_postdata();
-
-					return $options;
-				} )(),
-                'classes' => 'efpp-remote-render',
-                'tabs_wrapper' => 'form_fields_tabs',
-                'inner_tab' => 'form_fields_content_tab',
-                'tab' => 'content',
-                'condition' => [
-                    'field_type' => $this->get_type(),
-                    'efpp_dc_source_type' => 'acf',
-                ],
-            ],
-            'efpp_dc_acf_field_name' => [
-                'name' => 'efpp_dc_acf_field_name',
-                'label' => esc_html__( 'Field name', 'alex-efpp' ),
-                'type' => \Elementor\Controls_Manager::TEXT,
-                'placeholder' => 'e.g. car_brand',
+            'efpp_dc_acf_field' => [
+                'name' => 'efpp_dc_acf_field',
+                'label' => esc_html__('Meta Field', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'groups' => $this->get_acf_meta_fields_for_select(),
+                'default' => '',
                 'condition' => [
                     'field_type' => $this->get_type(),
                     'efpp_dc_source_type' => 'acf',
@@ -245,7 +203,7 @@ class Dynamic_Choose_Field extends Field_Base {
                 'name' => 'efpp_dc_jet_engine_field',
                 'label' => esc_html__('Meta Field', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::SELECT,
-                'groups' => $this->get_jet_engine_meta_fields_with_options_for_select(),
+                'groups' => $this->get_jet_engine_meta_fields_for_select(),
                 'default' => '',
                 'condition' => [
                     'field_type' => $this->get_type(),
@@ -321,7 +279,118 @@ class Dynamic_Choose_Field extends Field_Base {
         <?php
     }
 
-    private function get_jet_engine_meta_fields_with_options_for_select() {
+    private function get_acf_meta_fields_for_select() {
+        $types = array(
+            'select',
+			'checkbox',
+			'radio',
+        );
+
+		// ACF >= 5.0.0
+		if ( function_exists( 'acf_get_field_groups' ) ) {
+			$acf_groups = acf_get_field_groups();
+		} else {
+			$acf_groups = apply_filters( 'acf/get_field_groups', [] );
+		}
+
+		$groups = [];
+
+		$options_page_groups_ids = [];
+
+		if ( function_exists( 'acf_options_page' ) ) {
+			$pages = acf_options_page()->get_pages();
+			foreach ( $pages as $slug => $page ) {
+				$options_page_groups = acf_get_field_groups( [
+					'options_page' => $slug,
+				] );
+
+				foreach ( $options_page_groups as $options_page_group ) {
+					$options_page_groups_ids[] = $options_page_group['ID'];
+				}
+			}
+		}
+
+		foreach ( $acf_groups as $acf_group ) {
+			// ACF >= 5.0.0
+			if ( function_exists( 'acf_get_fields' ) ) {
+				if ( isset( $acf_group['ID'] ) && ! empty( $acf_group['ID'] ) ) {
+					$fields = acf_get_fields( $acf_group['ID'] );
+				} else {
+					$fields = acf_get_fields( $acf_group );
+				}
+			} else {
+				$fields = apply_filters( 'acf/field_group/get_fields', [], $acf_group['id'] );
+			}
+
+			$options = [];
+
+			if ( ! is_array( $fields ) ) {
+				continue;
+			}
+
+			$has_option_page_location = in_array( $acf_group['ID'], $options_page_groups_ids, true );
+			$is_only_options_page = $has_option_page_location && 1 === count( $acf_group['location'] );
+
+			foreach ( $fields as $field ) {
+				if ( ! in_array( $field['type'], $types, true ) ) {
+					continue;
+				}
+
+				// Use group ID for unique keys
+				if ( $has_option_page_location ) {
+					$key = 'options:' . $field['name'];
+					$options[ $key ] = esc_html__( 'Options', 'elementor-pro' ) . ':' . $field['label'];
+					if ( $is_only_options_page ) {
+						continue;
+					}
+				}
+
+				$key = $acf_group['ID'] . ':' . $field['name'];
+				$options[ $key ] = $field['label'];
+			}
+
+			if ( empty( $options ) ) {
+				continue;
+			}
+
+			if ( 1 === count( $options ) ) {
+				$options = [ -1 => ' -- ' ] + $options;
+			}
+
+			$groups[] = [
+				'label' => $acf_group['title'],
+				'options' => $options,
+			];
+		} // End foreach().
+
+		return $groups;
+	}
+
+    private function get_acf_meta_field_options( $acf_field ) {
+        $acf_field_args = explode( ':', $acf_field, 2 );
+        $meta_fields_group_name = $acf_field_args[0];
+        $meta_field_name = $acf_field_args[1];
+        $group_fields = acf_get_fields( $meta_fields_group_name );
+        $options = array();
+
+        if ( $group_fields ) {
+            foreach ( $group_fields as $field ) {
+                if ( $field['name'] === $meta_field_name ) {
+                    $options = $field['choices'];
+                    break;
+                }
+            }
+        }
+
+        return $options;
+	}
+
+    private function get_jet_engine_meta_fields_for_select() {
+        $types = array(
+            'select',
+            'radio',
+            'checkbox'
+        );
         $options = array();
         
         if (function_exists('jet_engine') && jet_engine()->meta_boxes) {
@@ -330,7 +399,7 @@ class Dynamic_Choose_Field extends Field_Base {
 
             foreach ( $meta_boxes as $meta_box_name => $meta_box_fields ) {
                 foreach( $meta_box_fields as $field ) {
-                    if ( in_array( $field['type'], ['select', 'radio', 'checkbox'] ) ) {
+                    if ( in_array( $field['type'], $types ) ) {
                         $options[ $meta_box_name ]['label'] = $post_types[ $meta_box_name ]->labels->name;
 
                         $option_value = $meta_box_name . '|' . $field['name'];
