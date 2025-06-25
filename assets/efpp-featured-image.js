@@ -53,16 +53,33 @@
 
     // Aktualizacja inputów hidden
     function updateInputs(wrapper) {
-      const images = wrapper.find('.efpp-image-item img').map(function () {
-        return $(this).attr('src');
-      }).get();
+    const images = wrapper.find('.efpp-image-item img').map(function () {
+      return $(this).attr('src');
+    }).get();
 
-      const featured = images[0] || '';
-      const gallery = images.slice(1);
+    const featured = images[0] || '';
+    const gallery = images;
 
-      wrapper.find('input[name^="form_fields["][name*="featured_image"]').val(featured);
-      wrapper.find('input[name^="form_fields["][name*="gallery"]').val(gallery.join(','));
+    const featuredInput = wrapper.find('input.efpp-featured-input');
+    const galleryInput = wrapper.find('input.efpp-gallery-input');
+
+    // 🔍 Logowanie do debugowania
+    console.group('[EFPP] Gallery Update');
+    console.log('🖼 Wszystkie zdjęcia:', images);
+    console.log('⭐ Featured image:', featured);
+    console.log('🖼 Gallery:', gallery);
+    console.log('✅ Featured input:', featuredInput.attr('name'));
+    console.log('✅ Gallery input:', galleryInput.attr('name'));
+    console.groupEnd();
+
+    // Ustaw wartości
+    if (featuredInput.length) {
+      featuredInput.val(featured);
     }
+    if (galleryInput.length) {
+      galleryInput.val(gallery.join(','));
+    }
+  }
 
     // Obsługa przeciągania pliku
     $(document).on('dragover', '.efpp-drop-zone', function (e) {

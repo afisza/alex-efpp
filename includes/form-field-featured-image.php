@@ -40,6 +40,10 @@ if ( ! class_exists( 'EFPP_Featured_Image_Field' ) ) {
             ]);
 
             $field_name = !empty($item['custom_id']) ? $item['custom_id'] : 'featured_image';
+			//$gallery_meta_key = $item['gallery_meta_key'] ?? 'gallery';
+			$gallery_meta_key = !empty($item['custom_id']) ? $item['custom_id'] : 'gallery';
+
+
             $field_id   = 'form-field-' . esc_attr($field_name);
             $label = trim($item['title'] ?? '');
 
@@ -58,8 +62,17 @@ if ( ! class_exists( 'EFPP_Featured_Image_Field' ) ) {
 						<ul class="efpp-image-list"></ul>
 					</div>
 
-                    <input type="hidden" name="form_fields[<?php echo esc_attr($field_name); ?>]" class="efpp-featured-input" value="">
-                    <input type="hidden" name="form_fields[gallery]" class="efpp-gallery-input" value="">
+                    <input type="hidden"
+						name="form_fields[<?php echo esc_attr($field_name); ?>]"
+						class="efpp-featured-input efpp-featured-<?php echo esc_attr($field_name); ?>"
+						value="">
+
+					<input type="hidden"
+						name="form_fields[<?php echo esc_attr($gallery_meta_key); ?>]"
+						class="efpp-gallery-input efpp-gallery-<?php echo esc_attr($gallery_meta_key); ?>"
+						value="">
+
+
                 </div>
             </div>
 

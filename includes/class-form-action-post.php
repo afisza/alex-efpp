@@ -197,6 +197,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                             'post_date' => 'Post Date (Y-m-d)',
                             'post_time' => 'Post Time (H:i)',
                             'custom_field' => 'Custom Field (meta)',
+                            'gallery_field' => 'Gallery Field (meta)',
                             'taxonomy' => 'Taxonomy (term_id)',
                             
                         ],
@@ -310,10 +311,16 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $featured_image_url = null;
         $gallery_urls = [];
         $price_value = null;
+        $gallery_meta_key = '';
+        $gallery_urls = '';
 
         foreach ($field_map as $map) {
             $type = $map['field_type'] ?? '';
             $form_field = $map['form_field_id'] ?? '';
+
+            $gallery_urls = null;
+            $gallery_meta_key = null;
+
             if (!$form_field || !$type) continue;
 
             $field_data = $fields[$form_field] ?? [];
@@ -332,27 +339,9 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 case 'custom_field':
                     $meta_key = $map['meta_key'] ?? '';
                     if ($meta_key) {
-                        // Obsługa tablicowych wartości (np. gallery z wieloma URL-ami)
-                        if (is_array($value)) {
-                            $post_meta[$meta_key] = $value;
-                        } elseif (str_contains($meta_key, 'gallery')) {
-                            $urls = is_array($value) ? $value : array_map('trim', explode(',', $value));
-                            $attachment_ids = [];
-
-                            foreach ($urls as $url) {
-                                if (!$url) continue;
-                                $id = attachment_url_to_postid($url);
-                                if (!$id && filter_var($url, FILTER_VALIDATE_URL)) {
-                                    $id = $this->media_sideload_image($url, $post_id);
-                                }
-                                if ($id && !is_wp_error($id)) {
-                                    $attachment_ids[] = (int) $id;
-                                }
-                            }
-
-                            if (!empty($attachment_ids)) {
-                                $post_meta[$meta_key] = $attachment_ids;
-                            }
+                        if (str_contains($meta_key, 'gallery')) {
+                            $gallery_meta_key = $meta_key;
+                            $gallery_urls = $value;
                         } else {
                             $post_meta[$meta_key] = $value;
                         }
@@ -382,6 +371,10 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     break;
                 case 'price':
                     $price_value = is_numeric($value) ? floatval($value) : 0;
+                    break;
+                case 'gallery_field':
+                    $gallery_meta_key = $map['meta_key'] ?? 'gallery';
+                    $gallery_urls = $fields[$form_field]['raw_value'] ?? ($fields[$form_field]['value'] ?? '');
                     break;
             }
         }
@@ -423,32 +416,34 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             }
         }
 
-        // --- Save gallery field (JetEngine / ACF compatibility) ---
-        if (!empty($fields['gallery']['value'])) {
-            $gallery_urls = explode(',', $fields['gallery']['value']);
-            $gallery_ids = [];
+        // --- Obsługa galerii (media_sideload_image + featured image) ---
+        if ($gallery_urls && $gallery_meta_key) {
+            $urls = is_array($gallery_urls) ? $gallery_urls : array_map('trim', explode(',', $gallery_urls));
+            $attachment_ids = [];
 
-            foreach ($gallery_urls as $url) {
-                $url = trim($url);
-                if (empty($url)) continue;
+            foreach ($urls as $index => $url) {
+                if (!$url) continue;
 
-                // Znajdź ID załącznika po URL – działa tylko dla obrazków już w bibliotece
-                $attachment_id = attachment_url_to_postid($url);
-
-                // Jeśli brak ID, spróbuj zaciągnąć z zewnątrz i dodać do biblioteki
-                if (!$attachment_id && filter_var($url, FILTER_VALIDATE_URL)) {
-                    $attachment_id = $this->media_sideload_image($url, $post_id);
+                $id = attachment_url_to_postid($url);
+                if (!$id && filter_var($url, FILTER_VALIDATE_URL)) {
+                    $id = $this->media_sideload_image($url, $post_id);
                 }
 
-                if ($attachment_id && !is_wp_error($attachment_id)) {
-                    $gallery_ids[] = (int) $attachment_id;
+                if ($id && !is_wp_error($id)) {
+                    $attachment_ids[] = (int) $id;
+
+                    // Ustaw pierwszy jako featured image
+                    if ($index === 0 && !has_post_thumbnail($post_id)) {
+                        set_post_thumbnail($post_id, $id);
+                    }
                 }
             }
 
-            if (!empty($gallery_ids)) {
-                update_post_meta($post_id, 'gallery', $gallery_ids);
+            if (!empty($attachment_ids)) {
+                update_post_meta($post_id, $gallery_meta_key, $attachment_ids);
             }
         }
+
 
 
         foreach ($post_meta as $key => $val) {
