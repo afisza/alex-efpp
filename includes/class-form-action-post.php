@@ -261,7 +261,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         return $id;
     }
 
-
     public function run($record, $ajax_handler) {
         $manager = \Elementor\Plugin::$instance->dynamic_tags;
         $settings = $record->get('form_settings');
@@ -296,7 +295,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             }
         }
 
-        // --- Prepare initial post data ---
         $post_data = [
             'post_type'    => $settings['alex_efpp_post_type'] ?? 'post',
             'post_status'  => $settings['alex_efpp_post_status'] ?? 'draft',
@@ -310,6 +308,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $post_date_raw = null;
         $post_time_raw = null;
         $featured_image_url = null;
+        $gallery_urls = [];
         $price_value = null;
 
         foreach ($field_map as $map) {
@@ -320,7 +319,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             $field_data = $fields[$form_field] ?? [];
             $value = $field_data['raw_value'] ?? ($field_data['value'] ?? $manager->tag_text($form_field));
 
-
             switch ($type) {
                 case 'title':
                     $post_data['post_title'] = sanitize_text_field($value);
@@ -330,7 +328,51 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     break;
                 case 'featured_image':
                     $featured_image_url = esc_url_raw($value);
-                    error_log('[EFPP] featured_image_url: ' . $featured_image_url);
+                    break;
+                case 'custom_field':
+                    $meta_key = $map['meta_key'] ?? '';
+                    if ($meta_key) {
+                        // Obsługa tablicowych wartości (np. gallery z wieloma URL-ami)
+                        if (is_array($value)) {
+                            $post_meta[$meta_key] = $value;
+                        } elseif (str_contains($meta_key, 'gallery')) {
+                            $urls = is_array($value) ? $value : array_map('trim', explode(',', $value));
+                            $attachment_ids = [];
+
+                            foreach ($urls as $url) {
+                                if (!$url) continue;
+                                $id = attachment_url_to_postid($url);
+                                if (!$id && filter_var($url, FILTER_VALIDATE_URL)) {
+                                    $id = $this->media_sideload_image($url, $post_id);
+                                }
+                                if ($id && !is_wp_error($id)) {
+                                    $attachment_ids[] = (int) $id;
+                                }
+                            }
+
+                            if (!empty($attachment_ids)) {
+                                $post_meta[$meta_key] = $attachment_ids;
+                            }
+                        } else {
+                            $post_meta[$meta_key] = $value;
+                        }
+                    }
+                    break;
+                case 'taxonomy':
+                    $taxonomy = $map['taxonomy_slug'] ?? '';
+                    if ($taxonomy && taxonomy_exists($taxonomy) && !empty($value)) {
+                        $values = is_array($value) ? $value : array_map('trim', explode(',', $value));
+                        $term_ids = [];
+                        foreach ($values as $slug) {
+                            $term = get_term_by('slug', $slug, $taxonomy);
+                            if ($term && !is_wp_error($term)) {
+                                $term_ids[] = (int) $term->term_id;
+                            }
+                        }
+                        if (!empty($term_ids)) {
+                            $post_terms[$taxonomy] = $term_ids;
+                        }
+                    }
                     break;
                 case 'post_date':
                     $post_date_raw = $value;
@@ -341,34 +383,9 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 case 'price':
                     $price_value = is_numeric($value) ? floatval($value) : 0;
                     break;
-                case 'custom_field':
-                    $meta_key = $map['meta_key'] ?? '';
-                    if ($meta_key) {
-                        $post_meta[$meta_key] = $value;
-                    }
-                    break;
-                case 'taxonomy':
-                    $taxonomy = $map['taxonomy_slug'] ?? '';
-                    if ($taxonomy && taxonomy_exists($taxonomy) && !empty($value)) {
-                        $values = is_array($value) ? $value : array_map('trim', explode(',', $value));
-
-                        $term_ids = [];
-                        foreach ($values as $slug) {
-                            $term = get_term_by('slug', $slug, $taxonomy);
-                            if ($term && !is_wp_error($term)) {
-                                $term_ids[] = (int) $term->term_id;
-                            }
-                        }
-
-                        if (!empty($term_ids)) {
-                            $post_terms[$taxonomy] = $term_ids;
-                        }
-                    }
-                    break;
             }
         }
 
-        // --- Handle post_date & post_time merge ---
         if ($post_date_raw && $post_time_raw) {
             $timestamp = strtotime("$post_date_raw $post_time_raw");
             if ($timestamp) {
@@ -380,7 +397,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             }
         }
 
-        // --- Create or Update ---
         $post_mode = $settings['alex_efpp_post_mode'] ?? 'create';
         if ($post_mode === 'update') {
             $id_field = $settings['alex_efpp_post_id_field'] ?? 'post_id';
@@ -400,45 +416,49 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             return;
         }
 
-        // --- Set featured image ---
         if (!empty($featured_image_url)) {
-            error_log('[EFPP] Próbuję przypisać obrazek z: ' . $featured_image_url);
-            $attachment_id = null;
-
-            if (is_numeric($featured_image_url)) {
-                // Jeśli formularz zwraca ID załącznika
-                $attachment_id = (int)$featured_image_url;
-                if (!wp_get_attachment_url($attachment_id)) {
-                    $attachment_id = null;
-                    error_log('[EFPP] Podany ID nie jest poprawnym załącznikiem.');
-                } else {
-                    error_log('[EFPP] Użyto istniejącego załącznika ID: ' . $attachment_id);
-                }
-            } elseif (filter_var($featured_image_url, FILTER_VALIDATE_URL)) {
-                // Jeśli formularz zwraca URL – próbujemy zaciągnąć obraz
-                $attachment_id = $this->media_sideload_image($featured_image_url, $post_id);
-                error_log('[EFPP] media_sideload_image zwrócił ID: ' . print_r($attachment_id, true));
-            }
-
+            $attachment_id = $this->media_sideload_image($featured_image_url, $post_id);
             if ($attachment_id) {
                 set_post_thumbnail($post_id, $attachment_id);
-                error_log('[EFPP] Ustawiono obrazek wyróżniający ID: ' . $attachment_id);
-            } else {
-                error_log('[EFPP] Nie udało się przypisać obrazka.');
             }
         }
 
-        // --- Save custom fields ---
+        // --- Save gallery field (JetEngine / ACF compatibility) ---
+        if (!empty($fields['gallery']['value'])) {
+            $gallery_urls = explode(',', $fields['gallery']['value']);
+            $gallery_ids = [];
+
+            foreach ($gallery_urls as $url) {
+                $url = trim($url);
+                if (empty($url)) continue;
+
+                // Znajdź ID załącznika po URL – działa tylko dla obrazków już w bibliotece
+                $attachment_id = attachment_url_to_postid($url);
+
+                // Jeśli brak ID, spróbuj zaciągnąć z zewnątrz i dodać do biblioteki
+                if (!$attachment_id && filter_var($url, FILTER_VALIDATE_URL)) {
+                    $attachment_id = $this->media_sideload_image($url, $post_id);
+                }
+
+                if ($attachment_id && !is_wp_error($attachment_id)) {
+                    $gallery_ids[] = (int) $attachment_id;
+                }
+            }
+
+            if (!empty($gallery_ids)) {
+                update_post_meta($post_id, 'gallery', $gallery_ids);
+            }
+        }
+
+
         foreach ($post_meta as $key => $val) {
             update_post_meta($post_id, $key, $val);
         }
 
-        // --- Set taxonomies ---
         foreach ($post_terms as $taxonomy => $term_ids) {
             wp_set_post_terms($post_id, $term_ids, $taxonomy, false);
         }
 
-        // --- WooCommerce support ---
         if ($post_data['post_type'] === 'product') {
             update_post_meta($post_id, '_regular_price', $price_value);
             update_post_meta($post_id, '_price', $price_value);
@@ -448,9 +468,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             do_action('woocommerce_process_product_meta_' . $product_type, $post_id);
         }
 
-        // --- Redirect if enabled ---
         $redirect_type = $settings['alex_efpp_redirect_type'] ?? 'none';
-
         switch ($redirect_type) {
             case 'post':
                 if (get_post_status($post_id)) {
@@ -458,7 +476,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     $ajax_handler->add_response_data('redirect_url', get_permalink($post_id));
                 }
                 break;
-
             case 'custom':
                 $custom_url = $settings['alex_efpp_custom_redirect_url'] ?? '';
                 if (!empty($custom_url) && filter_var($custom_url, FILTER_VALIDATE_URL)) {
@@ -466,13 +483,12 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     $ajax_handler->add_response_data('redirect_url', esc_url_raw($custom_url));
                 }
                 break;
-
             case 'none':
             default:
-                // Optional: message without redirect
                 $ajax_handler->add_success_message(__('Saved successfully.', 'alex-efpp'));
                 break;
         }
+
     }
 
 }

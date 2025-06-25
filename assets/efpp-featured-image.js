@@ -1,93 +1,108 @@
 (function ($) {
   $(document).ready(function () {
-    // Otwarcie Media Library po kliknięciu w obrazek lub tło
-    $(document).on('click', '.efpp-preview, .efpp-drop-zone:not(.has-image)', function () {
+    // Dodajemy sortable
+    $('.efpp-image-list').sortable({
+      items: '.efpp-image-item',
+      update: function (event, ui) {
+        updateInputs(ui.item.closest('.efpp-featured-image-wrapper'));
+      }
+    });
+
+    // Obsługa kliknięcia w drop zone
+    $(document).on('click', '.efpp-drop-zone', function () {
       const wrapper = $(this).closest('.efpp-featured-image-wrapper');
-      const input = wrapper.find('input[type="hidden"]');
+      const fieldName = wrapper.data('field-name');
 
       const frame = wp.media({
-        title: 'Wybierz obrazek',
-        multiple: false,
+        title: 'Wybierz obrazki',
+        multiple: true,
         library: { type: 'image' },
-        button: { text: 'Ustaw obrazek' }
+        button: { text: 'Dodaj obrazki' }
       });
 
       frame.on('select', function () {
-        const attachment = frame.state().get('selection').first().toJSON();
-        wrapper.find('.efpp-preview').attr('src', attachment.url).show();
-        if (!input.length) {
-          console.warn('EFPP: input[type=hidden] not found');
-          return;
-        }
-          if (!input.attr('name')) {
-          const fallbackName = wrapper.data('field-name');
-          input.attr('name', 'form_fields[' + fallbackName + ']');
-        }
-        input.val(attachment.url).trigger('change');
-        console.log('Set image URL:', attachment.url);
-
-        wrapper.find('.efpp-drop-zone').addClass('has-image');
-        wrapper.find('.efpp-remove-image').show();
+        const selection = frame.state().get('selection');
+        selection.each(function (attachment) {
+          const img = attachment.toJSON();
+          appendImage(wrapper, img.url);
+        });
+        updateInputs(wrapper);
       });
 
       frame.open();
     });
 
+    // Dodawanie nowego obrazka do listy
+    function appendImage(wrapper, url) {
+      const imageItem = $(`
+        <li class="efpp-image-item">
+          <img src="${url}" />
+          <button type="button" class="efpp-remove-image">×</button>
+        </li>
+      `);
+      wrapper.find('.efpp-image-list').append(imageItem);
+    }
+
     // Usuwanie obrazka
     $(document).on('click', '.efpp-remove-image', function (e) {
       e.preventDefault();
       const wrapper = $(this).closest('.efpp-featured-image-wrapper');
-      wrapper.find('.efpp-preview').attr('src', '').hide();
-      wrapper.find('input[type="hidden"]').val('');
-      wrapper.find('.efpp-drop-zone').removeClass('has-image');
-      $(this).hide();
+      $(this).closest('.efpp-image-item').remove();
+      updateInputs(wrapper);
     });
 
-    // Obsługa dragover
+    // Aktualizacja inputów hidden
+    function updateInputs(wrapper) {
+      const images = wrapper.find('.efpp-image-item img').map(function () {
+        return $(this).attr('src');
+      }).get();
+
+      const featured = images[0] || '';
+      const gallery = images.slice(1);
+
+      wrapper.find('input[name^="form_fields["][name*="featured_image"]').val(featured);
+      wrapper.find('input[name^="form_fields["][name*="gallery"]').val(gallery.join(','));
+    }
+
+    // Obsługa przeciągania pliku
     $(document).on('dragover', '.efpp-drop-zone', function (e) {
       e.preventDefault();
-      e.stopPropagation();
       $(this).addClass('dragover');
     });
 
-    // Obsługa dragleave
     $(document).on('dragleave', '.efpp-drop-zone', function (e) {
       e.preventDefault();
-      e.stopPropagation();
       $(this).removeClass('dragover');
     });
 
-    // Obsługa drop
     $(document).on('drop', '.efpp-drop-zone', function (e) {
       e.preventDefault();
-      e.stopPropagation();
       $(this).removeClass('dragover');
 
-      const file = e.originalEvent.dataTransfer.files[0];
-      if (!file || !file.type.match('image.*')) return;
-
       const wrapper = $(this).closest('.efpp-featured-image-wrapper');
-      const input = wrapper.find('input[type="hidden"]');
+      const files = e.originalEvent.dataTransfer.files;
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('action', 'efpp_upload_image');
-      formData.append('_wpnonce', EFPPImageField.nonce);
+      Array.from(files).forEach(file => {
+        if (!file.type.match('image.*')) return;
 
-      $.ajax({
-        url: EFPPImageField.ajax_url,
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (res) {
-          if (res.success && res.data.url) {
-            wrapper.find('.efpp-preview').attr('src', res.data.url).show();
-            input.val(res.data.url);
-            wrapper.find('.efpp-drop-zone').addClass('has-image');
-            wrapper.find('.efpp-remove-image').show();
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('action', 'efpp_upload_image');
+        formData.append('_wpnonce', EFPPImageField.nonce);
+
+        $.ajax({
+          url: EFPPImageField.ajax_url,
+          type: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (res) {
+            if (res.success && res.data.url) {
+              appendImage(wrapper, res.data.url);
+              updateInputs(wrapper);
+            }
           }
-        }
+        });
       });
     });
   });

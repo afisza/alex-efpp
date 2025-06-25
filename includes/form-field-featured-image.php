@@ -24,11 +24,12 @@ if ( ! class_exists( 'EFPP_Featured_Image_Field' ) ) {
             );
 
             wp_enqueue_media();
+            wp_enqueue_script('jquery-ui-sortable');
 
             wp_enqueue_script(
                 'efpp-featured-image-js',
                 plugin_dir_url(__FILE__) . '../assets/efpp-featured-image.js',
-                ['jquery', 'media-editor'],
+                ['jquery', 'media-editor', 'jquery-ui-sortable'],
                 '1.0',
                 true
             );
@@ -40,16 +41,8 @@ if ( ! class_exists( 'EFPP_Featured_Image_Field' ) ) {
 
             $field_name = !empty($item['custom_id']) ? $item['custom_id'] : 'featured_image';
             $field_id   = 'form-field-' . esc_attr($field_name);
-
-            $field_value = '';
-
-            if (!empty($item['field_value'])) {
-                $field_value = esc_url($item['field_value']);
-            } elseif (is_singular() && get_post_thumbnail_id()) {
-                $field_value = wp_get_attachment_url(get_post_thumbnail_id());
-            }
-
             $label = trim($item['title'] ?? '');
+
             ?>
 
             <div class="elementor-field-type-<?php echo esc_attr($this->get_type()); ?> elementor-column elementor-col-100 elementor-field-group-<?php echo esc_attr($field_name); ?>">
@@ -57,23 +50,20 @@ if ( ! class_exists( 'EFPP_Featured_Image_Field' ) ) {
                     <label for="<?php echo esc_attr($field_id); ?>" class="elementor-field-label"><?php echo esc_html($label); ?></label>
                 <?php endif; ?>
 
-                <div class="elementor-field efpp-featured-image-wrapper" data-field-name="<?php echo $field_name; ?>">
-                    <div class="efpp-drop-zone<?php echo $field_value ? ' has-image' : ''; ?>">
-                        <?php if ($field_value) : ?>
-                            <img src="<?php echo $field_value; ?>" class="efpp-preview" />
-                        <?php else : ?>
-                            <img src="" class="efpp-preview" style="display: none;" />
-                        <?php endif; ?>
+                <div class="elementor-field efpp-featured-image-wrapper" data-field-name="<?php echo esc_attr($field_name); ?>">
+                    <div class="efpp-gallery-clickable">
+						<div class="efpp-drop-zone">
+							<div class="efpp-instructions"><?php _e('Kliknij lub przeciągnij, aby dodać obrazki', 'alex-efpp'); ?></div>
+						</div>
+						<ul class="efpp-image-list"></ul>
+					</div>
 
-                        <div class="efpp-instructions"><?php _e('Click or Drag to add an image', 'alex-efpp'); ?></div>
-                        <button type="button" class="efpp-remove-image" style="<?php echo $field_value ? '' : 'display:none;'; ?>">×</button>
-                    </div>
-
-                    <input type="hidden" name="form_fields[<?php echo esc_attr($field_name); ?>]" id="<?php echo esc_attr($field_id); ?>" value="<?php echo esc_url($field_value); ?>" />
+                    <input type="hidden" name="form_fields[<?php echo esc_attr($field_name); ?>]" class="efpp-featured-input" value="">
+                    <input type="hidden" name="form_fields[gallery]" class="efpp-gallery-input" value="">
                 </div>
             </div>
-            <?php
 
+            <?php
             if ( Elementor\Plugin::$instance->editor->is_edit_mode() ) {
                 ?>
                 <script>
@@ -109,7 +99,6 @@ if ( ! class_exists( 'EFPP_Featured_Image_Field' ) ) {
             add_action('wp_footer', [ $this, 'content_template_script' ]);
         }
 
-        //CACHE
         public function content_template_script(): void {
             ?>
             <script>
