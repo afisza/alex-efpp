@@ -308,9 +308,11 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
 
     public function run($record, $ajax_handler) {
         $manager = \Elementor\Plugin::$instance->dynamic_tags;
+
         $settings = $record->get('form_settings');
         $fields   = $record->get('fields');
-        error_log( print_r( $fields, true ) );
+        //error_log( print_r( $record, true ) );
+        error_log( "fields\n" . print_r( $fields, true ) . "\n" );
 
         $field_map = $settings['efpp_post_field_map'] ?? [];
 
@@ -365,6 +367,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         foreach ($field_map as $map) {
             $type = $map['field_type'] ?? '';
             $form_field = $map['form_field_id'] ?? '';
+            error_log( "form_field\n" . print_r( $form_field, true ) . "\n" );
 
             $gallery_urls = null;
             $gallery_meta_key = null;
@@ -372,7 +375,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             if (!$form_field || !$type) continue;
 
             $field_data = $fields[$form_field] ?? [];
-            $value = $field_data['raw_value'] ?? ($field_data['value'] ?? $manager->tag_text($form_field));
+            $value = $field_data['raw_value'] ?: $field_data['value'];
 
             switch ($type) {
                 case 'title':
@@ -390,8 +393,9 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     break;
                 case 'custom_field':
                     $meta_key = $map['meta_key'] ?? '';
+                    error_log( "map\n" . print_r( $map, true ) . "\n" );
                     if ($meta_key) {
-                        error_log("[EFPP] meta_key=$meta_key | form_field=$form_field | value=" . print_r($value, true));
+                        //error_log("[EFPP] meta_key=$meta_key | form_field=$form_field | value=" . print_r($value, true));
                         $post_meta[$meta_key] = $value;
                     }
                     break;
@@ -491,6 +495,8 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
 
 
         foreach ($post_meta as $key => $val) {
+            error_log( "key\n" . print_r( $key, true ) . "\n" );
+            error_log( "val\n" . print_r( $val, true ) . "\n" );
             update_post_meta($post_id, $key, $val);
         }
 

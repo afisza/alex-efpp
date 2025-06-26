@@ -93,18 +93,19 @@ class Dynamic_Choose_Field extends Field_Base {
         $source_type = $item['efpp_dc_source_type'] ?? 'acf';
         $input_type = $item['efpp_dc_input_type'] ?? 'select';
 
+        //error_log( "item\n" . print_r( $item, true ) . "\n" );
 
         switch ($source_type) {
             case 'acf':
-                $field_name = explode( ':', $item['efpp_dc_acf_field'], 1 )[0];
-                $item['field_name'] = $field_name;
+                $field_name = explode( ':', $item['efpp_dc_acf_field'], 2 )[1];
+                //$item['field_name'] = $field_name;
                 $acf_field = $item['efpp_dc_acf_field'];
                 $options = $this->get_acf_meta_field_options( $acf_field );
                 break;
 
             case 'jetengine':
-                $field_name = explode( '|', $item['efpp_dc_jet_engine_field'], 1 )[0];
-                $item['field_name'] = $field_name;
+                $field_name = explode( '|', $item['efpp_dc_jet_engine_field'], 2 )[1];
+                //$item['field_name'] = $field_name;
                 if (function_exists('jet_engine')) {
                     $jet_engine_field = $item['efpp_dc_jet_engine_field'];
                     $options = $this->get_jet_engine_meta_field_options( $jet_engine_field );
@@ -128,7 +129,7 @@ class Dynamic_Choose_Field extends Field_Base {
                 echo '<div class="elementor-field elementor-select-wrapper" data-fields-repeater-item-id="' . $item['_id'] . '">';
                 echo '<div class="select-caret-down-wrapper"><svg aria-hidden="true" class="e-font-icon-svg e-eicon-caret-down" viewBox="0 0 571.4 571.4" xmlns="http://www.w3.org/2000/svg"><path d="M571 393Q571 407 561 418L311 668Q300 679 286 679T261 668L11 418Q0 407 0 393T11 368 36 357H536Q550 357 561 368T571 393Z"></path></svg></div>';
                     echo '<select 
-                        name="form_fields[' . esc_attr($field_name) . ']" 
+                        name="form_fields[' . esc_attr($item['custom_id']) . ']" 
                         id="form-field-' . esc_attr($field_name) . '" 
                         class="elementor-field-textual elementor-select efpp-dynamic-select" 
                         data-field-type="efpp-dynamic-choose">
@@ -152,7 +153,7 @@ class Dynamic_Choose_Field extends Field_Base {
                             echo '<input
                                 id="'. $field_id . '"
                                 type="radio" 
-                                name="form_fields[' . esc_attr( $field_name ) . ']" 
+                                name="form_fields[' . esc_attr( $item['custom_id'] ) . ']" 
                                 value="' . esc_attr( $value ) . '" 
                             >&nbsp;';
 
@@ -176,7 +177,7 @@ class Dynamic_Choose_Field extends Field_Base {
                             echo '<input
                                 id="'. $field_id . '"
                                 type="checkbox" 
-                                name="form_fields[' . esc_attr( $field_name ) . ']" 
+                                name="form_fields[' . esc_attr( $item['custom_id'] ) . ']" 
                                 value="' . esc_attr( $value ) . '" 
                                 class="elementor-field elementor-checkbox"
                             >&nbsp;';
