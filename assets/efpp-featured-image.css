@@ -82,3 +82,19 @@
 	text-align: center;
 	cursor: pointer;
 }
+
+.efpp-message {
+  background: #dff0d8;
+  color: #3c763d;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #d0e9c6;
+  font-size: 14px;
+}
+
+.efpp-message-error {
+  background: #f2dede;
+  color: #a94442;
+  border-color: #ebccd1;
+}

@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP
 Description: Publikuje treści z formularza Elementor jako wpis lub CPT.
-Version: 1.0.2.1
+Version: 1.0.2.2
 Author: Alex Scar
 */
 
@@ -10,28 +10,36 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 class Alex_EFPP {
 
-    public function __construct() {
-        // Rejestracja akcji formularza: publikacja posta
-        add_action('elementor_pro/forms/actions/register', [$this, 'register_action']);
-
-        // Rejestracja akcji formularza: rejestracja / aktualizacja użytkownika
-        add_action('elementor_pro/forms/actions/register', [$this, 'register_user_action']);
-
-        // Dodanie własnych pól formularza do Elementora
-        add_action('elementor_pro/forms/fields/register', [$this, 'register_efpp_form_fields']);
-
-        // Załaduj JS w edytorze
-        add_action('elementor/editor/after_enqueue_scripts', [$this, 'enqueue_editor_scripts']);
-
-        // Załaduj CSS na froncie
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_styles']);
-
-        // AJAX
-        require_once plugin_dir_path(__FILE__) . 'includes/ajax.php';
-
-        require_once plugin_dir_path(__FILE__) . 'includes/form-field-icons-extension.php';
-
+    public function load_textdomain() {
+        load_plugin_textdomain('alex-efpp', false, dirname(plugin_basename(__FILE__)) . '/languages');
     }
+
+    public function __construct() {
+		add_action('plugins_loaded', [$this, 'load_textdomain']);
+		add_action('elementor_pro/forms/actions/register', [$this, 'register_action']);
+		add_action('elementor_pro/forms/actions/register', [$this, 'register_user_action']);
+		add_action('elementor_pro/forms/fields/register', [$this, 'register_efpp_form_fields']);
+		add_action('elementor/editor/after_enqueue_scripts', [$this, 'enqueue_editor_scripts']);
+		add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_styles']);
+		add_action('elementor_pro/forms/render_form', [$this, 'render_efpp_messages_div'], 100, 2);
+
+		// 🔽 TU JEST NASZ KOD:
+		add_filter('elementor_pro/forms/show_message', function($show, $ajax_handler) {
+			$settings = $ajax_handler->get_settings();
+			if (in_array('alex_efpp', $settings['submit_actions'] ?? [])) {
+				return false;
+			}
+			return $show;
+		}, 10, 2);
+
+		require_once plugin_dir_path(__FILE__) . 'includes/ajax.php';
+		require_once plugin_dir_path(__FILE__) . 'includes/form-field-icons-extension.php';
+	}
+
+	public function render_efpp_messages_div_global() {
+		echo '<div class="efpp-messages"></div>';
+	}
+
 
     public function enqueue_frontend_styles() {
         wp_enqueue_style(
@@ -40,6 +48,13 @@ class Alex_EFPP {
             [],
             '1.0'
         );
+		wp_enqueue_script(
+			'alex-efpp-messages',
+			plugin_dir_url(__FILE__) . 'assets/js/efpp-messages.js',
+			['jquery'],
+			'1.0',
+			true
+		);
     }
 
     public function enqueue_editor_scripts() {
@@ -50,37 +65,8 @@ class Alex_EFPP {
             '1.0',
             true
         );
-
-        // wp_localize_script('alex-efpp-editor', 'efppEditor', [
-        //     'ajax_url' => admin_url('admin-ajax.php'),
-        // ]);
-
-        // wp_enqueue_script(
-        //     'alex-efpp-editor',
-        //     plugin_dir_url(__FILE__) . 'assets/editor-taxonomy.js',
-        //     ['jquery'],
-        //     '1.0',
-        //     true
-        // );
-
-        // wp_localize_script('alex-efpp-editor', 'AlexEFPP', [
-        //     'ajax_url' => admin_url('admin-ajax.php'),
-        //     'nonce'    => wp_create_nonce('alex_efpp_taxonomy_filter'),
-        // ]);
-
-        // wp_enqueue_script(
-        //     'alex-efpp-dynamic-choose-editor',
-        //     plugin_dir_url(__FILE__) . 'assets/editor-dynamic-choose.js',
-        //     ['jquery'],
-        //     '1.0',
-        //     true
-        // );
-
-        // wp_localize_script('alex-efpp-dynamic-choose-editor', 'AlexEFPP', [
-        //     'ajax_url' => admin_url('admin-ajax.php'),
-        //     'nonce'    => wp_create_nonce('alex_efpp_dynamic_fields'),
-        // ]);
     }
+
 
     public function register_action($actions) {
         require_once plugin_dir_path(__FILE__) . 'includes/class-form-action-post.php';
@@ -98,13 +84,11 @@ class Alex_EFPP {
         if (class_exists('\Taxonomy_Terms_Field')) {
             $fields_manager->register(new \Taxonomy_Terms_Field());
         }
-
         // Featured Image field
         require_once plugin_dir_path(__FILE__) . 'includes/form-field-featured-image.php';
         if (class_exists('\EFPP_Featured_Image_Field')) {
             $fields_manager->register(new \EFPP_Featured_Image_Field());
         }
-
         // Dynamic Choose field
         require_once plugin_dir_path(__FILE__) . 'includes/form-field-dynamic-choose.php';
         if (class_exists('\Dynamic_Choose_Field')) {

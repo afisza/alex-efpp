@@ -13,7 +13,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
     }
 
     public function get_label() {
-        return 'EFPP – Create/Update Post';
+        return __('EFPP – Create/Update Post', 'alex-efpp');
     }
 
     public function register_settings_section($widget) {
@@ -25,7 +25,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $widget->start_controls_section(
             'section_alex_efpp',
             [
-                'label' => 'EFPP – Publish Settings',
+                'label' =>  __('EFPP – Publish Settings'),
                 'condition' => [
                     'submit_actions' => $this->get_name(),
                 ],
@@ -41,7 +41,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         foreach ($roles as $role_slug => $role_details) {
             $role_options[$role_slug] = translate_user_role($role_details['name']);
         }
-        $role_options['guest'] = 'Guest (not logged in)';
+        $role_options['guest'] = __('Guest (not logged in)', 'alex-efpp');
 
         $widget->add_control(
             'alex_efpp_allowed_role',
@@ -50,7 +50,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 'type' => \Elementor\Controls_Manager::SELECT2,
                 'multiple' => true,
                 'options' => $role_options,
-                'default' => 'subscriber',
+                'default' => ['administrator', 'editor'],
                 'label_block' => true,
                 'condition' => [
                     'submit_actions' => $this->get_name(),
@@ -94,7 +94,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $widget->add_control(
             'alex_efpp_post_type',
             [
-                'label' => 'Post Type',
+                'label' => __('Post Type', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::SELECT,
                 'options' => $post_types,
                 'default' => 'post',
@@ -107,10 +107,10 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 'label' => __('Product Type', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::SELECT,
                 'options' => [
-                    'simple'   => 'Simple',
-                    'grouped'  => 'Grouped',
-                    'external' => 'External/Affiliate',
-                    'variable' => 'Variable',
+                    'simple'   => __('Simple', 'alex-efpp'),
+                    'grouped'  => __('Grouped', 'alex-efpp'),
+                    'external' => __('External/Affiliate', 'alex-efpp'),
+                    'variable' => __('Variable', 'alex-efpp'),
                 ],
                 'default' => 'simple',
                 'condition' => [
@@ -123,13 +123,13 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $widget->add_control(
             'alex_efpp_post_status',
             [
-                'label' => 'Post Status',
+                'label' => __('Post Status', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::SELECT,
                 'options' => [
-                    'draft' => 'Draft',
-                    'publish' => 'Published',
-                    'future' => 'Scheduled',
-                    'pending' => 'Pending Review',
+                    'draft'   => __('Draft', 'alex-efpp'),
+                    'publish' => __('Published', 'alex-efpp'),
+                    'future'  => __('Scheduled', 'alex-efpp'),
+                    'pending' => __('Pending Review', 'alex-efpp'),
                 ],
                 'default' => 'draft',
             ]
@@ -190,38 +190,38 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                         'label' => 'Target Field',
                         'type' => \Elementor\Controls_Manager::SELECT,
                         'options' => [
-                            'title' => 'Post Title',
-                            'content' => 'Post Content',
-                            'featured_image' => 'Featured Image (URL)',
-                            'price' => 'WooCommerce Price',
-                            'post_date' => 'Post Date (Y-m-d)',
-                            'post_time' => 'Post Time (H:i)',
-                            'custom_field' => 'Custom Field (meta)',
-                            'gallery_field' => 'Gallery Field (meta)',
-                            'taxonomy' => 'Taxonomy (term_id)',
-                            
+                            'title'          => __('Post Title', 'alex-efpp'),
+                            'content'        => __('Post Content', 'alex-efpp'),
+                            'featured_image' => __('Featured Image (URL)', 'alex-efpp'),
+                            'price'          => __('WooCommerce Price', 'alex-efpp'),
+                            'post_date'      => __('Post Date (Y-m-d)', 'alex-efpp'),
+                            'post_time'      => __('Post Time (H:i)', 'alex-efpp'),
+                            'custom_field'   => __('Custom Field (meta)', 'alex-efpp'),
+                            'gallery_field'  => __('Gallery Field (meta)', 'alex-efpp'),
+                            'taxonomy'       => __('Taxonomy (term_id)', 'alex-efpp'),
                         ],
+
                         'default' => 'custom_field',
                         'ai' => [ 'active' => false ],
                     ],
                     [
                         'name' => 'form_field_id',
-                        'label' => 'Form Field ID',
+                        'label' => __('Form Field ID'),
                         'type' => \Elementor\Controls_Manager::TEXT,
                         'placeholder' => 'e.g. title, price, custom_field_1',
                         'ai' => [ 'active' => false ],
                     ],
                     [
                         'name' => 'meta_key',
-                        'label' => 'Meta Key (for custom field)',
+                        'label' => __('Meta Key (for custom field)'),
                         'type' => \Elementor\Controls_Manager::TEXT,
-                        'placeholder' => 'e.g. _custom_price',
+                        'placeholder' => '_custom_price',
                         'condition' => [ 'field_type' => 'custom_field' ],
                         'ai' => [ 'active' => false ],
                     ],
                     [
                         'name' => 'taxonomy_slug',
-                        'label' => 'Taxonomy Slug',
+                        'label' => __('Taxonomy Slug'),
                         'type' => \Elementor\Controls_Manager::TEXT,
                         'placeholder' => 'e.g. category',
                         'condition' => [ 'field_type' => 'taxonomy' ],
@@ -230,7 +230,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
 
                     [
                         'name' => 'gallery_limit',
-                        'label' => 'Max images count',
+                        'label' => __('Max images count'),
                         'type' => \Elementor\Controls_Manager::NUMBER,
                         'default' => 12,
                         'condition' => [
@@ -240,7 +240,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     ],
                     [
                         'name' => 'gallery_max_size',
-                        'label' => 'Max file size (MB)',
+                        'label' => __('Max file size (MB)'),
                         'type' => \Elementor\Controls_Manager::NUMBER,
                         'default' => 5,
                         'condition' => [
@@ -250,7 +250,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     ],
                     [
                         'name' => 'gallery_allowed_types',
-                        'label' => 'Allowed file types (comma separated)',
+                        'label' => __('Allowed file types (comma separated)'),
                         'type' => \Elementor\Controls_Manager::TEXT,
                         'placeholder' => 'jpg,png,webp',
                         'condition' => [
@@ -303,27 +303,31 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $field_map = $settings['efpp_post_field_map'] ?? [];
 
         // --- Role check ---
-        $allowed_roles = $settings['alex_efpp_allowed_role'] ?? ['subscriber'];
+        $allowed_roles = $settings['alex_efpp_allowed_role'] ?? ['administrator'];
         if (!is_array($allowed_roles)) $allowed_roles = [$allowed_roles];
 
         $valid_roles = array_merge(array_keys(get_editable_roles()), ['guest']);
 
         foreach ($allowed_roles as $role) {
             if (!in_array($role, $valid_roles)) {
-                $ajax_handler->add_error_message('Invalid role configuration.');
+                $ajax_handler->add_error_message(__('Invalid role configuration.', 'alex-efpp'));
                 return;
             }
         }
 
         if (!is_user_logged_in()) {
             if (!in_array('guest', $allowed_roles)) {
-                $ajax_handler->add_error_message('You must be logged in to submit.');
+                $ajax_handler->add_error_message(__('You must be logged in to submit.', 'alex-efpp'));
                 return;
             }
         } else {
             $user = wp_get_current_user();
             if (!array_intersect($user->roles, $allowed_roles)) {
-                $ajax_handler->add_error_message('You do not have permission to submit.');
+                $role_list = implode(', ', $allowed_roles);
+                $ajax_handler->add_error_message(sprintf(
+                    __('You do not have permission to submit. Allowed roles: %s', 'alex-efpp'),
+                    $role_list
+                ));
                 return;
             }
         }
@@ -496,23 +500,47 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         }
 
         $redirect_type = $settings['alex_efpp_redirect_type'] ?? 'none';
+
+        $success_message = '';
+
+        if ($post_mode === 'update') {
+            $success_message = __('Updated entry successfully.', 'alex-efpp');
+        } else {
+            $success_message = __('POSTYYY added successfully.', 'alex-efpp');
+        }
+
+        error_log('=== EFPP SUCCESS ===');
+        error_log('Post ID: ' . $post_id);
+        error_log('Redirect type: ' . $redirect_type);
+        error_log('Success message: ' . $success_message);
+
         switch ($redirect_type) {
             case 'post':
                 if (get_post_status($post_id)) {
-                    $ajax_handler->add_success_message(__('Saved. Redirecting to post...', 'alex-efpp'));
+                    $ajax_handler->add_response_data('form', true);
+                    $ajax_handler->add_response_data('message', $success_message);
+                    $ajax_handler->add_response_data('success_message', $success_message);
                     $ajax_handler->add_response_data('redirect_url', get_permalink($post_id));
+                    error_log('Redirect URL: ' . get_permalink($post_id));
                 }
                 break;
+
             case 'custom':
                 $custom_url = $settings['alex_efpp_custom_redirect_url'] ?? '';
                 if (!empty($custom_url) && filter_var($custom_url, FILTER_VALIDATE_URL)) {
-                    $ajax_handler->add_success_message(__('Saved. Redirecting...', 'alex-efpp'));
+                    $ajax_handler->add_response_data('form', true);
+                    $ajax_handler->add_response_data('message', $success_message);
+                    $ajax_handler->add_response_data('success_message', $success_message);
                     $ajax_handler->add_response_data('redirect_url', esc_url_raw($custom_url));
                 }
                 break;
+
             case 'none':
             default:
-                $ajax_handler->add_success_message(__('Saved successfully.', 'alex-efpp'));
+                $ajax_handler->add_response_data('form', true);
+                $ajax_handler->add_response_data('message', $success_message);
+                $ajax_handler->add_response_data('success_message', $success_message);
+                error_log('Brak redirect_url – tylko message');
                 break;
         }
 

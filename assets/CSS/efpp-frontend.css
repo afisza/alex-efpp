@@ -1,4 +1,27 @@
-/* .efpp-taxonomy-select, .elementor-field-type-taxonomy_terms {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-} */
+.efpp-messages {
+	display: none;
+	color: green;
+	font-weight: 600;
+	margin-top: 10px;
+}
+
+.efpp-message {
+  background: #e7fbe7;
+  border: 1px solid #b7e2b7;
+  padding: 10px 15px;
+  margin-top: 15px;
+  font-size: 15px;
+  color: #1e4620;
+  border-radius: 6px;
+}
+
+.efpp-error-message {
+  background: #fdeaea;
+  border: 1px solid #e0a1a1;
+  padding: 10px 15px;
+  margin-top: 15px;
+  font-size: 15px;
+  color: #802020;
+  border-radius: 6px;
+}
+
