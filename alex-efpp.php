@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Alex EFPP
-Description: Publikuje treści z formularza Elementor jako wpis lub CPT.
-Version: 1.0.2.2
+Plugin Name: Alex EFPP - Elementor Form Publish Post
+Description: Publishes content from the Elementor form as an post or CPT.
+Version: 1.0.3
 Author: Alex Scar
 */
 

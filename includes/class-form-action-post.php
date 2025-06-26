@@ -553,7 +553,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         if ($post_mode === 'update') {
             $success_message = __('Updated entry successfully.', 'alex-efpp');
         } else {
-            $success_message = __('POSTYYY added successfully.', 'alex-efpp');
+            $success_message = __('POST added successfully.', 'alex-efpp');
         }
 
         error_log('=== EFPP SUCCESS ===');
