@@ -179,6 +179,18 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             ]
         );
 
+        $field_names = array(
+            'title'          => __('Post Title', 'alex-efpp'),
+            'content'        => __('Post Content', 'alex-efpp'),
+            'featured_image' => __('Featured Image (URL)', 'alex-efpp'),
+            'price'          => __('WooCommerce Price', 'alex-efpp'),
+            'post_date'      => __('Post Date (Y-m-d)', 'alex-efpp'),
+            'post_time'      => __('Post Time (H:i)', 'alex-efpp'),
+            'custom_field'   => __('Custom Field', 'alex-efpp'),
+            'gallery_field'  => __('Gallery Field', 'alex-efpp'),
+            'taxonomy'       => __('Taxonomy (term_id)', 'alex-efpp'),
+        );
+
         $widget->add_control(
             'efpp_post_field_map',
             [
@@ -189,18 +201,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                         'name' => 'field_type',
                         'label' => 'Target Field',
                         'type' => \Elementor\Controls_Manager::SELECT,
-                        'options' => [
-                            'title'          => __('Post Title', 'alex-efpp'),
-                            'content'        => __('Post Content', 'alex-efpp'),
-                            'featured_image' => __('Featured Image (URL)', 'alex-efpp'),
-                            'price'          => __('WooCommerce Price', 'alex-efpp'),
-                            'post_date'      => __('Post Date (Y-m-d)', 'alex-efpp'),
-                            'post_time'      => __('Post Time (H:i)', 'alex-efpp'),
-                            'custom_field'   => __('Custom Field (meta)', 'alex-efpp'),
-                            'gallery_field'  => __('Gallery Field (meta)', 'alex-efpp'),
-                            'taxonomy'       => __('Taxonomy (term_id)', 'alex-efpp'),
-                        ],
-
+                        'options' => $field_names,
                         'default' => 'custom_field',
                         'ai' => [ 'active' => false ],
                     ],
@@ -272,9 +273,41 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     ],
 
                 ],
-                'title_field' => '{{ field_type }}',
+                //'title_field' => '{{ field_type }}',
+                'title_field' => '<#
+                    if ( field_type == "title" ) {
+                        print("' . $field_names['title'] . '");
+                    }
+                    if ( field_type == "content" ) {
+                        print("' . $field_names['content'] . '");
+                    }
+                    if ( field_type == "featured_image" ) {
+                        print("' . $field_names['featured_image'] . '");
+                    }
+                    if ( field_type == "price" ) {
+                        print("' . $field_names['price'] . '");
+                    }
+                    if ( field_type == "post_date" ) {
+                        print("' . $field_names['post_date'] . '");
+                    }
+                    if ( field_type == "post_time" ) {
+                        print("' . $field_names['post_time'] . '");
+                    }
+                    if ( field_type == "custom_field" ) {
+                        print("' . $field_names['custom_field'] . '");
+                    }
+                    if ( field_type == "gallery_field" ) {
+                        print("' . $field_names['gallery_field'] . '");
+                    }
+                    if ( field_type == "taxonomy" ) {
+                        print("' . $field_names['taxonomy'] . '");
+                    }
+                    if (typeof form_field_id !== "undefined" && form_field_id) {
+                        print(": " + form_field_id);
+                    }
+                #>',
                 'condition' => [ 'submit_actions' => $this->get_name() ],
-                'ai' => [ 'active' => false ],
+                'max_items' => 50,
             ]
         );
 

@@ -12,7 +12,7 @@ if ( ! class_exists( 'EFPP_Featured_Image_Field' ) ) {
         }
 
         public function get_name() {
-            return 'EFPP Featured Image Upload + Preview';
+            return 'EFPP Image Uploader';
         }
 
         public function render($item, $item_index, $form) {
