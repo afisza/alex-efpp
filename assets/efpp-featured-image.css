@@ -1,6 +1,6 @@
 .efpp-featured-image-wrapper {
   padding: 10px;
-  border: 2px dashed #ccc;
+  border: 2px solid #ccc;
   background: #f9f9f9;
   position: relative;
 }
@@ -27,14 +27,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  overflow: visible; /* ważne: NIE ukrywa buttonów */
+  overflow: visible; 
   padding: 0;
-  margin: 0;
+  margin-top: 15px;
   list-style: none;
 }
 
 .efpp-image-list li {
-  width: calc(33.333% - 10px); /* 3 na rząd z marginesem */
+  width: calc(33.333% - 10px); 
   max-width: 120px;
   position: relative;
   border: 1px solid #ddd;
@@ -67,4 +67,18 @@
   z-index: 10;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   padding: 0;
+}
+
+.efpp-error {
+  color: red;
+  font-size: 14px;
+  margin-top: 8px;
+  display: none;
+}
+
+.efpp-gallery-clickable {
+	border: 2px dashed #ccc;
+	padding: 20px;
+	text-align: center;
+	cursor: pointer;
 }

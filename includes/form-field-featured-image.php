@@ -35,66 +35,91 @@ if ( ! class_exists( 'EFPP_Featured_Image_Field' ) ) {
             );
 
             wp_localize_script('efpp-featured-image-js', 'EFPPImageField', [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce'    => wp_create_nonce('efpp_featured_image_upload'),
-            ]);
+				'ajax_url' => admin_url('admin-ajax.php'),
+				'nonce'    => wp_create_nonce('efpp_featured_image_upload'),
+				'defaults' => [
+					'limit' => 6,
+					'maxSize' => 50,
+					'allowedTypes' => ['jpg', 'jpeg', 'png', 'webp',]
+				]
+			]);
 
             $field_name = !empty($item['custom_id']) ? $item['custom_id'] : 'featured_image';
-			//$gallery_meta_key = $item['gallery_meta_key'] ?? 'gallery';
 			$gallery_meta_key = !empty($item['custom_id']) ? $item['custom_id'] : 'gallery';
-
-
             $field_id   = 'form-field-' . esc_attr($field_name);
             $label = trim($item['title'] ?? '');
+
+			// Ustawienia domyślne
+			$limit       = isset($item['max_images_count']) ? (int) $item['max_images_count'] : 12;
+			$max_size    = isset($item['max_file_size']) ? (float) $item['max_file_size'] : 5;
+			$allowed_types = !empty($item['allowed_file_types']) ? $item['allowed_file_types'] : 'jpg,jpeg,png,webp';
+
+
+			$field_map = $form->get_settings('efpp_post_field_map') ?? [];
+
+			foreach ($field_map as $map) {
+				if (($map['field_type'] ?? '') === 'custom_field' && ($map['form_field_id'] ?? '') === $field_name) {
+					if (!empty($map['gallery_limit'])) {
+						$limit = (int) $map['gallery_limit'];
+					}
+					if (!empty($map['gallery_max_size'])) {
+						$max_size = (float) $map['gallery_max_size'];
+					}
+					if (!empty($map['gallery_allowed_types'])) {
+						$allowed_types = sanitize_text_field($map['gallery_allowed_types']);
+					}
+				}
+			}
+
 
             ?>
 
             <div class="elementor-field-type-<?php echo esc_attr($this->get_type()); ?> elementor-column elementor-col-100 elementor-field-group-<?php echo esc_attr($field_name); ?>">
-                <?php if (!empty($label)) : ?>
-                    <label for="<?php echo esc_attr($field_id); ?>" class="elementor-field-label"><?php echo esc_html($label); ?></label>
-                <?php endif; ?>
+				<?php if (!empty($label)) : ?>
+					<label for="<?php echo esc_attr($field_id); ?>" class="elementor-field-label"><?php echo esc_html($label); ?></label>
+				<?php endif; ?>
 
-                <div class="elementor-field efpp-featured-image-wrapper" data-field-name="<?php echo esc_attr($field_name); ?>">
-                    <div class="efpp-gallery-clickable">
-						<div class="efpp-drop-zone">
-							<div class="efpp-instructions"><?php _e('Kliknij lub przeciągnij, aby dodać obrazki', 'alex-efpp'); ?></div>
-						</div>
-						<ul class="efpp-image-list"></ul>
+				<div
+					class="elementor-field efpp-featured-image-wrapper"
+					data-field-name="<?php echo esc_attr($field_name); ?>"
+					data-limit="<?php echo esc_attr($limit); ?>"
+					data-max-size="<?php echo esc_attr($max_size); ?>"
+					data-types="<?php echo esc_attr($allowed_types); ?>"
+				>
+					<!-- Strefa drag&drop -->
+					<div class="efpp-gallery-clickable efpp-drop-zone">
+						<div class="efpp-instructions"><?php _e('Kliknij lub przeciągnij, aby dodać obrazki', 'alex-efpp'); ?></div>
 					</div>
 
-                    <input type="hidden"
-						name="form_fields[<?php echo esc_attr($field_name); ?>]"
-						class="efpp-featured-input efpp-featured-<?php echo esc_attr($field_name); ?>"
-						value="">
+					<!-- Miniaturki -->
+					<ul class="efpp-image-list"></ul>
 
-					<input type="hidden"
-						name="form_fields[<?php echo esc_attr($gallery_meta_key); ?>]"
-						class="efpp-gallery-input efpp-gallery-<?php echo esc_attr($gallery_meta_key); ?>"
-						value="">
+					<!-- Błędy -->
+					<div class="efpp-error" style="color: red; font-size: 13px; margin-top: 8px; display: none;"></div>
 
+					<!-- Hidden inputs -->
+					<input type="hidden" name="form_fields[<?php echo esc_attr($field_name); ?>]" class="efpp-featured-input" value="">
+					<input type="hidden" name="form_fields[gallery]" class="efpp-gallery-input" value="">
+				</div>
 
-                </div>
-            </div>
+			</div>
 
-            <?php
-            if ( Elementor\Plugin::$instance->editor->is_edit_mode() ) {
-                ?>
-                <script>
-                    var fieldItemId = "<?php echo esc_js($item['_id']); ?>";
-                    var field = jQuery('[data-field-name="<?php echo esc_js($field_name); ?>"]').parent().clone();
+			<?php
+			if (Elementor\Plugin::$instance->editor->is_edit_mode()) :
+				?>
+				<script>
+					var fieldItemId = "<?php echo esc_js($item['_id']); ?>";
+					var field = jQuery('[data-field-name="<?php echo esc_js($field_name); ?>"]').parent().clone();
 
-                    if (typeof window.efppFieldsCache === 'undefined') {
-                        window.efppFieldsCache = [];
-                    }
+					if (typeof window.efppFieldsCache === 'undefined') window.efppFieldsCache = [];
+					if (typeof window.efppFieldsCache["<?php echo esc_js($item['_id']); ?>"] === 'undefined') {
+						window.efppFieldsCache["<?php echo esc_js($item['_id']); ?>"] = {};
+					}
 
-                    if (typeof window.efppFieldsCache["<?php echo esc_js($item['_id']); ?>"] === 'undefined') {
-                        window.efppFieldsCache["<?php echo esc_js($item['_id']); ?>"] = {};
-                    }
-
-                    window.efppFieldsCache["<?php echo esc_js($item['_id']); ?>"].html = jQuery(field).html();
-                </script>
+					window.efppFieldsCache["<?php echo esc_js($item['_id']); ?>"].html = jQuery(field).html();
+				</script>
                 <?php
-            }
+            endif;
         }
 
         public function get_default_settings() {

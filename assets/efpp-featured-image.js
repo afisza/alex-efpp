@@ -32,15 +32,32 @@
       frame.open();
     });
 
+    function showError(wrapper, message) {
+      const errorBox = wrapper.find('.efpp-error');
+      errorBox.text(message).fadeIn();
+      setTimeout(() => errorBox.fadeOut(), 5000);
+    }
+
     // Dodawanie nowego obrazka do listy
     function appendImage(wrapper, url) {
+      const maxImages = parseInt(wrapper.data('limit')) || 12;
+      const currentCount = wrapper.find('.efpp-image-item').length;
+
+      if (currentCount >= maxImages) {
+        showError(wrapper, `Można dodać maksymalnie ${maxImages} zdjęć.`);
+        return;
+      }
+
       const imageItem = $(`
         <li class="efpp-image-item">
           <img src="${url}" />
           <button type="button" class="efpp-remove-image">×</button>
         </li>
       `);
+
       wrapper.find('.efpp-image-list').append(imageItem);
+      wrapper.find('.efpp-error').fadeOut().text('');
+
     }
 
     // Usuwanie obrazka
@@ -79,6 +96,8 @@
     if (galleryInput.length) {
       galleryInput.val(gallery.join(','));
     }
+    wrapper.find('.efpp-error').fadeOut().text('');
+
   }
 
     // Obsługa przeciągania pliku
@@ -98,9 +117,22 @@
 
       const wrapper = $(this).closest('.efpp-featured-image-wrapper');
       const files = e.originalEvent.dataTransfer.files;
+      const allowedTypes = (wrapper.data('types') || 'jpg,jpeg,png,webp').split(',').map(t => t.trim().toLowerCase());
+      const maxSizeMB = parseFloat(wrapper.data('max-size')) || 5;
 
       Array.from(files).forEach(file => {
-        if (!file.type.match('image.*')) return;
+        const ext = file.name.split('.').pop().toLowerCase();
+        const sizeMB = file.size / 1024 / 1024;
+
+        if (!allowedTypes.includes(ext)) {
+          showError(wrapper, `Plik ${file.name} ma niedozwolony format (${ext}). Dozwolone: ${allowedTypes.join(', ')}`);
+          return;
+        }
+
+        if (sizeMB > maxSizeMB) {
+          showError(wrapper, `Plik ${file.name} jest za duży (${sizeMB.toFixed(2)} MB). Limit: ${maxSizeMB} MB.`);
+          return;
+        }
 
         const formData = new FormData();
         formData.append('file', file);

@@ -227,6 +227,38 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                         'condition' => [ 'field_type' => 'taxonomy' ],
                         'ai' => [ 'active' => false ],
                     ],
+
+                    [
+                        'name' => 'gallery_limit',
+                        'label' => 'Max images count',
+                        'type' => \Elementor\Controls_Manager::NUMBER,
+                        'default' => 12,
+                        'condition' => [
+                            'field_type' => 'custom_field',
+                            'meta_key!' => '',
+                        ],
+                    ],
+                    [
+                        'name' => 'gallery_max_size',
+                        'label' => 'Max file size (MB)',
+                        'type' => \Elementor\Controls_Manager::NUMBER,
+                        'default' => 5,
+                        'condition' => [
+                            'field_type' => 'custom_field',
+                            'meta_key!' => '',
+                        ],
+                    ],
+                    [
+                        'name' => 'gallery_allowed_types',
+                        'label' => 'Allowed file types (comma separated)',
+                        'type' => \Elementor\Controls_Manager::TEXT,
+                        'placeholder' => 'jpg,png,webp',
+                        'condition' => [
+                            'field_type' => 'custom_field',
+                            'meta_key!' => '',
+                        ],
+                    ],
+
                 ],
                 'title_field' => '{{ field_type }}',
                 'condition' => [ 'submit_actions' => $this->get_name() ],
