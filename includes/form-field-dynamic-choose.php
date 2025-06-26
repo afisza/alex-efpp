@@ -96,35 +96,15 @@ class Dynamic_Choose_Field extends Field_Base {
 
         switch ($source_type) {
             case 'acf':
-                // $acf_field_group_post_id = $item['efpp_dc_acf_field_group_post_id'];
-                // $field_name = $item['efpp_dc_acf_field_name'];
-
-                // if (function_exists('acf_get_fields')) {
-                //     $field_group_key = get_post_field('post_name', $acf_field_group_post_id);
-
-                //     $fields = acf_get_fields($field_group_key );
-
-                //     $options = [];
-
-                //     if ($fields) {
-                //         foreach ($fields as $field) {
-                //             if ($field['name'] === $field_name && $field['type'] === $input_type) {
-                //                 $options = $field['choices'];
-                //                 break;
-                //             }
-                //         }
-                //     }
-
-                // }
-
-                
                 $field_name = explode( ':', $item['efpp_dc_acf_field'], 1 )[0];
+                $item['field_name'] = $field_name;
                 $acf_field = $item['efpp_dc_acf_field'];
                 $options = $this->get_acf_meta_field_options( $acf_field );
                 break;
 
             case 'jetengine':
                 $field_name = explode( '|', $item['efpp_dc_jet_engine_field'], 1 )[0];
+                $item['field_name'] = $field_name;
                 if (function_exists('jet_engine')) {
                     $jet_engine_field = $item['efpp_dc_jet_engine_field'];
                     $options = $this->get_jet_engine_meta_field_options( $jet_engine_field );

@@ -208,7 +208,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                         'name' => 'form_field_id',
                         'label' => __('Form Field ID'),
                         'type' => \Elementor\Controls_Manager::TEXT,
-                        'placeholder' => 'e.g. title, price, custom_field_1',
+                        'placeholder' => 'title, price, custom_field_1',
                         'ai' => [ 'active' => false ],
                     ],
                     [
@@ -216,7 +216,19 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                         'label' => __('Meta Key (for custom field)'),
                         'type' => \Elementor\Controls_Manager::TEXT,
                         'placeholder' => '_custom_price',
-                        'condition' => [ 'field_type' => 'custom_field' ],
+                        'condition' => [
+                            'field_type' => 'custom_field',
+                        ],
+                        'ai' => [ 'active' => false ],
+                    ],
+                    [
+                        'name' => 'meta_key_gallery',
+                        'label' => __('Meta Key', 'alex-efpp'),
+                        'type' => \Elementor\Controls_Manager::TEXT,
+                        'placeholder' => '_gallery_images',
+                        'condition' => [
+                            'field_type' => 'gallery_field',
+                        ],
                         'ai' => [ 'active' => false ],
                     ],
                     [
@@ -234,7 +246,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                         'type' => \Elementor\Controls_Manager::NUMBER,
                         'default' => 12,
                         'condition' => [
-                            'field_type' => 'custom_field',
+                            'field_type' => 'gallery_field',
                             'meta_key!' => '',
                         ],
                     ],
@@ -244,7 +256,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                         'type' => \Elementor\Controls_Manager::NUMBER,
                         'default' => 5,
                         'condition' => [
-                            'field_type' => 'custom_field',
+                            'field_type' => 'gallery_field',
                             'meta_key!' => '',
                         ],
                     ],
@@ -254,7 +266,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                         'type' => \Elementor\Controls_Manager::TEXT,
                         'placeholder' => 'jpg,png,webp',
                         'condition' => [
-                            'field_type' => 'custom_field',
+                            'field_type' => 'gallery_field',
                             'meta_key!' => '',
                         ],
                     ],
@@ -372,15 +384,15 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 case 'featured_image':
                     $featured_image_url = esc_url_raw($value);
                     break;
+                case 'gallery_field':
+                    $gallery_meta_key = $map['meta_key_gallery'] ?? $map['meta_key'] ?? 'gallery';
+                    $gallery_urls = $fields[$form_field]['raw_value'] ?? ($fields[$form_field]['value'] ?? '');
+                    break;
                 case 'custom_field':
                     $meta_key = $map['meta_key'] ?? '';
                     if ($meta_key) {
-                        if (str_contains($meta_key, 'gallery')) {
-                            $gallery_meta_key = $meta_key;
-                            $gallery_urls = $value;
-                        } else {
-                            $post_meta[$meta_key] = $value;
-                        }
+                        error_log("[EFPP] meta_key=$meta_key | form_field=$form_field | value=" . print_r($value, true));
+                        $post_meta[$meta_key] = $value;
                     }
                     break;
                 case 'taxonomy':
@@ -407,10 +419,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     break;
                 case 'price':
                     $price_value = is_numeric($value) ? floatval($value) : 0;
-                    break;
-                case 'gallery_field':
-                    $gallery_meta_key = $map['meta_key'] ?? 'gallery';
-                    $gallery_urls = $fields[$form_field]['raw_value'] ?? ($fields[$form_field]['value'] ?? '');
                     break;
             }
         }
