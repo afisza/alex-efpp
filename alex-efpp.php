@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post
 Description: Publishes content from the Elementor form as an post or CPT.
-Version: 1.0.3
+Version: 1.0.3.1
 Author: Alex Scar
 */
 
@@ -34,6 +34,8 @@ class Alex_EFPP {
 
 		require_once plugin_dir_path(__FILE__) . 'includes/ajax.php';
 		require_once plugin_dir_path(__FILE__) . 'includes/form-field-icons-extension.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/efpp-style-controls.php';
+
 	}
 
 	public function render_efpp_messages_div_global() {

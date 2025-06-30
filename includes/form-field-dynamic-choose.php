@@ -1,6 +1,8 @@
 <?php
 
 use ElementorPro\Modules\Forms\Fields\Field_Base;
+use Elementor\Controls_Manager;
+use Elementor\Group_Control_Typography;
 
 class Dynamic_Choose_Field extends Field_Base {
 
@@ -83,15 +85,35 @@ class Dynamic_Choose_Field extends Field_Base {
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
             ],
+            'efpp_dc_inline_display' => [
+            'name' => 'efpp_dc_inline_display',
+            'label' => esc_html__('Inline Display', 'alex-efpp'),
+            'type' => \Elementor\Controls_Manager::SWITCHER,
+            'label_on' => esc_html__('Yes', 'alex-efpp'),
+            'label_off' => esc_html__('No', 'alex-efpp'),
+            'return_value' => 'yes',
+            'default' => '',
+            'condition' => [
+                'field_type' => $this->get_type(),
+                'efpp_dc_input_type' => ['radio', 'checkboxes'],
+            ],
+            'classes' => 'efpp-remote-render',
+            'tab' => 'content',
+            'inner_tab' => 'form_fields_content_tab',
+            'tabs_wrapper' => 'form_fields_tabs',
+            ],
         ];
 
         $control_data['fields'] = $this->inject_field_controls($control_data['fields'], $field_controls);
         $widget->update_control('form_fields', $control_data);
     }
 
+
     public function render($item, $item_index, $form) {
         $source_type = $item['efpp_dc_source_type'] ?? 'acf';
         $input_type = $item['efpp_dc_input_type'] ?? 'select';
+        $is_inline = !empty($item['efpp_dc_inline_display']) && $item['efpp_dc_inline_display'] === 'yes';
+
 
         //error_log( "item\n" . print_r( $item, true ) . "\n" );
 
@@ -144,7 +166,9 @@ class Dynamic_Choose_Field extends Field_Base {
                 break;
             
             case 'radio':
-                echo '<div class="elementor-field-subgroup"  data-fields-repeater-item-id="' . $item['_id'] . '">';
+                $inline_class = $is_inline ? 'efpp-inline-options elementor-subgroup-inline' : '';
+                echo '<div class="elementor-field-subgroup ' . esc_attr($inline_class) . '" data-fields-repeater-item-id="' . esc_attr($item['_id']) . '">';
+
                     $index = 0;
                     foreach ( $options as $value => $label ) {
                         echo '<span class="elementor-field-option">';
@@ -168,7 +192,9 @@ class Dynamic_Choose_Field extends Field_Base {
                 break;
 
             case 'checkboxes':
-                echo '<div class="elementor-field-subgroup"  data-fields-repeater-item-id="' . $item['_id'] . '">';
+                $inline_class = $is_inline ? 'efpp-inline-options elementor-subgroup-inline' : '';
+                echo '<div class="elementor-field-subgroup ' . esc_attr($inline_class) . '" data-fields-repeater-item-id="' . esc_attr($item['_id']) . '">';
+                //echo '<div class="elementor-field-subgroup"  data-fields-repeater-item-id="' . $item['_id'] . '">';
                     $index = 0;
                     foreach ( $options as $value => $label ) {
                         echo '<span class="elementor-field-option">';

@@ -25,3 +25,21 @@
   border-radius: 6px;
 }
 
+.efpp-inline-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+}
+
+.efpp-inline-options .elementor-field-option {
+  display: flex;
+  align-items: center;
+  margin-right: 1em;
+}
+
+.efpp-inline-options input[type="radio"],
+.efpp-inline-options input[type="checkbox"] {
+  margin-right: 0.4em;
+}
+
+

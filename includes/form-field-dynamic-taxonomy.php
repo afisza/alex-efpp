@@ -59,7 +59,24 @@ class Taxonomy_Terms_Field extends Field_Base {
             'tab' => 'content',
             'inner_tab' => 'form_fields_content_tab',
             'tabs_wrapper' => 'form_fields_tabs',
-        ],
+            ],
+            'efpp_taxonomy_inline_display' => [
+            'name' => 'efpp_taxonomy_inline_display',
+            'label' => esc_html__('Inline Display', 'alex-efpp'),
+            'type' => \Elementor\Controls_Manager::SWITCHER,
+            'label_on' => esc_html__('Yes', 'alex-efpp'),
+            'label_off' => esc_html__('No', 'alex-efpp'),
+            'return_value' => 'yes',
+            'default' => '',
+            'condition' => [
+                'field_type' => $this->get_type(),
+                'efpp_taxonomy_input_type' => ['radio', 'checkboxes'],
+            ],
+            'classes' => 'efpp-remote-render',
+            'tab' => 'content',
+            'inner_tab' => 'form_fields_content_tab',
+            'tabs_wrapper' => 'form_fields_tabs',
+            ],
         ];
 
         $control_data['fields'] = $this->inject_field_controls($control_data['fields'], $field_controls);
@@ -73,6 +90,7 @@ class Taxonomy_Terms_Field extends Field_Base {
         $label = trim($item['title'] ?? '');
         $required = !empty($item['required']) ? 'required' : '';
         $type = $item['efpp_taxonomy_input_type'] ?? 'select';
+        $is_inline = !empty($item['efpp_taxonomy_inline_display']) && $item['efpp_taxonomy_inline_display'] === 'yes';
 
         // Label
         if (!empty($label)) {
@@ -101,7 +119,9 @@ class Taxonomy_Terms_Field extends Field_Base {
         switch ($type) {
             case 'radio':
             case 'checkboxes':
-                echo '<div class="elementor-field-subgroup" ' . $wrapper_attr . '>';
+                //echo '<div class="elementor-field-subgroup" ' . $wrapper_attr . '>';
+                $inline_class = $is_inline ? 'efpp-inline-options elementor-subgroup-inline' : '';
+                echo '<div class="elementor-field-subgroup ' . esc_attr($inline_class) . '" ' . $wrapper_attr . '>';
                 $index = 0;
                 foreach ($terms as $term) {
                     echo '<span class="elementor-field-option">';
