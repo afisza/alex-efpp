@@ -3,37 +3,30 @@
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Typography;
 
-add_action('elementor/init', function () {
-    add_action('elementor/element/form/after_section_end', function ($element) {
-        error_log('EFPP after_section_end');
 
-        $element->start_controls_section(
-            'alex_efpp_checkbox_style',
-            [
-                'label' => __('EFPP Checkbox Style', 'alex-efpp'),
-                'tab' => Controls_Manager::TAB_STYLE,
-            ]
-        );
+add_action('elementor/element/after_section_end', function ( $element, $section_id, $args ) {
 
-        $element->add_control(
-            'alex_efpp_checkbox_color',
-            [
-                'label' => __('Text Color', 'alex-efpp'),
-                'type' => Controls_Manager::COLOR,
-                'selectors' => [
-                    '{{WRAPPER}} .elementor-field-type-dynamic_choose input[type="checkbox"] + label' => 'color: {{VALUE}}',
-                ],
-            ]
-        );
+        if ( 'form' === $element->get_name() && 'section_field_style' === $section_id ) {
 
-        $element->add_group_control(
-            Group_Control_Typography::get_type(),
-            [
-                'name' => 'alex_efpp_checkbox_typography',
-                'selector' => '{{WRAPPER}} .elementor-field-type-dynamic_choose input[type="checkbox"] + label',
-            ]
-        );
+            $element->start_controls_section(
+                'custom_section',
+                [
+                    'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+                    'label' => esc_html__( 'Custom Section', 'textdomain' ),
+                ]
+            );
 
-        $element->end_controls_section();
-    }, 10, 1);
-});
+            $element->add_control(
+                'custom_control',
+                [
+                    'type' => \Elementor\Controls_Manager::NUMBER,
+                    'label' => esc_html__( 'Custom Control', 'textdomain' ),
+                ]
+            );
+
+            
+		    $element->end_controls_section();
+
+    }
+}, 10, 3);
+

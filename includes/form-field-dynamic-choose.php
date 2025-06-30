@@ -17,7 +17,7 @@ class Dynamic_Choose_Field extends Field_Base {
     public function update_controls($widget) {
         $control_data = \Elementor\Plugin::$instance->controls_manager->get_control_from_stack($widget->get_unique_name(), 'form_fields');
 
-        if (is_wp_error($control_data)) return;
+        if ( is_wp_error( $control_data ) ) return;
 
         $field_controls = [
             'efpp_dc_source_type' => [
@@ -85,26 +85,46 @@ class Dynamic_Choose_Field extends Field_Base {
                 'inner_tab' => 'form_fields_content_tab',
                 'tabs_wrapper' => 'form_fields_tabs',
             ],
-            'efpp_dc_inline_display' => [
-            'name' => 'efpp_dc_inline_display',
-            'label' => esc_html__('Inline Display', 'alex-efpp'),
-            'type' => \Elementor\Controls_Manager::SWITCHER,
-            'label_on' => esc_html__('Yes', 'alex-efpp'),
-            'label_off' => esc_html__('No', 'alex-efpp'),
-            'return_value' => 'yes',
-            'default' => '',
-            'condition' => [
-                'field_type' => $this->get_type(),
-                'efpp_dc_input_type' => ['radio', 'checkboxes'],
+            'efpp_dc_layout' => [
+                'name' => 'efpp_dc_layout',
+                'label' => esc_html__('Layout', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'options' => [
+                    'default' => 'Default',
+                    'inline' => 'Inline',
+                    'grid' => 'Grid',
+                ],
+                'default' => 'default',
+                'condition' => [
+                    'field_type' => $this->get_type(),
+                    'efpp_dc_input_type' => ['radio', 'checkboxes'],
+                ],
+                'classes' => 'efpp-remote-render',
+                'tab' => 'content',
+                'inner_tab' => 'form_fields_content_tab',
+                'tabs_wrapper' => 'form_fields_tabs',
             ],
-            'classes' => 'efpp-remote-render',
-            'tab' => 'content',
-            'inner_tab' => 'form_fields_content_tab',
-            'tabs_wrapper' => 'form_fields_tabs',
-            ],
+            'efpp_dc_grid_columns' => [
+                'name' => 'efpp_dc_grid_columns',
+				'label' => esc_html__( 'Columns', 'alex-efpp' ),
+				'type' => \Elementor\Controls_Manager::NUMBER,
+				'min' => 1,
+				'max' => 12,
+				'step' => 1,
+				'default' => 4,
+                'condition' => [
+                    'field_type' => $this->get_type(),
+                    'efpp_dc_input_type' => ['radio', 'checkboxes'],
+                    'efpp_dc_layout' => ['grid'],
+                ],
+                'classes' => 'efpp-remote-render',
+                'tab' => 'content',
+                'inner_tab' => 'form_fields_content_tab',
+                'tabs_wrapper' => 'form_fields_tabs',
+			],
         ];
 
-        $control_data['fields'] = $this->inject_field_controls($control_data['fields'], $field_controls);
+        $control_data['fields'] = $this->inject_field_controls( $control_data['fields'], $field_controls );
         $widget->update_control('form_fields', $control_data);
     }
 
@@ -166,8 +186,26 @@ class Dynamic_Choose_Field extends Field_Base {
                 break;
             
             case 'radio':
-                $inline_class = $is_inline ? 'efpp-inline-options elementor-subgroup-inline' : '';
-                echo '<div class="elementor-field-subgroup ' . esc_attr($inline_class) . '" data-fields-repeater-item-id="' . esc_attr($item['_id']) . '">';
+                $field_group_classes = array(
+                    'elementor-field-subgroup',
+                );
+
+                if ( ! empty( $item['efpp_dc_layout'] ) ) {
+                    switch ( $item['efpp_dc_layout'] ) {
+                        case 'inline':
+                            $field_group_classes[] = 'efpp-options-inline';
+                            break;
+                            
+                        case 'grid':
+                            $field_group_classes[] = 'efpp-options-grid';
+                            if ( ! empty( $item['efpp_dc_grid_columns'] ) ) {
+                                $field_group_classes[] = 'efpp-options-grid-columns-' . $item['efpp_dc_grid_columns'];
+                            }
+                            break;
+                    }
+                }  
+
+                echo '<div class="' . implode( ' ', $field_group_classes ) . '" data-fields-repeater-item-id="' . esc_attr($item['_id']) . '">';
 
                     $index = 0;
                     foreach ( $options as $value => $label ) {
@@ -192,9 +230,26 @@ class Dynamic_Choose_Field extends Field_Base {
                 break;
 
             case 'checkboxes':
-                $inline_class = $is_inline ? 'efpp-inline-options elementor-subgroup-inline' : '';
-                echo '<div class="elementor-field-subgroup ' . esc_attr($inline_class) . '" data-fields-repeater-item-id="' . esc_attr($item['_id']) . '">';
-                //echo '<div class="elementor-field-subgroup"  data-fields-repeater-item-id="' . $item['_id'] . '">';
+                $field_group_classes = array(
+                    'elementor-field-subgroup',
+                );
+
+                if ( ! empty( $item['efpp_dc_layout'] ) ) {
+                    switch ( $item['efpp_dc_layout'] ) {
+                        case 'inline':
+                            $field_group_classes[] = 'efpp-options-inline';
+                            break;
+                            
+                        case 'grid':
+                            $field_group_classes[] = 'efpp-options-grid';
+                            if ( ! empty( $item['efpp_dc_grid_columns'] ) ) {
+                                $field_group_classes[] = 'efpp-options-grid-columns-' . $item['efpp_dc_grid_columns'];
+                            }
+                            break;
+                    }
+                }  
+                
+                echo '<div class="' . implode( ' ', $field_group_classes ) . '" data-fields-repeater-item-id="' . esc_attr($item['_id']) . '">';
                     $index = 0;
                     foreach ( $options as $value => $label ) {
                         echo '<span class="elementor-field-option">';
