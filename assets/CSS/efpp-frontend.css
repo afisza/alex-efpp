@@ -25,21 +25,94 @@
   border-radius: 6px;
 }
 
-.efpp-inline-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1em;
+
+/* Ustawienie inline z odstępami */
+.elementor-field-subgroup.efpp-options-inline {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75em; /* Odstęp między opcjami */
+	align-items: center;
 }
 
-.efpp-inline-options .elementor-field-option {
-  display: flex;
-  align-items: center;
-  margin-right: 1em;
+/* Opcjonalne: styl dla poszczególnych opcji, np. labeli */
+.elementor-field-subgroup.efpp-options-inline label {
+	margin: 0;
 }
 
-.efpp-inline-options input[type="radio"],
-.efpp-inline-options input[type="checkbox"] {
-  margin-right: 0.4em;
+
+/* Nadpisanie domyślnego flexa Elementora */
+.elementor-field-subgroup.efpp-options-grid,
+.elementor-field-subgroup .efpp-options-grid {
+    display: grid !important;
+    gap: 0.5em;
 }
 
+/* Grid columns */
+.efpp-options-grid-columns-1  { grid-template-columns: repeat(1, 1fr); }
+.efpp-options-grid-columns-2  { grid-template-columns: repeat(2, 1fr); }
+.efpp-options-grid-columns-3  { grid-template-columns: repeat(3, 1fr); }
+.efpp-options-grid-columns-4  { grid-template-columns: repeat(4, 1fr); }
+.efpp-options-grid-columns-5  { grid-template-columns: repeat(5, 1fr); }
+.efpp-options-grid-columns-6  { grid-template-columns: repeat(6, 1fr); }
+.efpp-options-grid-columns-7  { grid-template-columns: repeat(7, 1fr); }
+.efpp-options-grid-columns-8  { grid-template-columns: repeat(8, 1fr); }
+.efpp-options-grid-columns-9  { grid-template-columns: repeat(9, 1fr); }
+.efpp-options-grid-columns-10 { grid-template-columns: repeat(10, 1fr); }
+.efpp-options-grid-columns-11 { grid-template-columns: repeat(11, 1fr); }
+.efpp-options-grid-columns-12 { grid-template-columns: repeat(12, 1fr); }
+
+/* Ukrywamy inputy w trybie "efpp-hide-inputs-yes" */
+.efpp-hide-inputs-yes .elementor-field-subgroup.efpp-options-inline input[type="radio"],
+.efpp-hide-inputs-yes .elementor-field-subgroup.efpp-options-inline input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+}
+.efpp-hide-inputs-yes .elementor-field-subgroup.efpp-options-grid input[type="radio"],
+.efpp-hide-inputs-yes .elementor-field-subgroup.efpp-options-grid input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+}
+
+
+.efpp-option-icon,
+.efpp-option-icon-checked {
+    font-size: 1em;
+    line-height: 1;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-inline-end: 0.5em;
+}
+
+/* Ustawienie max wysokości i szerokości */
+.efpp-option-icon svg,
+.efpp-option-icon-checked svg {
+    width: 1em;
+    height: 1em;
+    display: block;
+    fill: currentColor;
+}
+
+.efpp-option-icon-checked {
+    display: none;
+}
+
+label input:checked ~ .efpp-option-icon {
+    display: none;
+}
+label input:checked ~ .efpp-option-icon-checked {
+    display: inline-block;
+}
+
+label.elementor-field-option {
+  cursor: pointer;
+  user-select: none;
+}
 

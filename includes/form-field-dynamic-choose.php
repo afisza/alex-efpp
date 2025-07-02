@@ -3,6 +3,7 @@
 use ElementorPro\Modules\Forms\Fields\Field_Base;
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Typography;
+use Elementor\Icons_Manager;
 
 class Dynamic_Choose_Field extends Field_Base {
 
@@ -133,6 +134,7 @@ class Dynamic_Choose_Field extends Field_Base {
         $source_type = $item['efpp_dc_source_type'] ?? 'acf';
         $input_type = $item['efpp_dc_input_type'] ?? 'select';
         $is_inline = !empty($item['efpp_dc_inline_display']) && $item['efpp_dc_inline_display'] === 'yes';
+        $form_settings = $form->get_settings_for_display();
 
 
         //error_log( "item\n" . print_r( $item, true ) . "\n" );
@@ -186,6 +188,7 @@ class Dynamic_Choose_Field extends Field_Base {
                 break;
             
             case 'radio':
+
                 $field_group_classes = array(
                     'elementor-field-subgroup',
                 );
@@ -193,43 +196,62 @@ class Dynamic_Choose_Field extends Field_Base {
                 if ( ! empty( $item['efpp_dc_layout'] ) ) {
                     switch ( $item['efpp_dc_layout'] ) {
                         case 'inline':
+                            $field_group_classes[] = 'elementor-subgroup-inline';
+                            $field_group_classes[] = 'efpp-options-wrapper';
                             $field_group_classes[] = 'efpp-options-inline';
+
                             break;
-                            
+                        
                         case 'grid':
+                            $field_group_classes[] = 'efpp-options-wrapper';
                             $field_group_classes[] = 'efpp-options-grid';
                             if ( ! empty( $item['efpp_dc_grid_columns'] ) ) {
                                 $field_group_classes[] = 'efpp-options-grid-columns-' . $item['efpp_dc_grid_columns'];
                             }
                             break;
                     }
-                }  
+                }
 
                 echo '<div class="' . implode( ' ', $field_group_classes ) . '" data-fields-repeater-item-id="' . esc_attr($item['_id']) . '">';
 
-                    $index = 0;
-                    foreach ( $options as $value => $label ) {
-                        echo '<span class="elementor-field-option">';
-                        
-                            $field_id = 'form-field-field_' . $item['_id'] . '-' . $index;
-                            echo '<input
-                                id="'. $field_id . '"
-                                type="radio" 
-                                name="form_fields[' . esc_attr( $item['custom_id'] ) . ']" 
-                                value="' . esc_attr( $value ) . '" 
-                            >&nbsp;';
+                $index = 0;
+                foreach ( $options as $value => $label ) {
+                    $field_id = 'form-field-field_' . $item['_id'] . '-' . $index;
 
-                            echo '<label for="' . $field_id . '">';
-                                echo esc_html( $label );
-                            echo '</label>';
+                    echo '<label class="elementor-field-option" for="' . esc_attr($field_id) . '">';
 
-                        echo '</span>';
-                        $index++;
-                    }
+                        echo '<input
+                            id="' . esc_attr($field_id) . '"
+                            type="radio"
+                            name="form_fields[' . esc_attr($item['custom_id']) . ']"
+                            value="' . esc_attr($value) . '"
+                        >';
+
+                        if ( ! empty( $form_settings['efpp_icon_normal'] ) ) {
+                            echo '<span class="efpp-option-icon">';
+                            Icons_Manager::render_icon( $form_settings['efpp_icon_normal'], [ 'aria-hidden' => 'true' ] );
+                            echo '</span>';
+                        }
+
+                        if ( ! empty( $form_settings['efpp_icon_checked'] ) ) {
+                            echo '<span class="efpp-option-icon-checked">';
+                            Icons_Manager::render_icon( $form_settings['efpp_icon_checked'], [ 'aria-hidden' => 'true' ] );
+                            echo '</span>';
+                        }
+
+                        //echo '<span class="efpp-option-label">' . esc_html($label) . '</span>';
+                        echo esc_html($label);
+
+                    echo '</label>';
+
+                    $index++;
+                }
+
                 echo '</div>';
                 break;
 
             case 'checkboxes':
+
                 $field_group_classes = array(
                     'elementor-field-subgroup',
                 );
@@ -237,39 +259,56 @@ class Dynamic_Choose_Field extends Field_Base {
                 if ( ! empty( $item['efpp_dc_layout'] ) ) {
                     switch ( $item['efpp_dc_layout'] ) {
                         case 'inline':
+                            $field_group_classes[] = 'elementor-subgroup-inline';
+                            $field_group_classes[] = 'efpp-options-wrapper';
                             $field_group_classes[] = 'efpp-options-inline';
                             break;
-                            
+                        
                         case 'grid':
+                            $field_group_classes[] = 'efpp-options-wrapper';
                             $field_group_classes[] = 'efpp-options-grid';
                             if ( ! empty( $item['efpp_dc_grid_columns'] ) ) {
                                 $field_group_classes[] = 'efpp-options-grid-columns-' . $item['efpp_dc_grid_columns'];
                             }
                             break;
                     }
-                }  
-                
+                }
+
                 echo '<div class="' . implode( ' ', $field_group_classes ) . '" data-fields-repeater-item-id="' . esc_attr($item['_id']) . '">';
-                    $index = 0;
-                    foreach ( $options as $value => $label ) {
-                        echo '<span class="elementor-field-option">';
-                        
-                            $field_id = 'form-field-field_' . $item['_id'] . '-' . $index;
-                            echo '<input
-                                id="'. $field_id . '"
-                                type="checkbox" 
-                                name="form_fields[' . esc_attr( $item['custom_id'] ) . ']" 
-                                value="' . esc_attr( $value ) . '" 
-                                class="elementor-field elementor-checkbox"
-                            >&nbsp;';
 
-                            echo '<label for="' . $field_id . '">';
-                                echo esc_html( $label );
-                            echo '</label>';
+                $index = 0;
+                foreach ( $options as $value => $label ) {
+                    $field_id = 'form-field-field_' . $item['_id'] . '-' . $index;
 
-                        echo '</span>';
-                        $index++;
-                    }
+                    echo '<label class="elementor-field-option" for="' . esc_attr($field_id) . '">';
+
+                        echo '<input
+                            id="' . esc_attr($field_id) . '"
+                            type="checkbox"
+                            name="form_fields[' . esc_attr($item['custom_id']) . '][]"
+                            value="' . esc_attr($value) . '"
+                            class="elementor-field elementor-checkbox"
+                        >';
+
+                        if ( ! empty( $form_settings['efpp_icon_normal'] ) ) {
+                            echo '<span class="efpp-option-icon">';
+                            Icons_Manager::render_icon( $form_settings['efpp_icon_normal'], [ 'aria-hidden' => 'true' ] );
+                            echo '</span>';
+                        }
+
+                        if ( ! empty( $form_settings['efpp_icon_checked'] ) ) {
+                            echo '<span class="efpp-option-icon-checked">';
+                            Icons_Manager::render_icon( $form_settings['efpp_icon_checked'], [ 'aria-hidden' => 'true' ] );
+                            echo '</span>';
+                        }
+
+                        //echo '<span class="efpp-option-label">' . esc_html($label) . '</span>';
+                        echo esc_html($label);
+
+                    echo '</label>';
+
+                    $index++;
+                }
 
                 echo '</div>';
                 break;
