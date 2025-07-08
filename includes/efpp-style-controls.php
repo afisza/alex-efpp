@@ -299,7 +299,7 @@ add_action('elementor/element/after_section_end', function ( $element, $section_
                 'label' => esc_html__('Checked Background', 'alex-efpp'),
                 'type' => Controls_Manager::COLOR,
                 'selectors' => [
-                    '{{WRAPPER}} .elementor-field-subgroup label.elementor-field-option input:checked ~ *' => 'background-color: {{VALUE}};',
+                    '{{WRAPPER}} .efpp-options-wrapper label.elementor-field-option.efpp-checked' => 'background-color: {{VALUE}};',
                 ],
             ]
         );
@@ -310,7 +310,7 @@ add_action('elementor/element/after_section_end', function ( $element, $section_
                 'label' => esc_html__('Checked Text Color', 'alex-efpp'),
                 'type' => Controls_Manager::COLOR,
                 'selectors' => [
-                    '{{WRAPPER}} .efpp-options-wrapper input:checked + label.elementor-field-option' => 'color: {{VALUE}};',
+                    '{{WRAPPER}} .efpp-options-wrapper label.elementor-field-option.efpp-checked' => 'color: {{VALUE}};',
                 ],
             ]
         );
@@ -321,7 +321,7 @@ add_action('elementor/element/after_section_end', function ( $element, $section_
                 'label' => esc_html__('Checked Border Color', 'alex-efpp'),
                 'type' => Controls_Manager::COLOR,
                 'selectors' => [
-                    '{{WRAPPER}} .efpp-options-wrapper input:checked + label.elementor-field-option' => 'border-color: {{VALUE}};',
+                    '{{WRAPPER}} .efpp-options-wrapper label.elementor-field-option.efpp-checked' => 'border-color: {{VALUE}};',
                 ],
             ]
         );
@@ -332,7 +332,7 @@ add_action('elementor/element/after_section_end', function ( $element, $section_
                 'label' => esc_html__('Border Radius (Checked)', 'alex-efpp'),
                 'type' => Controls_Manager::DIMENSIONS,
                 'selectors' => [
-                    '{{WRAPPER}} .efpp-options-wrapper input:checked + label.elementor-field-option' =>
+                    '{{WRAPPER}} .efpp-options-wrapper label.elementor-field-option.efpp-checked' =>
                         'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]

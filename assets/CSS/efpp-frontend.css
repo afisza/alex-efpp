@@ -116,3 +116,10 @@ label.elementor-field-option {
   user-select: none;
 }
 
+/* Checked styles */
+.elementor-field-option.efpp-checked {
+	background-color: var(--efpp-checked-bg, #e0ffe0); /* możesz nadpisać przez inline style */
+	color: var(--efpp-checked-color, #1a1a1a);
+	border-color: var(--efpp-checked-border, #4caf50);
+}
+
