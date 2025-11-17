@@ -86,10 +86,30 @@ class Alex_EFPP_GitHub_Updater {
         add_action('upgrader_process_complete', [$this, 'clear_version_cache'], 10, 2);
         
         // Dodaj link "Sprawdź aktualizacje" w wierszu wtyczki
-        add_filter('plugin_row_meta', [$this, 'add_check_update_link'], 10, 2);
+        // Używamy priorytetu 20, aby link był na końcu listy
+        add_filter('plugin_row_meta', [$this, 'add_check_update_link'], 20, 2);
         
         // AJAX endpoint do wymuszenia sprawdzenia aktualizacji
         add_action('wp_ajax_alex_efpp_check_update', [$this, 'ajax_check_update']);
+        
+        // Debug: sprawdź czy wszystko jest poprawnie skonfigurowane
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            add_action('admin_notices', [$this, 'debug_notice']);
+        }
+    }
+    
+    /**
+     * Debug notice - tylko gdy WP_DEBUG jest włączony
+     */
+    public function debug_notice() {
+        $screen = get_current_screen();
+        if ($screen && $screen->id === 'plugins') {
+            $status = !empty($this->github_repo_url) ? '✅ URL: ' . esc_html($this->github_repo_url) : '❌ Brak URL';
+            $username = !empty($this->github_username) ? '✅ Username: ' . esc_html($this->github_username) : '❌ Brak username';
+            $repo = !empty($this->github_repo) ? '✅ Repo: ' . esc_html($this->github_repo) : '❌ Brak repo';
+            
+            echo '<div class="notice notice-info"><p><strong>EFPP Updater Debug:</strong> ' . $status . ' | ' . $username . ' | ' . $repo . '</p></div>';
+        }
     }
     
     /**
@@ -152,7 +172,14 @@ class Alex_EFPP_GitHub_Updater {
         $url = rtrim($url, '/');
         
         // Wyciągnij username i repo z URL
-        if (preg_match('#github\.com/([^/]+)/([^/]+)#', $url, $matches)) {
+        // Obsługuje różne formaty:
+        // https://github.com/username/repo
+        // https://github.com/username/repo.git
+        // git@github.com:username/repo.git
+        if (preg_match('#github\.com[:/]([^/]+)/([^/]+?)(?:\.git)?/?$#', $url, $matches)) {
+            $this->github_username = $matches[1];
+            $this->github_repo = $matches[2];
+        } elseif (preg_match('#github\.com/([^/]+)/([^/]+)#', $url, $matches)) {
             $this->github_username = $matches[1];
             $this->github_repo = $matches[2];
         }
@@ -410,13 +437,39 @@ class Alex_EFPP_GitHub_Updater {
      * Dodaje link "Sprawdź aktualizacje" w wierszu wtyczki
      */
     public function add_check_update_link($links, $file) {
-        if ($file !== $this->plugin_slug) {
+        // Sprawdź czy to nasza wtyczka - użyj basename dla porównania
+        $plugin_basename = plugin_basename($this->plugin_file);
+        
+        if ($file !== $this->plugin_slug && $file !== $plugin_basename) {
             return $links;
         }
         
         // Jeśli updater nie jest skonfigurowany, nie dodawaj linku
+        // Sprawdź czy mamy URL repozytorium (nawet jeśli nie został jeszcze sparsowany)
+        if (empty($this->github_repo_url)) {
+            // Spróbuj ponownie odczytać z nagłówka wtyczki
+            $plugin_data = get_file_data($this->plugin_file, ['Plugin URI' => 'Plugin URI'], 'plugin');
+            if (!empty($plugin_data['Plugin URI'])) {
+                $this->github_repo_url = $plugin_data['Plugin URI'];
+                $this->parse_github_url();
+            } else {
+                return $links;
+            }
+        }
+        
+        // Jeśli username i repo nie są ustawione, spróbuj ponownie sparsować
         if (empty($this->github_username) || empty($this->github_repo)) {
-            return $links;
+            $this->parse_github_url();
+        }
+        
+        // Jeśli nadal nie ma danych, ale mamy URL, dodaj link (może być problem z parsowaniem, ale spróbujemy)
+        if (empty($this->github_username) || empty($this->github_repo)) {
+            // Jeśli mamy URL, spróbujmy dodać link mimo wszystko - może zadziała
+            if (!empty($this->github_repo_url) && strpos($this->github_repo_url, 'github.com') !== false) {
+                // Dodaj link nawet bez pełnego parsowania - może zadziała
+            } else {
+                return $links;
+            }
         }
         
         $check_url = wp_nonce_url(

@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT.
-Version: 1.0.3.5
+Version: 1.0.3.6
 Author: Alex Scar
 Plugin URI: https://github.com/afisza/alex-efpp
 */
@@ -10,6 +10,11 @@ Plugin URI: https://github.com/afisza/alex-efpp
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 class Alex_EFPP {
+
+    /**
+     * Instancja GitHub Updatera
+     */
+    private $github_updater;
 
     public function __construct() {
         add_action('plugins_loaded', [$this, 'load_textdomain']);
@@ -53,7 +58,7 @@ class Alex_EFPP {
         // add_filter('alex_efpp_github_repo_url', function() {
         //     return 'https://github.com/username/repo-name';
         // });
-        new Alex_EFPP_GitHub_Updater(__FILE__);
+        $this->github_updater = new Alex_EFPP_GitHub_Updater(__FILE__);
     }
 
     public function load_textdomain() {
