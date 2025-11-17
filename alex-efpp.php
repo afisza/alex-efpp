@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Alex EFPP - Elementor Form Publish Post
+Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT.
-Version: 1.0.3.3
+Version: 1.0.3.4
 Author: Alex Scar
 Plugin URI: https://github.com/afisza/alex-efpp
 */
