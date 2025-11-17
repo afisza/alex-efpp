@@ -108,7 +108,23 @@ class Alex_EFPP_GitHub_Updater {
             $username = !empty($this->github_username) ? '✅ Username: ' . esc_html($this->github_username) : '❌ Brak username';
             $repo = !empty($this->github_repo) ? '✅ Repo: ' . esc_html($this->github_repo) : '❌ Brak repo';
             
-            echo '<div class="notice notice-info"><p><strong>EFPP Updater Debug:</strong> ' . $status . ' | ' . $username . ' | ' . $repo . '</p></div>';
+            // Sprawdź czy istnieje Release
+            $latest_version = $this->get_latest_version();
+            $version_status = $latest_version ? '✅ Najnowsza wersja: ' . esc_html($latest_version) : '❌ Brak Release na GitHub';
+            
+            $release_link = sprintf(
+                '<a href="https://github.com/%s/%s/releases" target="_blank">Utwórz Release</a>',
+                esc_attr($this->github_username),
+                esc_attr($this->github_repo)
+            );
+            
+            echo '<div class="notice notice-info"><p><strong>EFPP Updater Debug:</strong> ' . $status . ' | ' . $username . ' | ' . $repo . ' | ' . $version_status;
+            
+            if (!$latest_version) {
+                echo ' | ' . $release_link;
+            }
+            
+            echo '</p></div>';
         }
     }
     
@@ -232,7 +248,7 @@ class Alex_EFPP_GitHub_Updater {
         );
 
         $response = wp_remote_get($api_url, [
-            'timeout' => 10,
+            'timeout' => 15,
             'headers' => [
                 'Accept' => 'application/vnd.github.v3+json',
                 'User-Agent' => 'WordPress-Plugin-Updater',
@@ -240,13 +256,39 @@ class Alex_EFPP_GitHub_Updater {
         ]);
 
         if (is_wp_error($response)) {
+            // Loguj błąd jeśli WP_DEBUG jest włączony
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('EFPP Updater Error: ' . $response->get_error_message());
+            }
             return false;
         }
 
+        $response_code = wp_remote_retrieve_response_code($response);
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
+        // Sprawdź kod odpowiedzi
+        if ($response_code !== 200) {
+            // Loguj szczegóły błędu
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                $error_message = isset($data['message']) ? $data['message'] : 'Unknown error';
+                error_log(sprintf('EFPP Updater API Error (Code %d): %s', $response_code, $error_message));
+            }
+            
+            // Jeśli 404, oznacza to że nie ma jeszcze żadnego Release
+            if ($response_code === 404) {
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('EFPP Updater: Brak Release w repozytorium GitHub. Utwórz pierwszy Release na: https://github.com/' . $this->github_username . '/' . $this->github_repo . '/releases');
+                }
+            }
+            
+            return false;
+        }
+
         if (!isset($data['tag_name'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('EFPP Updater: Brak tag_name w odpowiedzi API. Response: ' . print_r($data, true));
+            }
             return false;
         }
 
