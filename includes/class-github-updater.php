@@ -84,6 +84,12 @@ class Alex_EFPP_GitHub_Updater {
         add_filter('plugins_api', [$this, 'plugin_info'], 20, 3);
         add_filter('upgrader_post_install', [$this, 'post_install'], 10, 3);
         add_action('upgrader_process_complete', [$this, 'clear_version_cache'], 10, 2);
+        
+        // Dodaj link "Sprawdź aktualizacje" w wierszu wtyczki
+        add_filter('plugin_row_meta', [$this, 'add_check_update_link'], 10, 2);
+        
+        // AJAX endpoint do wymuszenia sprawdzenia aktualizacji
+        add_action('wp_ajax_alex_efpp_check_update', [$this, 'ajax_check_update']);
     }
     
     /**
@@ -398,6 +404,82 @@ class Alex_EFPP_GitHub_Updater {
     public function set_github_repo($url) {
         $this->github_repo_url = $url;
         $this->parse_github_url();
+    }
+    
+    /**
+     * Dodaje link "Sprawdź aktualizacje" w wierszu wtyczki
+     */
+    public function add_check_update_link($links, $file) {
+        if ($file !== $this->plugin_slug) {
+            return $links;
+        }
+        
+        // Jeśli updater nie jest skonfigurowany, nie dodawaj linku
+        if (empty($this->github_username) || empty($this->github_repo)) {
+            return $links;
+        }
+        
+        $check_url = wp_nonce_url(
+            admin_url('admin-ajax.php?action=alex_efpp_check_update'),
+            'alex_efpp_check_update',
+            'nonce'
+        );
+        
+        $links[] = sprintf(
+            '<a href="%s" class="alex-efpp-check-update" data-plugin="%s">%s</a>',
+            esc_url($check_url),
+            esc_attr($this->plugin_slug),
+            esc_html__('Sprawdź aktualizacje', 'alex-efpp')
+        );
+        
+        return $links;
+    }
+    
+    /**
+     * AJAX handler do wymuszenia sprawdzenia aktualizacji
+     */
+    public function ajax_check_update() {
+        check_ajax_referer('alex_efpp_check_update', 'nonce');
+        
+        if (!current_user_can('update_plugins')) {
+            wp_send_json_error(['message' => __('Brak uprawnień do sprawdzania aktualizacji.', 'alex-efpp')]);
+        }
+        
+        // Wyczyść cache
+        delete_transient($this->version_cache_key);
+        delete_site_transient('update_plugins');
+        
+        // Wymuś sprawdzenie aktualizacji
+        $latest_version = $this->get_latest_version();
+        
+        if (!$latest_version) {
+            wp_send_json_error([
+                'message' => __('Nie udało się sprawdzić aktualizacji. Sprawdź konfigurację repozytorium GitHub.', 'alex-efpp')
+            ]);
+        }
+        
+        $has_update = version_compare($this->current_version, $latest_version, '<');
+        
+        if ($has_update) {
+            wp_send_json_success([
+                'message' => sprintf(
+                    __('Dostępna jest nowa wersja: %s (aktualna: %s). Odśwież stronę, aby zobaczyć przycisk aktualizacji.', 'alex-efpp'),
+                    $latest_version,
+                    $this->current_version
+                ),
+                'latest_version' => $latest_version,
+                'current_version' => $this->current_version,
+            ]);
+        } else {
+            wp_send_json_success([
+                'message' => sprintf(
+                    __('Wtyczka jest aktualna. Aktualna wersja: %s', 'alex-efpp'),
+                    $this->current_version
+                ),
+                'latest_version' => $latest_version,
+                'current_version' => $this->current_version,
+            ]);
+        }
     }
 }
 

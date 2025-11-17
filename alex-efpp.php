@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT.
-Version: 1.0.3.4
+Version: 1.0.3.5
 Author: Alex Scar
 Plugin URI: https://github.com/afisza/alex-efpp
 */
@@ -20,6 +20,7 @@ class Alex_EFPP {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
         add_action('elementor/frontend/after_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
         add_action('elementor_pro/forms/render_form', [$this, 'render_efpp_messages_div'], 100, 2);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
 
         // Ukryj domyślny komunikat Elementora przy akcji EFPP
         add_filter('elementor_pro/forms/show_message', function($show, $ajax_handler) {
@@ -145,6 +146,24 @@ class Alex_EFPP {
 
     public function render_efpp_messages_div() {
         echo '<div class="efpp-messages"></div>';
+    }
+
+    public function enqueue_admin_scripts($hook) {
+        // Załaduj skrypt tylko na stronie z wtyczkami
+        if ($hook === 'plugins.php') {
+            wp_enqueue_script(
+                'alex-efpp-check-update',
+                plugin_dir_url(__FILE__) . 'assets/js/check-update.js',
+                ['jquery'],
+                '1.0',
+                true
+            );
+            
+            // Lokalizacja dla skryptu (dodaje zmienną ajaxurl)
+            wp_localize_script('alex-efpp-check-update', 'alexEfppAjax', [
+                'ajaxurl' => admin_url('admin-ajax.php'),
+            ]);
+        }
     }
 
     public function register_action($actions) {
