@@ -226,7 +226,7 @@ class EFPP_Form_Action_Register_User extends Action_Base {
                         'placeholder' => 'field_name',
                     ],
                 ],
-                'title_field' => '{{ field_type }}: {{ form_field_id }}',
+                'title_field' => '{{ meta_key }}: {{ form_field_id }}',
             ]
         );
 
@@ -234,25 +234,147 @@ class EFPP_Form_Action_Register_User extends Action_Base {
     }
 
 
+    /**
+     * Wyciąga rzeczywiste ID pola z różnych formatów
+     * Obsługuje: [field id="email"], email, custom_id itp.
+     */
+    private function extract_field_id($field_setting, $available_fields = []) {
+        if (empty($field_setting)) {
+            return '';
+        }
+
+        // Jeśli jest w formacie [field id="..."]
+        if (preg_match('/\[field\s+id=["\']([^"\']+)["\']\]/i', $field_setting, $matches)) {
+            $extracted_id = $matches[1];
+            // Sprawdź czy takie pole istnieje
+            if (in_array($extracted_id, $available_fields)) {
+                return $extracted_id;
+            }
+            // Jeśli nie, spróbuj znaleźć podobne (np. email -> email_reg)
+            foreach ($available_fields as $available_field) {
+                if (strpos($available_field, $extracted_id) !== false || strpos($extracted_id, $available_field) !== false) {
+                    return $available_field;
+                }
+            }
+            return $extracted_id; // Zwróć wyciągnięte ID nawet jeśli nie znaleziono dopasowania
+        }
+
+        // Jeśli jest już czystym ID
+        if (in_array($field_setting, $available_fields)) {
+            return $field_setting;
+        }
+
+        // Spróbuj znaleźć podobne pole
+        foreach ($available_fields as $available_field) {
+            if (strpos($available_field, $field_setting) !== false || strpos($field_setting, $available_field) !== false) {
+                return $available_field;
+            }
+        }
+
+        // Zwróć oryginalną wartość jeśli nic nie znaleziono
+        return $field_setting;
+    }
+
     public function run($record, $ajax_handler) {
         $settings = $record->get('form_settings');
         $fields = $record->get('fields');
 
-        $login_field    = $settings['efpp_register_user_login'] ?? '';
-        $email_field    = $settings['efpp_register_user_email'] ?? '';
-        $password_field = $settings['efpp_register_user_password'] ?? '';
+        // Pobierz dostępne pola do dopasowania
+        $available_fields = array_keys($fields);
+
+        // Wyciągnij rzeczywiste ID pól z ustawień
+        $login_field_raw    = $settings['efpp_register_user_login'] ?? '';
+        $email_field_raw    = $settings['efpp_register_user_email'] ?? '';
+        $password_field_raw = $settings['efpp_register_user_password'] ?? '';
+
+        // Wyciągnij rzeczywiste ID pól
+        $login_field    = $this->extract_field_id($login_field_raw, $available_fields);
+        $email_field    = $this->extract_field_id($email_field_raw, $available_fields);
+        $password_field = $this->extract_field_id($password_field_raw, $available_fields);
+
         $role           = in_array($settings['efpp_register_user_role'] ?? '', ['subscriber', 'contributor', 'author', 'editor', 'customer']) ? $settings['efpp_register_user_role'] : 'subscriber';
         $mode           = $settings['efpp_register_user_mode'] ?? 'register';
         $auto_login     = !empty($settings['efpp_register_user_auto_login']);
         $redirect_url   = $settings['efpp_register_user_redirect'] ?? '';
 
-        $user_login = isset($fields[$login_field]['value']) ? sanitize_user($fields[$login_field]['value']) : '';
-        $user_email = isset($fields[$email_field]['value']) ? sanitize_email($fields[$email_field]['value']) : '';
-        $user_pass  = isset($fields[$password_field]['value']) && !empty($fields[$password_field]['value']) ? sanitize_text_field($fields[$password_field]['value']) : wp_generate_password();
-
-        if (!is_email($user_email)) {
-            $ajax_handler->add_error_message('Nieprawidłowy adres e-mail.');
+        // Sprawdź czy pole e-mail jest skonfigurowane
+        if (empty($email_field_raw)) {
+            $ajax_handler->add_error_message('Pole e-mail nie jest skonfigurowane w ustawieniach formularza.');
             return;
+        }
+
+        // Pobierz surową wartość e-maila przed sanitizacją
+        // Elementor może przekazywać wartości w 'raw_value' lub 'value'
+        $raw_email = '';
+        
+        if (isset($fields[$email_field])) {
+            $field_data = $fields[$email_field];
+            
+            // Sprawdź raw_value (pierwsza opcja, jak w class-form-action-post.php)
+            if (isset($field_data['raw_value']) && !empty($field_data['raw_value'])) {
+                $raw_email = trim($field_data['raw_value']);
+            }
+            // Sprawdź value (druga opcja)
+            elseif (isset($field_data['value']) && !empty($field_data['value'])) {
+                $raw_email = trim($field_data['value']);
+            }
+            // Może być przekazane bezpośrednio jako string
+            elseif (is_string($field_data)) {
+                $raw_email = trim($field_data);
+            }
+        }
+        
+        if (empty($raw_email)) {
+            // Debug: pokaż dostępne pola i strukturę (zawsze, żeby pomóc w diagnozie)
+            $debug_info = sprintf(
+                'Dostępne pola: %s | Wpisane w ustawieniach: %s | Wyciągnięte ID: %s',
+                implode(', ', $available_fields),
+                $email_field_raw,
+                $email_field
+            );
+            
+            // Jeśli WP_DEBUG włączony, loguj szczegóły
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('EFPP Debug - Available fields: ' . print_r($available_fields, true));
+                error_log('EFPP Debug - Email field raw: ' . $email_field_raw);
+                error_log('EFPP Debug - Email field extracted: ' . $email_field);
+                error_log('EFPP Debug - Fields structure: ' . print_r($fields, true));
+            }
+            
+            $ajax_handler->add_error_message(
+                'Adres e-mail jest wymagany. ' . 
+                'Sprawdź czy pole e-mail jest poprawnie skonfigurowane. ' .
+                'Debug: ' . $debug_info
+            );
+            return;
+        }
+
+        // Waliduj przed sanitizacją
+        if (!is_email($raw_email)) {
+            $ajax_handler->add_error_message('Nieprawidłowy adres e-mail: ' . esc_html($raw_email));
+            return;
+        }
+
+        // Teraz sanitizuj (po walidacji)
+        // Pobierz login - sprawdź raw_value i value
+        $user_login = '';
+        if (!empty($login_field) && isset($fields[$login_field])) {
+            $login_data = $fields[$login_field];
+            $user_login = sanitize_user(
+                $login_data['raw_value'] ?? ($login_data['value'] ?? '')
+            );
+        }
+        
+        $user_email = sanitize_email($raw_email);
+        
+        // Pobierz hasło - sprawdź raw_value i value
+        $user_pass = wp_generate_password(); // domyślnie wygeneruj
+        if (!empty($password_field) && isset($fields[$password_field])) {
+            $pass_data = $fields[$password_field];
+            $pass_value = $pass_data['raw_value'] ?? ($pass_data['value'] ?? '');
+            if (!empty($pass_value)) {
+                $user_pass = sanitize_text_field($pass_value);
+            }
         }
 
         if ($mode === 'register') {
@@ -293,14 +415,17 @@ class EFPP_Form_Action_Register_User extends Action_Base {
 
             switch ($lookup_by) {
                 case 'login':
-                    $user_identifier = $fields[$login_field]['value'] ?? '';
+                    $login_data = $fields[$login_field] ?? [];
+                    $user_identifier = $login_data['raw_value'] ?? ($login_data['value'] ?? '');
                     break;
                 case 'ID':
-                    $user_identifier = $fields[$login_field]['value'] ?? '';
+                    $id_data = $fields[$login_field] ?? [];
+                    $user_identifier = $id_data['raw_value'] ?? ($id_data['value'] ?? '');
                     break;
                 case 'email':
                 default:
-                    $user_identifier = $fields[$email_field]['value'] ?? '';
+                    $email_data = $fields[$email_field] ?? [];
+                    $user_identifier = $email_data['raw_value'] ?? ($email_data['value'] ?? '');
                     break;
             }
 
@@ -322,12 +447,21 @@ class EFPP_Form_Action_Register_User extends Action_Base {
                 $update_data['user_pass'] = $user_pass;
             }
 
-            if (!empty($user_email) && $user_email !== $existing_user->user_email) {
-                if (!is_email($user_email)) {
-                    $ajax_handler->add_error_message('Nieprawidłowy adres e-mail.');
+            // W trybie update, sprawdź czy e-mail się zmienił
+            $email_update_data = $fields[$email_field] ?? [];
+            $raw_email_update = '';
+            if (isset($email_update_data['raw_value']) && !empty($email_update_data['raw_value'])) {
+                $raw_email_update = trim($email_update_data['raw_value']);
+            } elseif (isset($email_update_data['value']) && !empty($email_update_data['value'])) {
+                $raw_email_update = trim($email_update_data['value']);
+            }
+            
+            if (!empty($raw_email_update) && $raw_email_update !== $existing_user->user_email) {
+                if (!is_email($raw_email_update)) {
+                    $ajax_handler->add_error_message('Nieprawidłowy adres e-mail: ' . esc_html($raw_email_update));
                     return;
                 }
-                $update_data['user_email'] = $user_email;
+                $update_data['user_email'] = sanitize_email($raw_email_update);
             }
 
             $updated = wp_update_user($update_data);
@@ -346,8 +480,17 @@ class EFPP_Form_Action_Register_User extends Action_Base {
 
         foreach ($meta_map as $map_item) {
             $meta_key  = $map_item['meta_key'] ?? '';
-            $field_id  = $map_item['form_field_id'] ?? '';
-            $field_val = $fields[$field_id]['value'] ?? '';
+            $field_id_raw = $map_item['form_field_id'] ?? '';
+            
+            // Wyciągnij rzeczywiste ID pola
+            $field_id = $this->extract_field_id($field_id_raw, $available_fields);
+            
+            // Pobierz wartość - sprawdź raw_value i value
+            $field_val = '';
+            if (isset($fields[$field_id])) {
+                $field_data = $fields[$field_id];
+                $field_val = $field_data['raw_value'] ?? ($field_data['value'] ?? '');
+            }
 
             if (!$meta_key || !$field_id || $field_val === '') continue;
 

@@ -80,14 +80,6 @@
     const featuredInput = wrapper.find('input.efpp-featured-input');
     const galleryInput = wrapper.find('input.efpp-gallery-input');
 
-    // 🔍 Logowanie do debugowania
-    console.group('[EFPP] Gallery Update');
-    console.log('🖼 Wszystkie zdjęcia:', images);
-    console.log('⭐ Featured image:', featured);
-    console.log('🖼 Gallery:', gallery);
-    console.log('✅ Featured input:', featuredInput.attr('name'));
-    console.log('✅ Gallery input:', galleryInput.attr('name'));
-    console.groupEnd();
 
     // Ustaw wartości
     if (featuredInput.length) {

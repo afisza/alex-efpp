@@ -1,14 +1,5 @@
 jQuery(document).ready(function ($) {
-  console.log('[EFPP] JS is loaded');
-
   $(document).on('elementor-pro/forms/ajax:success', function (event, id, responseData, $form) {
-    console.group('[EFPP] AJAX: SUCCESS HOOK');
-    console.log('event:', event);
-    console.log('form name (id):', id);
-    console.log('responseData:', responseData);
-    console.log('responseData.message:', responseData?.message);
-    console.log('responseData.data:', responseData?.data);
-    console.groupEnd();
 
     let $targetForm = $(`form[name="${id}"]`);
     if (!$targetForm.length && $form?.length) {
@@ -16,7 +7,6 @@ jQuery(document).ready(function ($) {
     }
 
     if (!$targetForm.length) {
-      console.warn('[EFPP] Nie znaleziono formularza!');
       return;
     }
 

@@ -1,5 +1,3 @@
-console.log('[EFPP] Script loaded');
-
 (function ($) {
   function updateCheckedState($root = $(document)) {
     $root.find('.elementor-field-option input[type="checkbox"], .elementor-field-option input[type="radio"]').each(function () {
@@ -14,7 +12,6 @@ console.log('[EFPP] Script loaded');
   }
 
   $(document).ready(function () {
-    console.log('[EFPP] Document ready');
     updateCheckedState();
     $(document).on('change', '.elementor-field-option input[type="checkbox"], .elementor-field-option input[type="radio"]', function () {
       updateCheckedState();
@@ -25,9 +22,7 @@ console.log('[EFPP] Script loaded');
   const waitForElementorFrontend = setInterval(function () {
     if (window.elementorFrontend && window.elementorFrontend.hooks) {
       clearInterval(waitForElementorFrontend);
-      console.log('[EFPP] Elementor hooks ready');
       elementorFrontend.hooks.addAction('frontend/element_ready/form.default', function ($scope) {
-        console.log('[EFPP] Form ready in editor');
         updateCheckedState($scope);
       });
     }

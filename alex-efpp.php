@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post
 Description: Publishes content from the Elementor form as a post or CPT.
-Version: 1.0.3.1
+Version: 1.0.3.2
 Author: Alex Scar
 */
 
@@ -44,7 +44,7 @@ class Alex_EFPP {
         if ( ! wp_style_is('alex-efpp-frontend', 'enqueued') ) {
             wp_enqueue_style(
                 'alex-efpp-frontend',
-                plugin_dir_url(__FILE__) . 'assets/css/efpp-frontend.css',
+                plugin_dir_url(__FILE__) . 'assets/CSS/efpp-frontend.css',
                 [],
                 '1.0'
             );
@@ -79,6 +79,48 @@ class Alex_EFPP {
             '1.0',
             true
         );
+        
+        // Lokalizacja dla skryptów edytora
+        wp_localize_script('alex-efpp-editor', 'AlexEFPP', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('alex_efpp_ajax'),
+        ]);
+        
+        // Dodatkowe skrypty edytora
+        wp_enqueue_script(
+            'alex-efpp-editor-taxonomy',
+            plugin_dir_url(__FILE__) . 'assets/editor-taxonomy.js',
+            ['jquery'],
+            '1.0',
+            true
+        );
+        
+        wp_enqueue_script(
+            'alex-efpp-editor-dynamic-choose',
+            plugin_dir_url(__FILE__) . 'assets/editor-dynamic-choose.js',
+            ['jquery'],
+            '1.0',
+            true
+        );
+        
+        wp_enqueue_script(
+            'alex-efpp-admin-hint',
+            plugin_dir_url(__FILE__) . 'assets/admin-hint.js',
+            ['jquery'],
+            '1.0',
+            true
+        );
+        
+        // Lokalizacja dla wszystkich skryptów edytora
+        wp_localize_script('alex-efpp-editor-taxonomy', 'AlexEFPP', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('alex_efpp_ajax'),
+        ]);
+        
+        wp_localize_script('alex-efpp-editor-dynamic-choose', 'AlexEFPP', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('alex_efpp_ajax'),
+        ]);
     }
 
     public function render_efpp_messages_div() {

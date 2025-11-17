@@ -5,6 +5,8 @@ add_action('wp_ajax_alex_efpp_get_taxonomies', 'alex_efpp_get_taxonomies');
 add_action('wp_ajax_nopriv_alex_efpp_get_taxonomies', 'alex_efpp_get_taxonomies');
 
 function alex_efpp_get_taxonomies() {
+    check_ajax_referer('alex_efpp_ajax', '_ajax_nonce');
+    
     if (!current_user_can('edit_posts')) {
         wp_send_json_error('Unauthorized');
     }
@@ -32,6 +34,11 @@ add_action('wp_ajax_nopriv_efpp_upload_image', 'efpp_handle_image_upload');
 
 function efpp_handle_image_upload() {
     check_ajax_referer('efpp_featured_image_upload');
+    
+    // Sprawdź uprawnienia - tylko zalogowani użytkownicy mogą uploadować obrazy
+    if (!is_user_logged_in() || !current_user_can('upload_files')) {
+        wp_send_json_error(['message' => 'Unauthorized']);
+    }
 
     if (!function_exists('media_handle_upload')) {
         require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -104,6 +111,8 @@ function alex_efpp_get_dynamic_fields() {
 add_action('wp_ajax_alex_efpp_list_field_groups', 'alex_efpp_list_field_groups');
 
 function alex_efpp_list_field_groups() {
+    check_ajax_referer('alex_efpp_ajax', '_ajax_nonce');
+    
     if (!current_user_can('edit_posts')) {
         wp_send_json_error('Unauthorized');
     }
@@ -145,7 +154,6 @@ function alex_efpp_list_field_groups() {
         }
     }
 
-    error_log('EFPP: list_field_groups zakończona. Zebrano: ' . count($options));
     wp_send_json_success($options);
 }
 

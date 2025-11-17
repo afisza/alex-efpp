@@ -34,8 +34,8 @@
                     }
                 }
             },
-            error: function(xhr) {
-                console.warn('EFPP AJAX taxonomy fetch error:', xhr.responseText);
+            error: function() {
+                // Silent fail - taxonomy select will remain empty
             }
         });
     }

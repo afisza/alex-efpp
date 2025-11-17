@@ -275,35 +275,35 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 ],
                 //'title_field' => '{{ field_type }}',
                 'title_field' => '<#
-                    if ( field_type == "title" ) {
+                    if ( item.field_type == "title" ) {
                         print("' . $field_names['title'] . '");
                     }
-                    if ( field_type == "content" ) {
+                    if ( item.field_type == "content" ) {
                         print("' . $field_names['content'] . '");
                     }
-                    if ( field_type == "featured_image" ) {
+                    if ( item.field_type == "featured_image" ) {
                         print("' . $field_names['featured_image'] . '");
                     }
-                    if ( field_type == "price" ) {
+                    if ( item.field_type == "price" ) {
                         print("' . $field_names['price'] . '");
                     }
-                    if ( field_type == "post_date" ) {
+                    if ( item.field_type == "post_date" ) {
                         print("' . $field_names['post_date'] . '");
                     }
-                    if ( field_type == "post_time" ) {
+                    if ( item.field_type == "post_time" ) {
                         print("' . $field_names['post_time'] . '");
                     }
-                    if ( field_type == "custom_field" ) {
+                    if ( item.field_type == "custom_field" ) {
                         print("' . $field_names['custom_field'] . '");
                     }
-                    if ( field_type == "gallery_field" ) {
+                    if ( item.field_type == "gallery_field" ) {
                         print("' . $field_names['gallery_field'] . '");
                     }
-                    if ( field_type == "taxonomy" ) {
+                    if ( item.field_type == "taxonomy" ) {
                         print("' . $field_names['taxonomy'] . '");
                     }
-                    if (typeof form_field_id !== "undefined" && form_field_id) {
-                        print(": " + form_field_id);
+                    if (typeof item.form_field_id !== "undefined" && item.form_field_id) {
+                        print(": " + item.form_field_id);
                     }
                 #>',
                 'condition' => [ 'submit_actions' => $this->get_name() ],
@@ -344,8 +344,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
 
         $settings = $record->get('form_settings');
         $fields   = $record->get('fields');
-        //error_log( print_r( $record, true ) );
-        error_log( "fields\n" . print_r( $fields, true ) . "\n" );
 
         $field_map = $settings['efpp_post_field_map'] ?? [];
 
@@ -400,7 +398,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         foreach ($field_map as $map) {
             $type = $map['field_type'] ?? '';
             $form_field = $map['form_field_id'] ?? '';
-            error_log( "form_field\n" . print_r( $form_field, true ) . "\n" );
 
             $gallery_urls = null;
             $gallery_meta_key = null;
@@ -426,9 +423,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     break;
                 case 'custom_field':
                     $meta_key = $map['meta_key'] ?? '';
-                    error_log( "map\n" . print_r( $map, true ) . "\n" );
                     if ($meta_key) {
-                        //error_log("[EFPP] meta_key=$meta_key | form_field=$form_field | value=" . print_r($value, true));
                         $post_meta[$meta_key] = $value;
                     }
                     break;
@@ -528,8 +523,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
 
 
         foreach ($post_meta as $key => $val) {
-            error_log( "key\n" . print_r( $key, true ) . "\n" );
-            error_log( "val\n" . print_r( $val, true ) . "\n" );
             update_post_meta($post_id, $key, $val);
         }
 
@@ -556,11 +549,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
             $success_message = __('POST added successfully.', 'alex-efpp');
         }
 
-        error_log('=== EFPP SUCCESS ===');
-        error_log('Post ID: ' . $post_id);
-        error_log('Redirect type: ' . $redirect_type);
-        error_log('Success message: ' . $success_message);
-
         switch ($redirect_type) {
             case 'post':
                 if (get_post_status($post_id)) {
@@ -568,7 +556,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     $ajax_handler->add_response_data('message', $success_message);
                     $ajax_handler->add_response_data('success_message', $success_message);
                     $ajax_handler->add_response_data('redirect_url', get_permalink($post_id));
-                    error_log('Redirect URL: ' . get_permalink($post_id));
                 }
                 break;
 
@@ -587,7 +574,6 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                 $ajax_handler->add_response_data('form', true);
                 $ajax_handler->add_response_data('message', $success_message);
                 $ajax_handler->add_response_data('success_message', $success_message);
-                error_log('Brak redirect_url – tylko message');
                 break;
         }
 

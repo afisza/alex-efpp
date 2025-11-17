@@ -136,13 +136,9 @@ class Dynamic_Choose_Field extends Field_Base {
         $is_inline = !empty($item['efpp_dc_inline_display']) && $item['efpp_dc_inline_display'] === 'yes';
         $form_settings = $form->get_settings_for_display();
 
-
-        //error_log( "item\n" . print_r( $item, true ) . "\n" );
-
         switch ($source_type) {
             case 'acf':
                 $field_name = explode( ':', $item['efpp_dc_acf_field'], 2 )[1];
-                //$item['field_name'] = $field_name;
                 $acf_field = $item['efpp_dc_acf_field'];
                 $options = $this->get_acf_meta_field_options( $acf_field );
                 break;
