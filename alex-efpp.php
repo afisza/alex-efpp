@@ -2,8 +2,9 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post
 Description: Publishes content from the Elementor form as a post or CPT.
-Version: 1.0.3.2
+Version: 1.0.3.3
 Author: Alex Scar
+Plugin URI: https://github.com/afisza/alex-efpp
 */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -33,6 +34,25 @@ class Alex_EFPP {
         require_once plugin_dir_path(__FILE__) . 'includes/ajax.php';
         require_once plugin_dir_path(__FILE__) . 'includes/form-field-icons-extension.php';
         require_once plugin_dir_path(__FILE__) . 'includes/efpp-style-controls.php';
+        
+        // GitHub Updater
+        require_once plugin_dir_path(__FILE__) . 'includes/class-github-updater.php';
+        $this->init_github_updater();
+    }
+    
+    /**
+     * Inicjalizuje GitHub Updater
+     */
+    private function init_github_updater() {
+        // Updater automatycznie pobierze URL z stałej ALEX_EFPP_GITHUB_REPO_URL
+        // lub z filtra 'alex_efpp_github_repo_url'
+        // Przykład użycia w functions.php:
+        // define('ALEX_EFPP_GITHUB_REPO_URL', 'https://github.com/username/repo-name');
+        // lub
+        // add_filter('alex_efpp_github_repo_url', function() {
+        //     return 'https://github.com/username/repo-name';
+        // });
+        new Alex_EFPP_GitHub_Updater(__FILE__);
     }
 
     public function load_textdomain() {
