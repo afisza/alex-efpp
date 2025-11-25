@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
-Description: Publishes content from the Elementor form as a post or CPT.
+Description: Publishes content from the Elementor form as a post or CPT. Includes user registration, login, logout, and password reset actions.
 Version: 1.0.3.6
 Author: Alex Scar
 Plugin URI: https://github.com/afisza/alex-efpp
@@ -20,6 +20,9 @@ class Alex_EFPP {
         add_action('plugins_loaded', [$this, 'load_textdomain']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_action']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_user_action']);
+        add_action('elementor_pro/forms/actions/register', [$this, 'register_login_action']);
+        add_action('elementor_pro/forms/actions/register', [$this, 'register_logout_action']);
+        add_action('elementor_pro/forms/actions/register', [$this, 'register_reset_password_action']);
         add_action('elementor_pro/forms/fields/register', [$this, 'register_efpp_form_fields']);
         add_action('elementor/editor/after_enqueue_scripts', [$this, 'enqueue_editor_scripts']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
@@ -179,6 +182,21 @@ class Alex_EFPP {
     public function register_user_action($actions) {
         require_once plugin_dir_path(__FILE__) . 'includes/form-action-register-user.php';
         $actions->register(new \EFPP_Form_Action_Register_User());
+    }
+
+    public function register_login_action($actions) {
+        require_once plugin_dir_path(__FILE__) . 'includes/form-action-login.php';
+        $actions->register(new \EFPP_Form_Action_Login());
+    }
+
+    public function register_logout_action($actions) {
+        require_once plugin_dir_path(__FILE__) . 'includes/form-action-logout.php';
+        $actions->register(new \EFPP_Form_Action_Logout());
+    }
+
+    public function register_reset_password_action($actions) {
+        require_once plugin_dir_path(__FILE__) . 'includes/form-action-reset-password.php';
+        $actions->register(new \EFPP_Form_Action_Reset_Password());
     }
 
     public function register_efpp_form_fields($fields_manager) {
