@@ -342,6 +342,191 @@ add_action('elementor/element/after_section_end', function ( $element, $section_
         $element->end_controls_tabs();
         // === END: STYLE TABS ===
 
+        // === LOGOUT LINK STYLES ===
+        $element->add_control(
+            'efpp_logout_heading',
+            [
+                'label' => esc_html__('Logout Link Styles', 'alex-efpp'),
+                'type' => Controls_Manager::HEADING,
+                'separator' => 'before',
+            ]
+        );
+
+        // User Info Styles
+        $element->add_group_control(
+            Group_Control_Typography::get_type(),
+            [
+                'name' => 'efpp_logout_user_info_typography',
+                'label' => esc_html__('User Info Typography', 'alex-efpp'),
+                'selector' => '{{WRAPPER}} .efpp-logout-user-info',
+            ]
+        );
+
+        $element->add_control(
+            'efpp_logout_user_info_color',
+            [
+                'label' => esc_html__('User Info Color', 'alex-efpp'),
+                'type' => Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-user-info' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $element->add_responsive_control(
+            'efpp_logout_user_info_spacing',
+            [
+                'label' => esc_html__('User Info Spacing', 'alex-efpp'),
+                'type' => Controls_Manager::SLIDER,
+                'size_units' => ['px', 'em', 'rem'],
+                'range' => [
+                    'px' => ['min' => 0, 'max' => 100],
+                    'em' => ['min' => 0, 'max' => 10],
+                    'rem' => ['min' => 0, 'max' => 10],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-user-info' => 'margin-bottom: {{SIZE}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        // Logout Button Styles
+        $element->start_controls_tabs('efpp_logout_button_tabs');
+
+        // Normal
+        $element->start_controls_tab(
+            'efpp_logout_button_normal',
+            [
+                'label' => esc_html__('Normal', 'alex-efpp'),
+            ]
+        );
+
+        $element->add_control(
+            'efpp_logout_button_color',
+            [
+                'label' => esc_html__('Text Color', 'alex-efpp'),
+                'type' => Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-button' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $element->add_control(
+            'efpp_logout_button_bg',
+            [
+                'label' => esc_html__('Background Color', 'alex-efpp'),
+                'type' => Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-button' => 'background-color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $element->add_group_control(
+            \Elementor\Group_Control_Border::get_type(),
+            [
+                'name' => 'efpp_logout_button_border',
+                'selector' => '{{WRAPPER}} .efpp-logout-button',
+            ]
+        );
+
+        $element->add_responsive_control(
+            'efpp_logout_button_border_radius',
+            [
+                'label' => esc_html__('Border Radius', 'alex-efpp'),
+                'type' => Controls_Manager::DIMENSIONS,
+                'size_units' => ['px', '%', 'em'],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-button' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $element->add_responsive_control(
+            'efpp_logout_button_padding',
+            [
+                'label' => esc_html__('Padding', 'alex-efpp'),
+                'type' => Controls_Manager::DIMENSIONS,
+                'size_units' => ['px', 'em', 'rem'],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-button' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $element->add_group_control(
+            Group_Control_Typography::get_type(),
+            [
+                'name' => 'efpp_logout_button_typography',
+                'label' => esc_html__('Typography', 'alex-efpp'),
+                'selector' => '{{WRAPPER}} .efpp-logout-button',
+            ]
+        );
+
+        $element->end_controls_tab();
+
+        // Hover
+        $element->start_controls_tab(
+            'efpp_logout_button_hover',
+            [
+                'label' => esc_html__('Hover', 'alex-efpp'),
+            ]
+        );
+
+        $element->add_control(
+            'efpp_logout_button_hover_color',
+            [
+                'label' => esc_html__('Text Color', 'alex-efpp'),
+                'type' => Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-button:hover' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $element->add_control(
+            'efpp_logout_button_hover_bg',
+            [
+                'label' => esc_html__('Background Color', 'alex-efpp'),
+                'type' => Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-button:hover' => 'background-color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $element->add_control(
+            'efpp_logout_button_hover_border_color',
+            [
+                'label' => esc_html__('Border Color', 'alex-efpp'),
+                'type' => Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-button:hover' => 'border-color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $element->add_control(
+            'efpp_logout_button_hover_transition',
+            [
+                'label' => esc_html__('Transition Duration', 'alex-efpp'),
+                'type' => Controls_Manager::SLIDER,
+                'range' => [
+                    'px' => [
+                        'max' => 3,
+                        'step' => 0.1,
+                    ],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-button' => 'transition-duration: {{SIZE}}s',
+                ],
+            ]
+        );
+
+        $element->end_controls_tab();
+        $element->end_controls_tabs();
+
         $element->end_controls_section();
     }
 

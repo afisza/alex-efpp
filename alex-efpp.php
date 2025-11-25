@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT. Includes user registration, login, logout, and password reset actions.
-Version: 1.0.3.6
+Version: 1.0.3.7
 Author: Alex Scar
 Plugin URI: https://github.com/afisza/alex-efpp
 */
@@ -210,6 +210,12 @@ class Alex_EFPP {
         require_once plugin_dir_path(__FILE__) . 'includes/form-field-featured-image.php';
         if (class_exists('\EFPP_Featured_Image_Field')) {
             $fields_manager->register(new \EFPP_Featured_Image_Field());
+        }
+
+        // Logout Link
+        require_once plugin_dir_path(__FILE__) . 'includes/form-field-logout-link.php';
+        if (class_exists('\EFPP_Logout_Link_Field')) {
+            $fields_manager->register(new \EFPP_Logout_Link_Field());
         }
 
         // Dynamic Choose

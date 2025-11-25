@@ -26,6 +26,58 @@ class EFPP_Form_Action_Logout extends Action_Base {
         );
 
         $widget->add_control(
+            'efpp_logout_show_email',
+            [
+                'label' => 'Pokaż e-mail użytkownika',
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Tak', 'alex-efpp'),
+                'label_off' => __('Nie', 'alex-efpp'),
+                'return_value' => 'yes',
+                'default' => 'yes',
+                'description' => 'Wyświetl adres email zalogowanego użytkownika nad przyciskiem wyloguj',
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_logout_show_login',
+            [
+                'label' => 'Pokaż Login użytkownika',
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Tak', 'alex-efpp'),
+                'label_off' => __('Nie', 'alex-efpp'),
+                'return_value' => 'yes',
+                'default' => '',
+                'description' => 'Wyświetl login zalogowanego użytkownika',
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_logout_show_name',
+            [
+                'label' => 'Pokaż Imię i Nazwisko',
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Tak', 'alex-efpp'),
+                'label_off' => __('Nie', 'alex-efpp'),
+                'return_value' => 'yes',
+                'default' => '',
+                'description' => 'Wyświetl imię i nazwisko zalogowanego użytkownika',
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_logout_show_role',
+            [
+                'label' => 'Pokaż rolę użytkownika',
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Tak', 'alex-efpp'),
+                'label_off' => __('Nie', 'alex-efpp'),
+                'return_value' => 'yes',
+                'default' => '',
+                'description' => 'Wyświetl rolę zalogowanego użytkownika',
+            ]
+        );
+
+        $widget->add_control(
             'efpp_logout_message',
             [
                 'label' => 'Success Message',
