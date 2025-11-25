@@ -123,3 +123,46 @@ label.elementor-field-option {
 	border-color: var(--efpp-checked-border, #4caf50);
 }
 
+/* Logout User Info Styles */
+.efpp-logout-user-info {
+	margin-bottom: 1em;
+}
+
+/* Inline style (default) */
+.efpp-logout-user-info-inline {
+	display: inline-block;
+}
+
+.efpp-logout-user-info-inline span:not(:last-child)::after {
+	content: ' | ';
+	margin: 0 0.5em;
+}
+
+/* List style (flex) */
+.efpp-logout-user-info-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+}
+
+.efpp-logout-user-info-list[style*="flex-direction: row"] {
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.efpp-user-info-item {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+}
+
+.efpp-user-info-label {
+	font-weight: 600;
+	margin-right: 0.5em;
+	white-space: nowrap;
+}
+
+.efpp-user-info-value {
+	/* Style dla wartości będzie dodany przez Elementor controls */
+}
+

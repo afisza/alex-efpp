@@ -65,6 +65,9 @@ if ( ! class_exists( 'EFPP_Logout_Link_Field' ) ) {
             $show_login = $show_user_info && !empty($form_settings['efpp_logout_show_login']);
             $show_name = $show_user_info && !empty($form_settings['efpp_logout_show_name']);
             $show_role = $show_user_info && !empty($form_settings['efpp_logout_show_role']);
+            
+            // Pobierz styl wyświetlania (inline lub list)
+            $display_style = $form_settings['efpp_logout_user_info_display'] ?? 'inline';
 
             $user = wp_get_current_user();
 
@@ -75,16 +78,24 @@ if ( ! class_exists( 'EFPP_Logout_Link_Field' ) ) {
                 <?php endif; ?>
 
                 <?php if ($show_user_info && ($show_email || $show_login || $show_name || $show_role)) : ?>
-                    <div class="efpp-logout-user-info">
+                    <div class="efpp-logout-user-info efpp-logout-user-info-<?php echo esc_attr($display_style); ?>">
                         <?php 
-                        $info_parts = [];
+                        $info_items = [];
                         
                         if ($show_email) {
-                            $info_parts[] = '<span class="efpp-user-email">' . esc_html($user->user_email) . '</span>';
+                            $info_items[] = [
+                                'class' => 'efpp-user-email',
+                                'label' => 'E-mail',
+                                'value' => esc_html($user->user_email)
+                            ];
                         }
                         
                         if ($show_login && $user->user_login) {
-                            $info_parts[] = '<span class="efpp-user-login">' . esc_html($user->user_login) . '</span>';
+                            $info_items[] = [
+                                'class' => 'efpp-user-login',
+                                'label' => 'Login',
+                                'value' => esc_html($user->user_login)
+                            ];
                         }
                         
                         if ($show_name) {
@@ -92,7 +103,11 @@ if ( ! class_exists( 'EFPP_Logout_Link_Field' ) ) {
                             $last_name = get_user_meta($user->ID, 'last_name', true);
                             $full_name = trim($first_name . ' ' . $last_name);
                             if (!empty($full_name)) {
-                                $info_parts[] = '<span class="efpp-user-name">' . esc_html($full_name) . '</span>';
+                                $info_items[] = [
+                                    'class' => 'efpp-user-name',
+                                    'label' => 'Imię i Nazwisko',
+                                    'value' => esc_html($full_name)
+                                ];
                             }
                         }
                         
@@ -105,12 +120,34 @@ if ( ! class_exists( 'EFPP_Logout_Link_Field' ) ) {
                                 }
                             }
                             if (!empty($role_names)) {
-                                $info_parts[] = '<span class="efpp-user-role">' . esc_html(implode(', ', $role_names)) . '</span>';
+                                $info_items[] = [
+                                    'class' => 'efpp-user-role',
+                                    'label' => 'Rola',
+                                    'value' => esc_html(implode(', ', $role_names))
+                                ];
                             }
                         }
                         
-                        if (!empty($info_parts)) {
-                            echo implode(' | ', $info_parts);
+                        if (!empty($info_items)) {
+                            if ($display_style === 'list') {
+                                // Wyświetl jako lista (flex)
+                                // Kierunek będzie kontrolowany przez CSS w Elementorze
+                                echo '<div class="efpp-logout-user-info-list">';
+                                foreach ($info_items as $item) {
+                                    echo '<div class="efpp-user-info-item ' . esc_attr($item['class']) . '">';
+                                    echo '<span class="efpp-user-info-label">' . esc_html($item['label']) . ':</span> ';
+                                    echo '<span class="efpp-user-info-value">' . $item['value'] . '</span>';
+                                    echo '</div>';
+                                }
+                                echo '</div>';
+                            } else {
+                                // Wyświetl inline (domyślnie)
+                                $info_parts = [];
+                                foreach ($info_items as $item) {
+                                    $info_parts[] = '<span class="' . esc_attr($item['class']) . '">' . $item['value'] . '</span>';
+                                }
+                                echo implode(' | ', $info_parts);
+                            }
                         }
                         ?>
                     </div>

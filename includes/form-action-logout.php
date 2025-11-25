@@ -78,6 +78,20 @@ class EFPP_Form_Action_Logout extends Action_Base {
         );
 
         $widget->add_control(
+            'efpp_logout_user_info_display',
+            [
+                'label' => 'Styl wyświetlania informacji użytkownika',
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'options' => [
+                    'inline' => 'Inline (w jednej linii)',
+                    'list' => 'Lista (flex)',
+                ],
+                'default' => 'inline',
+                'description' => 'Wybierz sposób wyświetlania informacji o użytkowniku',
+            ]
+        );
+
+        $widget->add_control(
             'efpp_logout_message',
             [
                 'label' => 'Success Message',

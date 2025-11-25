@@ -390,6 +390,90 @@ add_action('elementor/element/after_section_end', function ( $element, $section_
             ]
         );
 
+        // Style dla trybu listy
+        $element->add_control(
+            'efpp_logout_user_info_list_heading',
+            [
+                'label' => esc_html__('List Style (Flex)', 'alex-efpp'),
+                'type' => Controls_Manager::HEADING,
+                'separator' => 'before',
+            ]
+        );
+
+        $element->add_responsive_control(
+            'efpp_logout_user_info_list_gap',
+            [
+                'label' => esc_html__('Gap Between Items', 'alex-efpp'),
+                'type' => Controls_Manager::SLIDER,
+                'size_units' => ['px', 'em', 'rem'],
+                'range' => [
+                    'px' => ['min' => 0, 'max' => 50],
+                    'em' => ['min' => 0, 'max' => 5],
+                    'rem' => ['min' => 0, 'max' => 5],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-user-info-list' => 'gap: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .efpp-logout-user-info-list .efpp-user-info-item' => 'margin-bottom: 0;',
+                ],
+            ]
+        );
+
+        $element->add_responsive_control(
+            'efpp_logout_user_info_list_direction',
+            [
+                'label' => esc_html__('Direction', 'alex-efpp'),
+                'type' => Controls_Manager::SELECT,
+                'options' => [
+                    'column' => esc_html__('Column (Vertical)', 'alex-efpp'),
+                    'row' => esc_html__('Row (Horizontal)', 'alex-efpp'),
+                ],
+                'default' => 'column',
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-logout-user-info-list' => 'flex-direction: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $element->add_control(
+            'efpp_logout_user_info_label_color',
+            [
+                'label' => esc_html__('Label Color', 'alex-efpp'),
+                'type' => Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-user-info-label' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $element->add_group_control(
+            Group_Control_Typography::get_type(),
+            [
+                'name' => 'efpp_logout_user_info_label_typography',
+                'label' => esc_html__('Label Typography', 'alex-efpp'),
+                'selector' => '{{WRAPPER}} .efpp-user-info-label',
+            ]
+        );
+
+        $element->add_control(
+            'efpp_logout_user_info_value_color',
+            [
+                'label' => esc_html__('Value Color', 'alex-efpp'),
+                'type' => Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-user-info-value' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $element->add_group_control(
+            Group_Control_Typography::get_type(),
+            [
+                'name' => 'efpp_logout_user_info_value_typography',
+                'label' => esc_html__('Value Typography', 'alex-efpp'),
+                'selector' => '{{WRAPPER}} .efpp-user-info-value',
+            ]
+        );
+
         // Logout Button Styles
         $element->start_controls_tabs('efpp_logout_button_tabs');
 
