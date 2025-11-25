@@ -213,11 +213,11 @@ class Alex_EFPP {
             $fields_manager->register(new \EFPP_Featured_Image_Field());
         }
 
-        // Logout Link
-        require_once plugin_dir_path(__FILE__) . 'includes/form-field-logout-link.php';
-        if (class_exists('\EFPP_Logout_Link_Field')) {
-            $fields_manager->register(new \EFPP_Logout_Link_Field());
-        }
+        // Logout Link - zakomentowane na razie
+        // require_once plugin_dir_path(__FILE__) . 'includes/form-field-logout-link.php';
+        // if (class_exists('\EFPP_Logout_Link_Field')) {
+        //     $fields_manager->register(new \EFPP_Logout_Link_Field());
+        // }
 
         // Dynamic Choose
         require_once plugin_dir_path(__FILE__) . 'includes/form-field-dynamic-choose.php';
