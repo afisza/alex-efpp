@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT. Includes user registration, login, logout, and password reset actions.
-Version: 1.0.3.8.1
+Version: 1.0.3.8.2
 Author: Alex Shram
 Plugin URI: https://github.com/afisza/alex-efpp
 */

@@ -274,38 +274,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
 
                 ],
                 //'title_field' => '{{ field_type }}',
-                'title_field' => '<#
-                    if ( item.field_type == "title" ) {
-                        print("' . $field_names['title'] . '");
-                    }
-                    if ( item.field_type == "content" ) {
-                        print("' . $field_names['content'] . '");
-                    }
-                    if ( item.field_type == "featured_image" ) {
-                        print("' . $field_names['featured_image'] . '");
-                    }
-                    if ( item.field_type == "price" ) {
-                        print("' . $field_names['price'] . '");
-                    }
-                    if ( item.field_type == "post_date" ) {
-                        print("' . $field_names['post_date'] . '");
-                    }
-                    if ( item.field_type == "post_time" ) {
-                        print("' . $field_names['post_time'] . '");
-                    }
-                    if ( item.field_type == "custom_field" ) {
-                        print("' . $field_names['custom_field'] . '");
-                    }
-                    if ( item.field_type == "gallery_field" ) {
-                        print("' . $field_names['gallery_field'] . '");
-                    }
-                    if ( item.field_type == "taxonomy" ) {
-                        print("' . $field_names['taxonomy'] . '");
-                    }
-                    if (typeof item.form_field_id !== "undefined" && item.form_field_id) {
-                        print(": " + item.form_field_id);
-                    }
-                #>',
+                'title_field' => '{{ field_type }}: {{ form_field_id }}',
                 'condition' => [ 'submit_actions' => $this->get_name() ],
                 'max_items' => 50,
             ]
