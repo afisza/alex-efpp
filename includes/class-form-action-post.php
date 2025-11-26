@@ -273,7 +273,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     ],
 
                 ],
-                'title_field' => '<# var fieldType = item && item.field_type ? item.field_type : ""; var fieldId = item && item.form_field_id ? item.form_field_id : ""; print(fieldType + (fieldId ? ": " + fieldId : "")); #>',
+                'title_field' => '{{ field_type }}',
                 'condition' => [ 'submit_actions' => $this->get_name() ],
                 'max_items' => 50,
             ]
