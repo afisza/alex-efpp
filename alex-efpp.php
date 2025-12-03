@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT. Includes user registration, login, logout, and password reset actions.
-Version: 1.0.3.8.3
+Version: 1.0.3.8.4
 Author: Alex Shram
 Plugin URI: https://github.com/afisza/alex-efpp
 */
@@ -16,7 +16,15 @@ class Alex_EFPP {
      */
     private $github_updater;
 
+    /**
+     * Wersja pluginu
+     */
+    private $version;
+
     public function __construct() {
+        // Pobierz wersję z nagłówka pluginu
+        $plugin_data = get_file_data(__FILE__, ['Version' => 'Version'], 'plugin');
+        $this->version = $plugin_data['Version'] ?? '1.0.3.8.4';
         add_action('plugins_loaded', [$this, 'load_textdomain']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_action']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_user_action']);
@@ -74,9 +82,9 @@ class Alex_EFPP {
         if ( ! wp_style_is('alex-efpp-frontend', 'enqueued') ) {
             wp_enqueue_style(
                 'alex-efpp-frontend',
-                plugin_dir_url(__FILE__) . 'assets/CSS/efpp-frontend.css',
+                plugin_dir_url(__FILE__) . 'assets/css/efpp-frontend.css',
                 [],
-                '1.0'
+                $this->version
             );
         }
 
@@ -86,7 +94,7 @@ class Alex_EFPP {
                 'alex-efpp-frontend',
                 plugin_dir_url(__FILE__) . 'assets/js/efpp-frontend.js',
                 ['jquery'],
-                time(), // cache-busting
+                $this->version,
                 true
             );
         }
@@ -96,7 +104,7 @@ class Alex_EFPP {
             'alex-efpp-messages',
             plugin_dir_url(__FILE__) . 'assets/js/efpp-messages.js',
             ['jquery'],
-            '1.0',
+            $this->version,
             true
         );
     }
@@ -106,7 +114,7 @@ class Alex_EFPP {
             'alex-efpp-editor',
             plugin_dir_url(__FILE__) . 'assets/editor.js',
             [],
-            '1.0',
+            $this->version,
             true
         );
         
@@ -121,7 +129,7 @@ class Alex_EFPP {
             'alex-efpp-editor-taxonomy',
             plugin_dir_url(__FILE__) . 'assets/editor-taxonomy.js',
             ['jquery'],
-            '1.0',
+            $this->version,
             true
         );
         
@@ -129,7 +137,7 @@ class Alex_EFPP {
             'alex-efpp-editor-dynamic-choose',
             plugin_dir_url(__FILE__) . 'assets/editor-dynamic-choose.js',
             ['jquery'],
-            '1.0',
+            $this->version,
             true
         );
         
@@ -137,7 +145,7 @@ class Alex_EFPP {
             'alex-efpp-admin-hint',
             plugin_dir_url(__FILE__) . 'assets/admin-hint.js',
             ['jquery'],
-            '1.0',
+            $this->version,
             true
         );
         
@@ -164,7 +172,7 @@ class Alex_EFPP {
                 'alex-efpp-check-update',
                 plugin_dir_url(__FILE__) . 'assets/js/check-update.js',
                 ['jquery'],
-                '1.0',
+                $this->version,
                 true
             );
             
