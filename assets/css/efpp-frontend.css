@@ -1,0 +1,168 @@
+.efpp-messages {
+	display: none;
+	color: green;
+	font-weight: 600;
+	margin-top: 10px;
+}
+
+.efpp-message {
+  background: #e7fbe7;
+  border: 1px solid #b7e2b7;
+  padding: 10px 15px;
+  margin-top: 15px;
+  font-size: 15px;
+  color: #1e4620;
+  border-radius: 6px;
+}
+
+.efpp-error-message {
+  background: #fdeaea;
+  border: 1px solid #e0a1a1;
+  padding: 10px 15px;
+  margin-top: 15px;
+  font-size: 15px;
+  color: #802020;
+  border-radius: 6px;
+}
+
+
+/* Ustawienie inline z odstępami */
+.elementor-field-subgroup.efpp-options-inline {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75em; /* Odstęp między opcjami */
+	align-items: center;
+}
+
+/* Opcjonalne: styl dla poszczególnych opcji, np. labeli */
+.elementor-field-subgroup.efpp-options-inline label {
+	margin: 0;
+}
+
+
+/* Nadpisanie domyślnego flexa Elementora */
+.elementor-field-subgroup.efpp-options-grid,
+.elementor-field-subgroup .efpp-options-grid {
+    display: grid !important;
+    gap: 0.5em;
+}
+
+/* Grid columns */
+.efpp-options-grid-columns-1  { grid-template-columns: repeat(1, 1fr); }
+.efpp-options-grid-columns-2  { grid-template-columns: repeat(2, 1fr); }
+.efpp-options-grid-columns-3  { grid-template-columns: repeat(3, 1fr); }
+.efpp-options-grid-columns-4  { grid-template-columns: repeat(4, 1fr); }
+.efpp-options-grid-columns-5  { grid-template-columns: repeat(5, 1fr); }
+.efpp-options-grid-columns-6  { grid-template-columns: repeat(6, 1fr); }
+.efpp-options-grid-columns-7  { grid-template-columns: repeat(7, 1fr); }
+.efpp-options-grid-columns-8  { grid-template-columns: repeat(8, 1fr); }
+.efpp-options-grid-columns-9  { grid-template-columns: repeat(9, 1fr); }
+.efpp-options-grid-columns-10 { grid-template-columns: repeat(10, 1fr); }
+.efpp-options-grid-columns-11 { grid-template-columns: repeat(11, 1fr); }
+.efpp-options-grid-columns-12 { grid-template-columns: repeat(12, 1fr); }
+
+/* Ukrywamy inputy w trybie "efpp-hide-inputs-yes" */
+.efpp-hide-inputs-yes .elementor-field-subgroup.efpp-options-inline input[type="radio"],
+.efpp-hide-inputs-yes .elementor-field-subgroup.efpp-options-inline input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+}
+.efpp-hide-inputs-yes .elementor-field-subgroup.efpp-options-grid input[type="radio"],
+.efpp-hide-inputs-yes .elementor-field-subgroup.efpp-options-grid input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+}
+
+
+.efpp-option-icon,
+.efpp-option-icon-checked {
+    font-size: 1em;
+    line-height: 1;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-inline-end: 0.5em;
+}
+
+/* Ustawienie max wysokości i szerokości */
+.efpp-option-icon svg,
+.efpp-option-icon-checked svg {
+    width: 1em;
+    height: 1em;
+    display: block;
+    fill: currentColor;
+}
+
+.efpp-option-icon-checked {
+    display: none;
+}
+
+label input:checked ~ .efpp-option-icon {
+    display: none;
+}
+label input:checked ~ .efpp-option-icon-checked {
+    display: inline-block;
+}
+
+label.elementor-field-option {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Checked styles */
+.elementor-field-option.efpp-checked {
+	background-color: var(--efpp-checked-bg, #e0ffe0); /* możesz nadpisać przez inline style */
+	color: var(--efpp-checked-color, #1a1a1a);
+	border-color: var(--efpp-checked-border, #4caf50);
+}
+
+/* Logout User Info Styles */
+.efpp-logout-user-info {
+	margin-bottom: 1em;
+}
+
+/* Inline style (default) */
+.efpp-logout-user-info-inline {
+	display: inline-block;
+}
+
+.efpp-logout-user-info-inline span:not(:last-child)::after {
+	content: ' | ';
+	margin: 0 0.5em;
+}
+
+/* List style (flex) */
+.efpp-logout-user-info-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+}
+
+.efpp-logout-user-info-list[style*="flex-direction: row"] {
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.efpp-user-info-item {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+}
+
+.efpp-user-info-label {
+	font-weight: 600;
+	margin-right: 0.5em;
+	white-space: nowrap;
+}
+
+.efpp-user-info-value {
+	/* Style dla wartości będzie dodany przez Elementor controls */
+}
+
