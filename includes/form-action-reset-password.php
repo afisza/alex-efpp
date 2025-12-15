@@ -55,6 +55,169 @@ class EFPP_Form_Action_Reset_Password extends Action_Base {
             ]
         );
 
+        $widget->add_control(
+            'efpp_reset_show_login_link',
+            [
+                'label' => __('Show Login link', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Yes', 'alex-efpp'),
+                'label_off' => __('No', 'alex-efpp'),
+                'default' => 'no',
+                'separator' => 'before',
+                'description' => __('Pokazuje link do formularza logowania. Po kliknięciu ukryje ten formularz i pokaże formularz logowania.', 'alex-efpp'),
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_reset_login_form_id',
+            [
+                'label' => __('Login Form ID', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::TEXT,
+                'placeholder' => 'np. login_form',
+                'description' => __('ID formularza logowania (używane do pokazania). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name).', 'alex-efpp'),
+                'condition' => [
+                    'efpp_reset_show_login_link' => 'yes',
+                ],
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_reset_password_form_id',
+            [
+                'label' => __('Reset Password Form ID', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::TEXT,
+                'placeholder' => 'np. reset_form',
+                'description' => __('ID tego formularza resetowania hasła (używane do ukrywania). Jeśli puste, zostanie użyte ID z ustawień formularza Elementor (Form ID). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name) tego formularza resetowania.', 'alex-efpp'),
+                'condition' => [
+                    'efpp_reset_show_login_link' => 'yes',
+                ],
+                'separator' => 'default',
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_reset_login_link_text',
+            [
+                'label' => __('Login Link Text', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::TEXT,
+                'default' => __('Wróć do logowania', 'alex-efpp'),
+                'placeholder' => __('Wróć do logowania', 'alex-efpp'),
+                'condition' => [
+                    'efpp_reset_show_login_link' => 'yes',
+                ],
+            ]
+        );
+
+        $widget->end_controls_section();
+
+        // Style Section - Login Link
+        $widget->start_controls_section(
+            'section_efpp_reset_login_link_style',
+            [
+                'label' => __('Login Link', 'alex-efpp'),
+                'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+                'condition' => [
+                    'efpp_reset_show_login_link' => 'yes',
+                ],
+            ]
+        );
+
+        $widget->add_group_control(
+            \Elementor\Group_Control_Typography::get_type(),
+            [
+                'name' => 'efpp_login_link_typography',
+                'label' => __('Typography', 'alex-efpp'),
+                'selector' => '{{WRAPPER}} .efpp-switch-to-login-link',
+            ]
+        );
+
+        $widget->start_controls_tabs('efpp_login_link_tabs');
+
+        $widget->start_controls_tab(
+            'efpp_login_link_normal',
+            [
+                'label' => __('Normal', 'alex-efpp'),
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_login_link_color',
+            [
+                'label' => __('Color', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-switch-to-login-link' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $widget->end_controls_tab();
+
+        $widget->start_controls_tab(
+            'efpp_login_link_hover',
+            [
+                'label' => __('Hover', 'alex-efpp'),
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_login_link_hover_color',
+            [
+                'label' => __('Color', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-switch-to-login-link:hover' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $widget->end_controls_tab();
+
+        $widget->end_controls_tabs();
+
+        $widget->add_responsive_control(
+            'efpp_login_link_spacing',
+            [
+                'label' => __('Spacing', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => ['px', 'em', 'rem'],
+                'range' => [
+                    'px' => [
+                        'min' => 0,
+                        'max' => 50,
+                    ],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-switch-to-login-link' => 'margin-top: {{SIZE}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $widget->add_responsive_control(
+            'efpp_login_link_alignment',
+            [
+                'label' => __('Alignment', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::CHOOSE,
+                'options' => [
+                    'left' => [
+                        'title' => __('Left', 'alex-efpp'),
+                        'icon' => 'eicon-text-align-left',
+                    ],
+                    'center' => [
+                        'title' => __('Center', 'alex-efpp'),
+                        'icon' => 'eicon-text-align-center',
+                    ],
+                    'right' => [
+                        'title' => __('Right', 'alex-efpp'),
+                        'icon' => 'eicon-text-align-right',
+                    ],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-switch-to-login-link' => 'text-align: {{VALUE}};',
+                ],
+            ]
+        );
+
         $widget->end_controls_section();
     }
 

@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT. Includes user registration, login, logout, and password reset actions.
-Version: 1.0.3.8.5
+Version: 1.0.3.8.6
 Author: Alex Shram
 Plugin URI: https://github.com/afisza/alex-efpp
 */
@@ -24,7 +24,7 @@ class Alex_EFPP {
     public function __construct() {
         // Pobierz wersję z nagłówka pluginu
         $plugin_data = get_file_data(__FILE__, ['Version' => 'Version'], 'plugin');
-        $this->version = $plugin_data['Version'] ?? '1.0.3.8.5';
+        $this->version = $plugin_data['Version'] ?? '1.0.3.8.6';
         add_action('plugins_loaded', [$this, 'load_textdomain']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_action']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_user_action']);
@@ -36,6 +36,10 @@ class Alex_EFPP {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
         add_action('elementor/frontend/after_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
         add_action('elementor_pro/forms/render_form', [$this, 'render_efpp_messages_div'], 100, 2);
+        add_action('elementor/frontend/widget/before_render', [$this, 'add_remember_me_data_to_form'], 10, 1);
+        add_action('elementor/frontend/widget/before_render', [$this, 'add_form_switch_data_to_form'], 10, 1);
+        add_action('wp_footer', [$this, 'add_remember_me_script']);
+        add_action('wp_footer', [$this, 'add_form_switch_script']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
 
         // Ukryj domyślny komunikat Elementora przy akcji EFPP
@@ -48,14 +52,34 @@ class Alex_EFPP {
         }, 10, 2);
 
         // Wewnętrzne pliki
-        require_once plugin_dir_path(__FILE__) . 'includes/ajax.php';
-        require_once plugin_dir_path(__FILE__) . 'includes/form-field-icons-extension.php';
-        require_once plugin_dir_path(__FILE__) . 'includes/efpp-style-controls.php';
-        require_once plugin_dir_path(__FILE__) . 'includes/form-buttons-logout-control.php';
+        $plugin_path = plugin_dir_path(__FILE__);
         
-        // GitHub Updater
-        require_once plugin_dir_path(__FILE__) . 'includes/class-github-updater.php';
-        $this->init_github_updater();
+        $required_files = [
+            'includes/ajax.php',
+            'includes/form-field-icons-extension.php',
+            'includes/efpp-style-controls.php',
+            'includes/form-buttons-logout-control.php',
+            'includes/class-github-updater.php',
+        ];
+        
+        foreach ($required_files as $file) {
+            $file_path = $plugin_path . $file;
+            if (file_exists($file_path)) {
+                require_once $file_path;
+            } else {
+                // Log error but don't break the plugin
+                error_log(sprintf(
+                    'Alex EFPP: Required file not found: %s (Full path: %s)',
+                    $file,
+                    $file_path
+                ));
+            }
+        }
+        
+        // GitHub Updater - only initialize if class exists
+        if (class_exists('Alex_EFPP_Github_Updater')) {
+            $this->init_github_updater();
+        }
         
         // Add plugin action links (Check for updates)
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), [$this, 'add_plugin_action_links']);
@@ -174,6 +198,132 @@ class Alex_EFPP {
         echo '<div class="efpp-messages"></div>';
     }
 
+    /**
+     * Add data attribute to form widget for Remember Me checkbox
+     */
+    public function add_remember_me_data_to_form($widget) {
+        // Only process form widgets
+        if ($widget->get_name() !== 'form') {
+            return;
+        }
+        
+        $settings = $widget->get_settings_for_display();
+        
+        // Check if EFPP Login action is enabled
+        $submit_actions = $settings['submit_actions'] ?? [];
+        $has_efpp_login = in_array('efpp_login', $submit_actions);
+        
+        // Check if Remember me checkbox should be shown
+        $show_remember_me = $has_efpp_login && !empty($settings['efpp_login_remember']);
+        
+        // Add data attribute to widget
+        if ($show_remember_me) {
+            $widget->add_render_attribute('_wrapper', 'data-efpp-show-remember-me', '1');
+        }
+    }
+
+    /**
+     * Add Remember Me script
+     */
+    public function add_remember_me_script() {
+        // Only load if Elementor is active
+        if (!did_action('elementor/loaded')) {
+            return;
+        }
+        
+        wp_enqueue_script(
+            'efpp-remember-me',
+            plugin_dir_url(__FILE__) . 'assets/js/efpp-remember-me.js',
+            ['jquery', 'elementor-frontend'],
+            $this->version,
+            true
+        );
+        
+        // Pass translated text to JavaScript
+        wp_localize_script('efpp-remember-me', 'efppRememberMe', [
+            'text' => __('Zapamiętaj mnie', 'alex-efpp'),
+        ]);
+    }
+
+    /**
+     * Add data attributes for form switching
+     */
+    public function add_form_switch_data_to_form($widget) {
+        // Only process form widgets
+        if ($widget->get_name() !== 'form') {
+            return;
+        }
+        
+        $settings = $widget->get_settings_for_display();
+        
+        // Check for Login form with reset password link
+        $submit_actions = $settings['submit_actions'] ?? [];
+        if (in_array('efpp_login', $submit_actions)) {
+            $show_reset_link = !empty($settings['efpp_login_show_reset_link']);
+            if ($show_reset_link) {
+                $login_form_id = $settings['efpp_login_form_id'] ?? '';
+                $reset_form_id = $settings['efpp_reset_password_form_id'] ?? '';
+                $link_text = $settings['efpp_reset_password_link_text'] ?? __('Zapomniałeś hasła?', 'alex-efpp');
+                
+                if (!empty($login_form_id) && !empty($reset_form_id)) {
+                    $widget->add_render_attribute('_wrapper', 'data-efpp-login-form-id', esc_attr($login_form_id));
+                    $widget->add_render_attribute('_wrapper', 'data-efpp-reset-form-id', esc_attr($reset_form_id));
+                    $widget->add_render_attribute('_wrapper', 'data-efpp-reset-link-text', esc_attr($link_text));
+                    $widget->add_render_attribute('_wrapper', 'data-efpp-show-reset-link', '1');
+                }
+            }
+        }
+        
+        // Check for Reset Password form with login link
+        if (in_array('efpp_reset_password', $submit_actions)) {
+            // Check both 'yes' string and boolean true
+            $show_login_link = !empty($settings['efpp_reset_show_login_link']) && 
+                               ($settings['efpp_reset_show_login_link'] === 'yes' || $settings['efpp_reset_show_login_link'] === true);
+            
+            if ($show_login_link) {
+                $login_form_id = $settings['efpp_reset_login_form_id'] ?? '';
+                $reset_form_id = $settings['efpp_reset_password_form_id'] ?? '';
+                $link_text = $settings['efpp_reset_login_link_text'] ?? __('Wróć do logowania', 'alex-efpp');
+                
+                // Always try to get reset form ID from form settings (this is the current form's ID)
+                // Priority: efpp_reset_password_form_id > form_id > form_name
+                if (empty($reset_form_id)) {
+                    $reset_form_id = $settings['form_id'] ?? $settings['form_name'] ?? '';
+                }
+                
+                // Add attributes if we have login_form_id (required)
+                if (!empty($login_form_id)) {
+                    $widget->add_render_attribute('_wrapper', 'data-efpp-login-form-id', esc_attr($login_form_id));
+                    $widget->add_render_attribute('_wrapper', 'data-efpp-login-link-text', esc_attr($link_text));
+                    $widget->add_render_attribute('_wrapper', 'data-efpp-show-login-link', '1');
+                    
+                    // Always add reset_form_id - use form_id/form_name if efpp_reset_password_form_id is empty
+                    if (!empty($reset_form_id)) {
+                        $widget->add_render_attribute('_wrapper', 'data-efpp-reset-form-id', esc_attr($reset_form_id));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Add Form Switch script
+     */
+    public function add_form_switch_script() {
+        // Only load if Elementor is active
+        if (!did_action('elementor/loaded')) {
+            return;
+        }
+        
+        wp_enqueue_script(
+            'efpp-form-switch',
+            plugin_dir_url(__FILE__) . 'assets/js/efpp-form-switch.js',
+            ['jquery', 'elementor-frontend'],
+            $this->version,
+            true
+        );
+    }
+
     public function enqueue_admin_scripts($hook) {
         // Załaduj skrypt tylko na stronie z wtyczkami
         if ($hook === 'plugins.php') {
@@ -193,53 +343,106 @@ class Alex_EFPP {
     }
 
     public function register_action($actions) {
-        require_once plugin_dir_path(__FILE__) . 'includes/class-form-action-post.php';
-        $actions->register(new \Alex_EFPP_Form_Action_Post());
+        $file_path = plugin_dir_path(__FILE__) . 'includes/class-form-action-post.php';
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            if (class_exists('\Alex_EFPP_Form_Action_Post')) {
+                $actions->register(new \Alex_EFPP_Form_Action_Post());
+            }
+        } else {
+            error_log('Alex EFPP: File not found: ' . $file_path);
+        }
     }
 
     public function register_user_action($actions) {
-        require_once plugin_dir_path(__FILE__) . 'includes/form-action-register-user.php';
-        $actions->register(new \EFPP_Form_Action_Register_User());
+        $file_path = plugin_dir_path(__FILE__) . 'includes/form-action-register-user.php';
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            if (class_exists('\EFPP_Form_Action_Register_User')) {
+                $actions->register(new \EFPP_Form_Action_Register_User());
+            }
+        } else {
+            error_log('Alex EFPP: File not found: ' . $file_path);
+        }
     }
 
     public function register_login_action($actions) {
-        require_once plugin_dir_path(__FILE__) . 'includes/form-action-login.php';
-        $actions->register(new \EFPP_Form_Action_Login());
+        $file_path = plugin_dir_path(__FILE__) . 'includes/form-action-login.php';
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            if (class_exists('\EFPP_Form_Action_Login')) {
+                $actions->register(new \EFPP_Form_Action_Login());
+            }
+        } else {
+            error_log('Alex EFPP: File not found: ' . $file_path);
+        }
     }
 
     public function register_logout_action($actions) {
-        require_once plugin_dir_path(__FILE__) . 'includes/form-action-logout.php';
-        $actions->register(new \EFPP_Form_Action_Logout());
+        $file_path = plugin_dir_path(__FILE__) . 'includes/form-action-logout.php';
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            if (class_exists('\EFPP_Form_Action_Logout')) {
+                $actions->register(new \EFPP_Form_Action_Logout());
+            }
+        } else {
+            error_log('Alex EFPP: File not found: ' . $file_path);
+        }
     }
 
     public function register_reset_password_action($actions) {
-        require_once plugin_dir_path(__FILE__) . 'includes/form-action-reset-password.php';
-        $actions->register(new \EFPP_Form_Action_Reset_Password());
+        $file_path = plugin_dir_path(__FILE__) . 'includes/form-action-reset-password.php';
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            if (class_exists('\EFPP_Form_Action_Reset_Password')) {
+                $actions->register(new \EFPP_Form_Action_Reset_Password());
+            }
+        } else {
+            error_log('Alex EFPP: File not found: ' . $file_path);
+        }
     }
 
     public function register_efpp_form_fields($fields_manager) {
         // Dynamic Taxonomy
-        require_once plugin_dir_path(__FILE__) . 'includes/form-field-dynamic-taxonomy.php';
-        if (class_exists('\Taxonomy_Terms_Field')) {
-            $fields_manager->register(new \Taxonomy_Terms_Field());
+        $file_path = plugin_dir_path(__FILE__) . 'includes/form-field-dynamic-taxonomy.php';
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            if (class_exists('\Taxonomy_Terms_Field')) {
+                $fields_manager->register(new \Taxonomy_Terms_Field());
+            }
+        } else {
+            error_log('Alex EFPP: File not found: ' . $file_path);
         }
 
         // Featured Image
-        require_once plugin_dir_path(__FILE__) . 'includes/form-field-featured-image.php';
-        if (class_exists('\EFPP_Featured_Image_Field')) {
-            $fields_manager->register(new \EFPP_Featured_Image_Field());
+        $file_path = plugin_dir_path(__FILE__) . 'includes/form-field-featured-image.php';
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            if (class_exists('\EFPP_Featured_Image_Field')) {
+                $fields_manager->register(new \EFPP_Featured_Image_Field());
+            }
+        } else {
+            error_log('Alex EFPP: File not found: ' . $file_path);
         }
 
         // Logout Link - zakomentowane na razie
-        // require_once plugin_dir_path(__FILE__) . 'includes/form-field-logout-link.php';
-        // if (class_exists('\EFPP_Logout_Link_Field')) {
-        //     $fields_manager->register(new \EFPP_Logout_Link_Field());
+        // $file_path = plugin_dir_path(__FILE__) . 'includes/form-field-logout-link.php';
+        // if (file_exists($file_path)) {
+        //     require_once $file_path;
+        //     if (class_exists('\EFPP_Logout_Link_Field')) {
+        //         $fields_manager->register(new \EFPP_Logout_Link_Field());
+        //     }
         // }
 
         // Dynamic Choose
-        require_once plugin_dir_path(__FILE__) . 'includes/form-field-dynamic-choose.php';
-        if (class_exists('\Dynamic_Choose_Field')) {
-            $fields_manager->register(new \Dynamic_Choose_Field());
+        $file_path = plugin_dir_path(__FILE__) . 'includes/form-field-dynamic-choose.php';
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            if (class_exists('\Dynamic_Choose_Field')) {
+                $fields_manager->register(new \Dynamic_Choose_Field());
+            }
+        } else {
+            error_log('Alex EFPP: File not found: ' . $file_path);
         }
     }
     

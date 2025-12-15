@@ -166,3 +166,66 @@ label.elementor-field-option {
 	/* Style dla wartości będzie dodany przez Elementor controls */
 }
 
+/* Remember Me Checkbox Styles */
+.elementor-field-group-efpp-remember-me {
+	margin-bottom: 1em;
+}
+
+.elementor-field-group-efpp-remember-me .elementor-field-label {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	user-select: none;
+}
+
+.elementor-field-group-efpp-remember-me .efpp-remember-me-checkbox {
+	margin-right: 0.5em;
+	width: auto;
+	height: auto;
+}
+
+.elementor-field-group-efpp-remember-me .elementor-field-label span {
+	font-size: inherit;
+	line-height: inherit;
+}
+
+/* Form Switch Links Styles */
+.efpp-switch-to-reset-link,
+.efpp-switch-to-login-link {
+	display: block;
+	margin-top: 1em;
+	text-align: center;
+	cursor: pointer;
+	color: inherit;
+	text-decoration: underline;
+	transition: opacity 0.3s ease;
+}
+
+.efpp-switch-to-reset-link:hover,
+.efpp-switch-to-login-link:hover {
+	opacity: 0.8;
+	text-decoration: none;
+}
+
+/* Hide forms marked as hidden by JavaScript */
+.elementor-widget-form.efpp-form-hidden {
+	display: none !important;
+}
+
+/* Hide reset password form initially if it has login link */
+/* This means: if reset form has login link, it should be hidden (login form is visible) */
+.elementor-widget-form[data-efpp-show-login-link="1"].efpp-form-hidden {
+	display: none !important;
+}
+
+/* Show reset form when it's not hidden (JavaScript will control via inline style) */
+.elementor-widget-form[data-efpp-show-login-link="1"]:not(.efpp-form-hidden) {
+	/* JavaScript will set inline style with !important, so this is just a fallback */
+	display: block;
+}
+
+/* Smooth transitions for form switching animations */
+.elementor-widget-form {
+	transition: opacity 0.3s ease-in-out;
+}
+

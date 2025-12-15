@@ -48,11 +48,12 @@ class EFPP_Form_Action_Login extends Action_Base {
         $widget->add_control(
             'efpp_login_remember',
             [
-                'label' => 'Remember me',
+                'label' => __('Show "Remember me" checkbox', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::SWITCHER,
                 'label_on' => __('Yes', 'alex-efpp'),
                 'label_off' => __('No', 'alex-efpp'),
                 'default' => 'yes',
+                'description' => __('Pokazuje checkbox "Zapamiętaj mnie" przed przyciskiem submit. Użytkownik może zaznaczyć, czy chce być zapamiętany.', 'alex-efpp'),
             ]
         );
 
@@ -63,6 +64,256 @@ class EFPP_Form_Action_Login extends Action_Base {
                 'type' => \Elementor\Controls_Manager::TEXT,
                 'placeholder' => 'https://example.com/dashboard/',
                 'description' => 'URL do przekierowania po zalogowaniu. Zostaw puste, aby pozostać na tej samej stronie.',
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_login_show_reset_link',
+            [
+                'label' => __('Show Reset Password link', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Yes', 'alex-efpp'),
+                'label_off' => __('No', 'alex-efpp'),
+                'default' => 'no',
+                'separator' => 'before',
+                'description' => __('Pokazuje link do formularza resetowania hasła. Po kliknięciu ukryje ten formularz i pokaże formularz resetowania.', 'alex-efpp'),
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_login_form_id',
+            [
+                'label' => __('Login Form ID', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::TEXT,
+                'placeholder' => 'np. login-form-123',
+                'description' => __('ID formularza logowania (używane do ukrywania). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name).', 'alex-efpp'),
+                'condition' => [
+                    'efpp_login_show_reset_link' => 'yes',
+                ],
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_reset_password_form_id',
+            [
+                'label' => __('Reset Password Form ID', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::TEXT,
+                'placeholder' => 'np. reset-form-456',
+                'description' => __('ID formularza resetowania hasła (używane do pokazania). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name).', 'alex-efpp'),
+                'condition' => [
+                    'efpp_login_show_reset_link' => 'yes',
+                ],
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_reset_password_link_text',
+            [
+                'label' => __('Reset Password Link Text', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::TEXT,
+                'default' => __('Zapomniałeś hasła?', 'alex-efpp'),
+                'placeholder' => __('Zapomniałeś hasła?', 'alex-efpp'),
+                'condition' => [
+                    'efpp_login_show_reset_link' => 'yes',
+                ],
+            ]
+        );
+
+        $widget->end_controls_section();
+
+        // Style Section - Remember Me Checkbox
+        $widget->start_controls_section(
+            'section_efpp_login_remember_style',
+            [
+                'label' => __('Remember Me Checkbox', 'alex-efpp'),
+                'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+                'condition' => [
+                    'efpp_login_remember' => 'yes',
+                ],
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_remember_checkbox_color',
+            [
+                'label' => __('Checkbox Color', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-remember-me-checkbox' => 'accent-color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $widget->add_group_control(
+            \Elementor\Group_Control_Typography::get_type(),
+            [
+                'name' => 'efpp_remember_text_typography',
+                'label' => __('Text Typography', 'alex-efpp'),
+                'selector' => '{{WRAPPER}} .efpp-remember-me-checkbox + span',
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_remember_text_color',
+            [
+                'label' => __('Text Color', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-remember-me-checkbox + span' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $widget->add_responsive_control(
+            'efpp_remember_spacing',
+            [
+                'label' => __('Spacing', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => ['px', 'em', 'rem'],
+                'range' => [
+                    'px' => [
+                        'min' => 0,
+                        'max' => 50,
+                    ],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .elementor-field-group-efpp-remember-me' => 'margin-bottom: {{SIZE}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $widget->add_responsive_control(
+            'efpp_remember_alignment',
+            [
+                'label' => __('Alignment', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::CHOOSE,
+                'options' => [
+                    'left' => [
+                        'title' => __('Left', 'alex-efpp'),
+                        'icon' => 'eicon-text-align-left',
+                    ],
+                    'center' => [
+                        'title' => __('Center', 'alex-efpp'),
+                        'icon' => 'eicon-text-align-center',
+                    ],
+                    'right' => [
+                        'title' => __('Right', 'alex-efpp'),
+                        'icon' => 'eicon-text-align-right',
+                    ],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .elementor-field-group-efpp-remember-me' => 'text-align: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $widget->end_controls_section();
+
+        // Style Section - Reset Password Link
+        $widget->start_controls_section(
+            'section_efpp_login_reset_link_style',
+            [
+                'label' => __('Reset Password Link', 'alex-efpp'),
+                'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+                'condition' => [
+                    'efpp_login_show_reset_link' => 'yes',
+                ],
+            ]
+        );
+
+        $widget->add_group_control(
+            \Elementor\Group_Control_Typography::get_type(),
+            [
+                'name' => 'efpp_reset_link_typography',
+                'label' => __('Typography', 'alex-efpp'),
+                'selector' => '{{WRAPPER}} .efpp-switch-to-reset-link',
+            ]
+        );
+
+        $widget->start_controls_tabs('efpp_reset_link_tabs');
+
+        $widget->start_controls_tab(
+            'efpp_reset_link_normal',
+            [
+                'label' => __('Normal', 'alex-efpp'),
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_reset_link_color',
+            [
+                'label' => __('Color', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-switch-to-reset-link' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $widget->end_controls_tab();
+
+        $widget->start_controls_tab(
+            'efpp_reset_link_hover',
+            [
+                'label' => __('Hover', 'alex-efpp'),
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_reset_link_hover_color',
+            [
+                'label' => __('Color', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-switch-to-reset-link:hover' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $widget->end_controls_tab();
+
+        $widget->end_controls_tabs();
+
+        $widget->add_responsive_control(
+            'efpp_reset_link_spacing',
+            [
+                'label' => __('Spacing', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => ['px', 'em', 'rem'],
+                'range' => [
+                    'px' => [
+                        'min' => 0,
+                        'max' => 50,
+                    ],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-switch-to-reset-link' => 'margin-top: {{SIZE}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $widget->add_responsive_control(
+            'efpp_reset_link_alignment',
+            [
+                'label' => __('Alignment', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::CHOOSE,
+                'options' => [
+                    'left' => [
+                        'title' => __('Left', 'alex-efpp'),
+                        'icon' => 'eicon-text-align-left',
+                    ],
+                    'center' => [
+                        'title' => __('Center', 'alex-efpp'),
+                        'icon' => 'eicon-text-align-center',
+                    ],
+                    'right' => [
+                        'title' => __('Right', 'alex-efpp'),
+                        'icon' => 'eicon-text-align-right',
+                    ],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-switch-to-reset-link' => 'text-align: {{VALUE}};',
+                ],
             ]
         );
 
@@ -176,8 +427,20 @@ class EFPP_Form_Action_Login extends Action_Base {
             return;
         }
 
-        // Zaloguj użytkownika
-        $remember = !empty($settings['efpp_login_remember']);
+        // Sprawdź czy użytkownik zaznaczył "Zapamiętaj mnie"
+        $remember = false;
+        
+        // Najpierw sprawdź wartość z checkboxa w formularzu
+        if (isset($fields['efpp_remember_me'])) {
+            $remember_field = $fields['efpp_remember_me'];
+            $remember_value = $remember_field['value'] ?? $remember_field['raw_value'] ?? '';
+            $remember = !empty($remember_value) && ($remember_value === '1' || $remember_value === 1 || $remember_value === true);
+        }
+        
+        // Jeśli checkbox nie istnieje, użyj wartości z ustawień (backward compatibility)
+        if (!isset($fields['efpp_remember_me'])) {
+            $remember = !empty($settings['efpp_login_remember']);
+        }
         
         wp_clear_auth_cookie();
         wp_set_current_user($user->ID);
