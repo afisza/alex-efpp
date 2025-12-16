@@ -94,7 +94,7 @@ class EFPP_Form_Action_Login extends Action_Base {
         );
 
         $widget->add_control(
-            'efpp_reset_password_form_id',
+            'efpp_login_reset_password_form_id',
             [
                 'label' => __('Reset Password Form ID', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
