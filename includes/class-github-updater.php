@@ -92,19 +92,7 @@ class Alex_EFPP_GitHub_Updater {
         // AJAX endpoint do wymuszenia sprawdzenia aktualizacji
         add_action('wp_ajax_alex_efpp_check_update', [$this, 'ajax_check_update']);
         
-        // Debug: sprawdź czy wszystko jest poprawnie skonfigurowane
-        // Wyświetlaj tylko w środowisku deweloperskim (localhost lub gdy WP_DEBUG_LOG jest włączony)
-        if (defined('WP_DEBUG') && WP_DEBUG && (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG)) {
-            // Dodatkowo sprawdź czy nie jesteśmy na produkcji (opcjonalnie)
-            $is_local = strpos(home_url(), 'localhost') !== false || 
-                       strpos(home_url(), '127.0.0.1') !== false ||
-                       strpos(home_url(), '.local') !== false ||
-                       strpos(home_url(), '.test') !== false;
-            
-            if ($is_local) {
-                add_action('admin_notices', [$this, 'debug_notice']);
-            }
-        }
+        // Debug logging only (no admin notices)
     }
     
     /**
