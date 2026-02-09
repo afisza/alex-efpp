@@ -319,6 +319,10 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $allowed_roles = $settings['alex_efpp_allowed_role'] ?? ['administrator'];
         if (!is_array($allowed_roles)) $allowed_roles = [$allowed_roles];
 
+        //$valid_roles = array_merge(array_keys(get_editable_roles()), ['guest']);
+        if (!function_exists('get_editable_roles')) {
+            require_once ABSPATH . 'wp-admin/includes/user.php';
+        }
         $valid_roles = array_merge(array_keys(get_editable_roles()), ['guest']);
 
         foreach ($allowed_roles as $role) {
