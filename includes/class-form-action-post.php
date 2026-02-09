@@ -307,6 +307,68 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         return $id;
     }
 
+    /**
+     * Normalizes allowed roles from form settings (string, array of strings, or array of objects).
+     *
+     * @param mixed $raw_value Value from $settings['alex_efpp_allowed_role'].
+     * @return string[] Array of role slugs.
+     */
+    private function normalize_allowed_roles($raw_value) {
+        $slugs = [];
+        if (is_string($raw_value) && $raw_value !== '') {
+            $slugs = [$raw_value];
+        } elseif (is_array($raw_value)) {
+            foreach ($raw_value as $item) {
+                if (is_object($item)) {
+                    $slug = $item->value ?? $item->id ?? null;
+                    if (is_string($slug) && $slug !== '') {
+                        $slugs[] = $slug;
+                    }
+                } elseif (is_string($item) && $item !== '') {
+                    $slugs[] = $item;
+                }
+            }
+        }
+        return array_values(array_unique($slugs));
+    }
+
+    /**
+     * Checks if the current user is allowed to submit based on allowed roles.
+     *
+     * @param string[] $allowed_roles Normalized list of role slugs.
+     * @param \ElementorPro\Modules\Forms\Classes\Ajax_Handler $ajax_handler
+     * @return bool True if allowed, false otherwise (and error message is set).
+     */
+    private function user_passes_role_check($allowed_roles, $ajax_handler) {
+        if (!function_exists('get_editable_roles')) {
+            require_once ABSPATH . 'wp-admin/includes/user.php';
+        }
+        $valid_roles = array_merge(array_keys(get_editable_roles()), ['guest']);
+        $allowed_roles = array_values(array_intersect($allowed_roles, $valid_roles));
+        if (empty($allowed_roles)) {
+            $allowed_roles = ['administrator'];
+        }
+
+        if (!is_user_logged_in()) {
+            if (!in_array('guest', $allowed_roles, true)) {
+                $ajax_handler->add_error_message(__('You must be logged in to submit.', 'alex-efpp'));
+                return false;
+            }
+            return true;
+        }
+
+        $user = wp_get_current_user();
+        if (!array_intersect($user->roles, $allowed_roles)) {
+            $role_list = implode(', ', $allowed_roles);
+            $ajax_handler->add_error_message(sprintf(
+                __('You do not have permission to submit. Allowed roles: %s', 'alex-efpp'),
+                $role_list
+            ));
+            return false;
+        }
+        return true;
+    }
+
     public function run($record, $ajax_handler) {
         $manager = \Elementor\Plugin::$instance->dynamic_tags;
 
@@ -315,38 +377,9 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
 
         $field_map = $settings['efpp_post_field_map'] ?? [];
 
-        // --- Role check ---
-        $allowed_roles = $settings['alex_efpp_allowed_role'] ?? ['administrator'];
-        if (!is_array($allowed_roles)) $allowed_roles = [$allowed_roles];
-
-        //$valid_roles = array_merge(array_keys(get_editable_roles()), ['guest']);
-        if (!function_exists('get_editable_roles')) {
-            require_once ABSPATH . 'wp-admin/includes/user.php';
-        }
-        $valid_roles = array_merge(array_keys(get_editable_roles()), ['guest']);
-
-        foreach ($allowed_roles as $role) {
-            if (!in_array($role, $valid_roles)) {
-                $ajax_handler->add_error_message(__('Invalid role configuration.', 'alex-efpp'));
-                return;
-            }
-        }
-
-        if (!is_user_logged_in()) {
-            if (!in_array('guest', $allowed_roles)) {
-                $ajax_handler->add_error_message(__('You must be logged in to submit.', 'alex-efpp'));
-                return;
-            }
-        } else {
-            $user = wp_get_current_user();
-            if (!array_intersect($user->roles, $allowed_roles)) {
-                $role_list = implode(', ', $allowed_roles);
-                $ajax_handler->add_error_message(sprintf(
-                    __('You do not have permission to submit. Allowed roles: %s', 'alex-efpp'),
-                    $role_list
-                ));
-                return;
-            }
+        $allowed_roles = $this->normalize_allowed_roles($settings['alex_efpp_allowed_role'] ?? []);
+        if (!$this->user_passes_role_check($allowed_roles, $ajax_handler)) {
+            return;
         }
 
         $post_data = [
