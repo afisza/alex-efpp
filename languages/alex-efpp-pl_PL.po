@@ -21,7 +21,7 @@ msgid "Remember me"
 msgstr "Zapamiętaj mnie"
 
 #: alex-efpp.php
-msgid "Forgot password?"
+msgid "Lost password?"
 msgstr "Zapomniałeś hasła?"
 
 #: alex-efpp.php
@@ -141,8 +141,20 @@ msgid "Scroll to form after switch"
 msgstr "Przewiń do formularza po przełączeniu"
 
 #: includes/form-action-login.php
-msgid "When \"Forgot password?\" is clicked, scroll to the reset form. Turn off to keep current scroll position."
-msgstr "Po kliknięciu „Zapomniałeś hasła?” przewija do formularza resetowania. Wyłącz, aby zachować bieżącą pozycję przewijania."
+msgid "When the reset link is clicked, scroll to the reset form. Turn off to keep current scroll position."
+msgstr "Po kliknięciu linku resetowania przewija do formularza. Wyłącz, aby zachować bieżącą pozycję przewijania."
+
+#: includes/form-action-login.php
+msgid "Link position"
+msgstr "Pozycja linku"
+
+#: includes/form-action-login.php
+msgid "Below submit button"
+msgstr "Poniżej przycisku wysyłania"
+
+#: includes/form-action-login.php
+msgid "Above submit button"
+msgstr "Powyżej przycisku wysyłania"
 
 #: includes/form-action-login.php
 msgid "Remember Me Checkbox"

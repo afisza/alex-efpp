@@ -26,7 +26,7 @@ if (!class_exists('EFPP_Reset_Password_Link_Field')) {
                     'name' => 'efpp_reset_link_text',
                     'label' => __('Link Text', 'alex-efpp'),
                     'type' => \Elementor\Controls_Manager::TEXT,
-                    'default' => __('Forgot password?', 'alex-efpp'),
+                    'default' => __('Lost password?', 'alex-efpp'),
                     'condition' => [
                         'field_type' => $this->get_type(),
                     ],
@@ -54,7 +54,7 @@ if (!class_exists('EFPP_Reset_Password_Link_Field')) {
                 return;
             }
 
-            $link_text = !empty($item['efpp_reset_link_text']) ? $item['efpp_reset_link_text'] : ($settings['efpp_reset_password_link_text'] ?? __('Forgot password?', 'alex-efpp'));
+            $link_text = !empty($item['efpp_reset_link_text']) ? $item['efpp_reset_link_text'] : ($settings['efpp_reset_password_link_text'] ?? __('Lost password?', 'alex-efpp'));
 
             ?>
             <div class="elementor-field-type-<?php echo esc_attr($this->get_type()); ?> elementor-column elementor-col-100 elementor-field-group-<?php echo esc_attr($this->get_type()); ?> efpp-reset-link-wrapper">
@@ -80,7 +80,7 @@ if (!class_exists('EFPP_Reset_Password_Link_Field')) {
         }
 
         public function content_template_script(): void {
-            $text = __('Forgot password?', 'alex-efpp');
+            $text = __('Lost password?', 'alex-efpp');
             ?>
             <script>
                 jQuery(document).ready(function() {

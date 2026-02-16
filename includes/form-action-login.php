@@ -111,8 +111,24 @@ class EFPP_Form_Action_Login extends Action_Base {
             [
                 'label' => __('Reset Password Link Text', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
-                'default' => __('Forgot password?', 'alex-efpp'),
-                'placeholder' => __('Forgot password?', 'alex-efpp'),
+                'default' => __('Lost password?', 'alex-efpp'),
+                'placeholder' => __('Lost password?', 'alex-efpp'),
+                'condition' => [
+                    'efpp_login_show_reset_link' => 'yes',
+                ],
+            ]
+        );
+
+        $widget->add_control(
+            'efpp_reset_link_position',
+            [
+                'label' => __('Link position', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'default' => 'below',
+                'options' => [
+                    'below' => __('Below submit button', 'alex-efpp'),
+                    'above' => __('Above submit button', 'alex-efpp'),
+                ],
                 'condition' => [
                     'efpp_login_show_reset_link' => 'yes',
                 ],
@@ -127,7 +143,7 @@ class EFPP_Form_Action_Login extends Action_Base {
                 'label_on' => __('Yes', 'alex-efpp'),
                 'label_off' => __('No', 'alex-efpp'),
                 'default' => 'yes',
-                'description' => __('When "Forgot password?" is clicked, scroll to the reset form. Turn off to keep current scroll position.', 'alex-efpp'),
+                'description' => __('When the reset link is clicked, scroll to the reset form. Turn off to keep current scroll position.', 'alex-efpp'),
                 'condition' => [
                     'efpp_login_show_reset_link' => 'yes',
                 ],

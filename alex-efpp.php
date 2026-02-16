@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT. Includes user registration, login, logout, and password reset actions.
-Version: 2.0.3
+Version: 2.0.4
 Author: Alex Shram
 Plugin URI: https://github.com/afisza/alex-efpp
 */
@@ -24,7 +24,7 @@ class Alex_EFPP {
     public function __construct() {
         // Pobierz wersję z nagłówka pluginu
         $plugin_data = get_file_data(__FILE__, ['Version' => 'Version'], 'plugin');
-        $this->version = $plugin_data['Version'] ?? '2.0.3';
+        $this->version = $plugin_data['Version'] ?? '2.0.4';
         add_action('plugins_loaded', [$this, 'load_textdomain']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_action']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_user_action']);
@@ -263,12 +263,13 @@ class Alex_EFPP {
             if ($show_reset_link) {
                 $login_form_id = $settings['efpp_login_form_id'] ?? '';
                 $reset_form_id = $settings['efpp_login_reset_password_form_id'] ?? '';
-                $link_text = $settings['efpp_reset_password_link_text'] ?? __('Forgot password?', 'alex-efpp');
-                
+                $link_text = $settings['efpp_reset_password_link_text'] ?? __('Lost password?', 'alex-efpp');
+                $link_position = isset($settings['efpp_reset_link_position']) ? $settings['efpp_reset_link_position'] : 'below';
                 if (!empty($login_form_id) && !empty($reset_form_id)) {
                     $widget->add_render_attribute('_wrapper', 'data-efpp-login-form-id', esc_attr($login_form_id));
                     $widget->add_render_attribute('_wrapper', 'data-efpp-reset-form-id', esc_attr($reset_form_id));
                     $widget->add_render_attribute('_wrapper', 'data-efpp-reset-link-text', esc_attr($link_text));
+                    $widget->add_render_attribute('_wrapper', 'data-efpp-reset-link-position', esc_attr($link_position));
                     $widget->add_render_attribute('_wrapper', 'data-efpp-show-reset-link', '1');
                     $scroll = !empty($settings['efpp_login_scroll_after_switch']) && $settings['efpp_login_scroll_after_switch'] === 'yes' ? '1' : '0';
                     $widget->add_render_attribute('_wrapper', 'data-efpp-scroll-after-switch', $scroll);

@@ -75,7 +75,8 @@
             
             var loginFormId = $widget.data('efpp-login-form-id');
             var resetFormId = $widget.data('efpp-reset-form-id');
-            var linkText = $widget.data('efpp-reset-link-text') || 'Zapomniałeś hasła?';
+            var linkText = $widget.data('efpp-reset-link-text') || 'Lost password?';
+            var linkPosition = $widget.attr('data-efpp-reset-link-position') || 'below';
             
             if (!loginFormId || !resetFormId) {
                 return;
@@ -98,8 +99,11 @@
             // Wrapper for alignment (left/center/right)
             var $wrapper = $('<div>', { 'class': 'efpp-reset-link-wrapper' }).append($link);
 
-            // Insert after submit button
-            $submitContainer.after($wrapper);
+            if (linkPosition === 'above') {
+                $submitContainer.before($wrapper);
+            } else {
+                $submitContainer.after($wrapper);
+            }
             if (window.location.search.indexOf('efpp_debug=1') !== -1) {
                 console.log('EFPP Form Switch: Added reset password link to login form');
             }
