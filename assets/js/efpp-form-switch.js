@@ -68,27 +68,37 @@
                 return;
             }
             
-            // Check if link already exists
-            if ($form.find('.efpp-switch-to-reset-link').length > 0) {
-                return;
-            }
-            
             var loginFormId = $widget.data('efpp-login-form-id');
             var resetFormId = $widget.data('efpp-reset-form-id');
-            var linkText = $widget.data('efpp-reset-link-text') || 'Lost password?';
-            var linkPosition = $widget.attr('data-efpp-reset-link-position') || 'below';
+            var linkPosition = ($widget.attr('data-efpp-reset-link-position') || $widget.data('efpp-reset-link-position') || 'below').toString();
             
             if (!loginFormId || !resetFormId) {
                 return;
             }
             
-            // Find submit button container
             var $submitContainer = $form.find('.e-form__buttons');
             if ($submitContainer.length === 0) {
                 return;
             }
             
-            // Create link
+            var $existingLink = $form.find('.efpp-switch-to-reset-link');
+            var $wrapper = $existingLink.length ? $existingLink.closest('.efpp-reset-link-wrapper').length ? $existingLink.closest('.efpp-reset-link-wrapper') : $existingLink.parent() : null;
+            
+            if ($existingLink.length > 0 && $wrapper && $wrapper.length > 0) {
+                // Link already exists (e.g. native field): apply position and text from widget settings
+                var linkText = $widget.attr('data-efpp-reset-link-text') || $widget.data('efpp-reset-link-text');
+                if (linkText !== undefined && linkText !== '') {
+                    $existingLink.text(linkText);
+                }
+                if (linkPosition === 'above') {
+                    $submitContainer.before($wrapper);
+                } else {
+                    $submitContainer.after($wrapper);
+                }
+                return;
+            }
+            
+            var linkText = $widget.attr('data-efpp-reset-link-text') || $widget.data('efpp-reset-link-text') || 'Lost password?';
             var $link = $('<a>', {
                 'href': '#',
                 'class': 'efpp-switch-to-reset-link',
@@ -96,13 +106,12 @@
                 'data-reset-form-id': resetFormId,
                 'text': linkText
             });
-            // Wrapper for alignment (left/center/right)
-            var $wrapper = $('<div>', { 'class': 'efpp-reset-link-wrapper' }).append($link);
+            var $newWrapper = $('<div>', { 'class': 'efpp-reset-link-wrapper' }).append($link);
 
             if (linkPosition === 'above') {
-                $submitContainer.before($wrapper);
+                $submitContainer.before($newWrapper);
             } else {
-                $submitContainer.after($wrapper);
+                $submitContainer.after($newWrapper);
             }
             if (window.location.search.indexOf('efpp_debug=1') !== -1) {
                 console.log('EFPP Form Switch: Added reset password link to login form');

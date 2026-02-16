@@ -54,7 +54,10 @@ if (!class_exists('EFPP_Reset_Password_Link_Field')) {
                 return;
             }
 
-            $link_text = !empty($item['efpp_reset_link_text']) ? $item['efpp_reset_link_text'] : ($settings['efpp_reset_password_link_text'] ?? __('Lost password?', 'alex-efpp'));
+            // Form-level "Reset Password Link Text" overrides field-level when set
+            $link_text = isset($settings['efpp_reset_password_link_text']) && (string) $settings['efpp_reset_password_link_text'] !== ''
+                ? $settings['efpp_reset_password_link_text']
+                : (!empty($item['efpp_reset_link_text']) ? $item['efpp_reset_link_text'] : __('Lost password?', 'alex-efpp'));
 
             ?>
             <div class="elementor-field-type-<?php echo esc_attr($this->get_type()); ?> elementor-column elementor-col-100 elementor-field-group-<?php echo esc_attr($this->get_type()); ?> efpp-reset-link-wrapper">
