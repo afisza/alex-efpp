@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT. Includes user registration, login, logout, and password reset actions.
-Version: 2.0.2
+Version: 2.0.3
 Author: Alex Shram
 Plugin URI: https://github.com/afisza/alex-efpp
 */
@@ -24,7 +24,7 @@ class Alex_EFPP {
     public function __construct() {
         // Pobierz wersję z nagłówka pluginu
         $plugin_data = get_file_data(__FILE__, ['Version' => 'Version'], 'plugin');
-        $this->version = $plugin_data['Version'] ?? '2.0.2';
+        $this->version = $plugin_data['Version'] ?? '2.0.3';
         add_action('plugins_loaded', [$this, 'load_textdomain']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_action']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_user_action']);
@@ -270,6 +270,8 @@ class Alex_EFPP {
                     $widget->add_render_attribute('_wrapper', 'data-efpp-reset-form-id', esc_attr($reset_form_id));
                     $widget->add_render_attribute('_wrapper', 'data-efpp-reset-link-text', esc_attr($link_text));
                     $widget->add_render_attribute('_wrapper', 'data-efpp-show-reset-link', '1');
+                    $scroll = !empty($settings['efpp_login_scroll_after_switch']) && $settings['efpp_login_scroll_after_switch'] === 'yes' ? '1' : '0';
+                    $widget->add_render_attribute('_wrapper', 'data-efpp-scroll-after-switch', $scroll);
                 }
             }
         }
@@ -296,7 +298,8 @@ class Alex_EFPP {
                     $widget->add_render_attribute('_wrapper', 'data-efpp-login-form-id', esc_attr($login_form_id));
                     $widget->add_render_attribute('_wrapper', 'data-efpp-login-link-text', esc_attr($link_text));
                     $widget->add_render_attribute('_wrapper', 'data-efpp-show-login-link', '1');
-                    
+                    $scroll = !empty($settings['efpp_reset_scroll_after_switch']) && $settings['efpp_reset_scroll_after_switch'] === 'yes' ? '1' : '0';
+                    $widget->add_render_attribute('_wrapper', 'data-efpp-scroll-after-switch', $scroll);
                     // Always add reset_form_id - use form_id/form_name if efpp_reset_password_form_id is empty
                     if (!empty($reset_form_id)) {
                         $widget->add_render_attribute('_wrapper', 'data-efpp-reset-form-id', esc_attr($reset_form_id));

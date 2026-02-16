@@ -108,6 +108,21 @@ class EFPP_Form_Action_Reset_Password extends Action_Base {
             ]
         );
 
+        $widget->add_control(
+            'efpp_reset_scroll_after_switch',
+            [
+                'label' => __('Scroll to form after switch', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Yes', 'alex-efpp'),
+                'label_off' => __('No', 'alex-efpp'),
+                'default' => 'yes',
+                'description' => __('When "Back to login" is clicked, scroll to the login form. Turn off to keep current scroll position.', 'alex-efpp'),
+                'condition' => [
+                    'efpp_reset_show_login_link' => 'yes',
+                ],
+            ]
+        );
+
         $widget->end_controls_section();
 
         // Style Section - Login Link

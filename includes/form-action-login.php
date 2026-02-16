@@ -119,6 +119,21 @@ class EFPP_Form_Action_Login extends Action_Base {
             ]
         );
 
+        $widget->add_control(
+            'efpp_login_scroll_after_switch',
+            [
+                'label' => __('Scroll to form after switch', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Yes', 'alex-efpp'),
+                'label_off' => __('No', 'alex-efpp'),
+                'default' => 'yes',
+                'description' => __('When "Forgot password?" is clicked, scroll to the reset form. Turn off to keep current scroll position.', 'alex-efpp'),
+                'condition' => [
+                    'efpp_login_show_reset_link' => 'yes',
+                ],
+            ]
+        );
+
         $widget->end_controls_section();
 
         // Style Section - Remember Me Checkbox

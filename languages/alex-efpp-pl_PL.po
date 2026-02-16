@@ -137,6 +137,14 @@ msgid "Reset Password Link Text"
 msgstr "Tekst linku Resetowanie hasła"
 
 #: includes/form-action-login.php
+msgid "Scroll to form after switch"
+msgstr "Przewiń do formularza po przełączeniu"
+
+#: includes/form-action-login.php
+msgid "When \"Forgot password?\" is clicked, scroll to the reset form. Turn off to keep current scroll position."
+msgstr "Po kliknięciu „Zapomniałeś hasła?” przewija do formularza resetowania. Wyłącz, aby zachować bieżącą pozycję przewijania."
+
+#: includes/form-action-login.php
 msgid "Remember Me Checkbox"
 msgstr "Checkbox Zapamiętaj mnie"
 
@@ -431,6 +439,10 @@ msgstr "ID formularza logowania (do pokazania). Wpisz ID z ustawień formularza 
 #: includes/form-action-reset-password.php
 msgid "This reset password form ID (used for hiding). If empty, the ID from Elementor form settings (Form ID) will be used. Enter the ID from Elementor form settings (Form ID) or this form's name (Form Name)."
 msgstr "ID tego formularza resetowania hasła (do ukrywania). Jeśli puste, zostanie użyte ID z ustawień formularza Elementor (Form ID). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę tego formularza (Form Name)."
+
+#: includes/form-action-reset-password.php
+msgid "When \"Back to login\" is clicked, scroll to the login form. Turn off to keep current scroll position."
+msgstr "Po kliknięciu „Wróć do logowania” przewija do formularza logowania. Wyłącz, aby zachować bieżącą pozycję przewijania."
 
 #: includes/form-action-reset-password.php
 msgid "Login Link Text"

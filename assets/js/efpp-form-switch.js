@@ -447,12 +447,16 @@
                     }
                 }, 100);
                 
-                // Scroll to reset form if needed (after fade in completes)
-                setTimeout(function() {
-                    $('html, body').animate({
-                        scrollTop: $resetForm.offset().top - 100
+                // Scroll to reset form if enabled in settings (after fade in completes)
+                var $sourceWidget = $link.closest('.elementor-widget-form');
+                var scrollAfterSwitch = $sourceWidget.length && ($sourceWidget.attr('data-efpp-scroll-after-switch') === '1' || $sourceWidget.data('efpp-scroll-after-switch') === 1);
+                if (scrollAfterSwitch) {
+                    setTimeout(function() {
+                        $('html, body').animate({
+                            scrollTop: $resetForm.offset().top - 100
+                        }, fadeDuration);
                     }, fadeDuration);
-                }, fadeDuration);
+                }
                 
                 // Re-run initFormSwitching after a delay to ensure link is added
                 setTimeout(function() {
@@ -485,10 +489,14 @@
                         });
                         $loginForm[0].style.setProperty('display', 'block', 'important');
                         
-                        // Scroll to login form if needed
-                        $('html, body').animate({
-                            scrollTop: $loginForm.offset().top - 100
-                        }, fadeDuration);
+                        // Scroll to login form if enabled in settings
+                        var $sourceWidget = $link.closest('.elementor-widget-form');
+                        var scrollAfterSwitch = $sourceWidget.length && ($sourceWidget.attr('data-efpp-scroll-after-switch') === '1' || $sourceWidget.data('efpp-scroll-after-switch') === 1);
+                        if (scrollAfterSwitch) {
+                            $('html, body').animate({
+                                scrollTop: $loginForm.offset().top - 100
+                            }, fadeDuration);
+                        }
                     });
                 });
                 
