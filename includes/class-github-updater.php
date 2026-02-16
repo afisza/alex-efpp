@@ -491,7 +491,7 @@ class Alex_EFPP_GitHub_Updater {
             '<a href="%s" class="alex-efpp-check-update" data-plugin="%s">%s</a>',
             esc_url($check_url),
             esc_attr($this->plugin_slug),
-            esc_html__('Sprawdź aktualizacje', 'alex-efpp')
+            esc_html__('Check for updates', 'alex-efpp')
         );
         
         return $links;
@@ -504,7 +504,7 @@ class Alex_EFPP_GitHub_Updater {
         check_ajax_referer('alex_efpp_check_update', 'nonce');
         
         if (!current_user_can('update_plugins')) {
-            wp_send_json_error(['message' => __('Brak uprawnień do sprawdzania aktualizacji.', 'alex-efpp')]);
+            wp_send_json_error(['message' => __('You do not have permission to check for updates.', 'alex-efpp')]);
         }
         
         // Wyczyść cache
@@ -516,7 +516,7 @@ class Alex_EFPP_GitHub_Updater {
         
         if (!$latest_version) {
             wp_send_json_error([
-                'message' => __('Nie udało się sprawdzić aktualizacji. Sprawdź konfigurację repozytorium GitHub.', 'alex-efpp')
+                'message' => __('Failed to check for updates. Verify the GitHub repository configuration.', 'alex-efpp')
             ]);
         }
         
@@ -525,7 +525,7 @@ class Alex_EFPP_GitHub_Updater {
         if ($has_update) {
             wp_send_json_success([
                 'message' => sprintf(
-                    __('Dostępna jest nowa wersja: %s (aktualna: %s). Odśwież stronę, aby zobaczyć przycisk aktualizacji.', 'alex-efpp'),
+                    __('A new version is available: %s (current: %s). Refresh the page to see the update button.', 'alex-efpp'),
                     $latest_version,
                     $this->current_version
                 ),
@@ -535,7 +535,7 @@ class Alex_EFPP_GitHub_Updater {
         } else {
             wp_send_json_success([
                 'message' => sprintf(
-                    __('Wtyczka jest aktualna. Aktualna wersja: %s', 'alex-efpp'),
+                    __('The plugin is up to date. Current version: %s', 'alex-efpp'),
                     $this->current_version
                 ),
                 'latest_version' => $latest_version,

@@ -25,7 +25,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
         $widget->start_controls_section(
             'section_alex_efpp',
             [
-                'label' =>  __('EFPP – Publish Settings'),
+                'label' => __('EFPP – Publish Settings', 'alex-efpp'),
                 'condition' => [
                     'submit_actions' => $this->get_name(),
                 ],
@@ -207,14 +207,14 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     ],
                     [
                         'name' => 'form_field_id',
-                        'label' => __('Form Field ID'),
+                        'label' => __('Form Field ID', 'alex-efpp'),
                         'type' => \Elementor\Controls_Manager::TEXT,
                         'placeholder' => 'title, price, custom_field_1',
                         'ai' => [ 'active' => false ],
                     ],
                     [
                         'name' => 'meta_key',
-                        'label' => __('Meta Key (for custom field)'),
+                        'label' => __('Meta Key (for custom field)', 'alex-efpp'),
                         'type' => \Elementor\Controls_Manager::TEXT,
                         'placeholder' => '_custom_price',
                         'condition' => [
@@ -234,7 +234,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     ],
                     [
                         'name' => 'taxonomy_slug',
-                        'label' => __('Taxonomy Slug'),
+                        'label' => __('Taxonomy Slug', 'alex-efpp'),
                         'type' => \Elementor\Controls_Manager::TEXT,
                         'placeholder' => 'e.g. category',
                         'condition' => [ 'field_type' => 'taxonomy' ],
@@ -243,7 +243,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
 
                     [
                         'name' => 'gallery_limit',
-                        'label' => __('Max images count'),
+                        'label' => __('Max images count', 'alex-efpp'),
                         'type' => \Elementor\Controls_Manager::NUMBER,
                         'default' => 12,
                         'condition' => [
@@ -253,7 +253,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     ],
                     [
                         'name' => 'gallery_max_size',
-                        'label' => __('Max file size (MB)'),
+                        'label' => __('Max file size (MB)', 'alex-efpp'),
                         'type' => \Elementor\Controls_Manager::NUMBER,
                         'default' => 5,
                         'condition' => [
@@ -263,7 +263,7 @@ class Alex_EFPP_Form_Action_Post extends Action_Base {
                     ],
                     [
                         'name' => 'gallery_allowed_types',
-                        'label' => __('Allowed file types (comma separated)'),
+                        'label' => __('Allowed file types (comma separated)', 'alex-efpp'),
                         'type' => \Elementor\Controls_Manager::TEXT,
                         'placeholder' => 'jpg,png,webp',
                         'condition' => [

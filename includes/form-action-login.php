@@ -11,14 +11,14 @@ class EFPP_Form_Action_Login extends Action_Base {
     }
 
     public function get_label() {
-        return 'EFPP – Login User';
+        return __('EFPP – Login User', 'alex-efpp');
     }
 
     public function register_settings_section($widget) {
         $widget->start_controls_section(
             'section_efpp_login',
             [
-                'label' => 'EFPP – Login User',
+                'label' => __('EFPP – Login User', 'alex-efpp'),
                 'condition' => [
                     'submit_actions' => $this->get_name(),
                 ],
@@ -28,20 +28,20 @@ class EFPP_Form_Action_Login extends Action_Base {
         $widget->add_control(
             'efpp_login_identifier',
             [
-                'label' => 'Login/Email (field ID)',
+                'label' => __('Login/Email (field ID)', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
-                'placeholder' => 'np. email lub login',
-                'description' => 'ID pola formularza zawierającego login lub email użytkownika',
+                'placeholder' => __('e.g. email or login', 'alex-efpp'),
+                'description' => __('Form field ID containing the user login or email.', 'alex-efpp'),
             ]
         );
 
         $widget->add_control(
             'efpp_login_password',
             [
-                'label' => 'Password (field ID)',
+                'label' => __('Password (field ID)', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
-                'placeholder' => 'np. password',
-                'description' => 'ID pola formularza zawierającego hasło',
+                'placeholder' => __('e.g. password', 'alex-efpp'),
+                'description' => __('Form field ID containing the password.', 'alex-efpp'),
             ]
         );
 
@@ -53,17 +53,17 @@ class EFPP_Form_Action_Login extends Action_Base {
                 'label_on' => __('Yes', 'alex-efpp'),
                 'label_off' => __('No', 'alex-efpp'),
                 'default' => 'yes',
-                'description' => __('Pokazuje checkbox "Zapamiętaj mnie" przed przyciskiem submit. Użytkownik może zaznaczyć, czy chce być zapamiętany.', 'alex-efpp'),
+                'description' => __('Shows the "Remember me" checkbox before the submit button. The user can choose whether to stay logged in.', 'alex-efpp'),
             ]
         );
 
         $widget->add_control(
             'efpp_login_redirect',
             [
-                'label' => 'Redirect to URL',
+                'label' => __('Redirect to URL', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
                 'placeholder' => 'https://example.com/dashboard/',
-                'description' => 'URL do przekierowania po zalogowaniu. Zostaw puste, aby pozostać na tej samej stronie.',
+                'description' => __('URL to redirect to after login. Leave empty to stay on the same page.', 'alex-efpp'),
             ]
         );
 
@@ -76,7 +76,7 @@ class EFPP_Form_Action_Login extends Action_Base {
                 'label_off' => __('No', 'alex-efpp'),
                 'default' => 'no',
                 'separator' => 'before',
-                'description' => __('Pokazuje link do formularza resetowania hasła. Po kliknięciu ukryje ten formularz i pokaże formularz resetowania.', 'alex-efpp'),
+                'description' => __('Shows a link to the password reset form. On click, this form is hidden and the reset form is shown.', 'alex-efpp'),
             ]
         );
 
@@ -85,8 +85,8 @@ class EFPP_Form_Action_Login extends Action_Base {
             [
                 'label' => __('Login Form ID', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
-                'placeholder' => 'np. login-form-123',
-                'description' => __('ID formularza logowania (używane do ukrywania). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name).', 'alex-efpp'),
+                'placeholder' => __('e.g. login-form-123', 'alex-efpp'),
+                'description' => __('Login form ID (used for hiding). Enter the ID from Elementor form settings (Form ID) or the form name (Form Name).', 'alex-efpp'),
                 'condition' => [
                     'efpp_login_show_reset_link' => 'yes',
                 ],
@@ -98,8 +98,8 @@ class EFPP_Form_Action_Login extends Action_Base {
             [
                 'label' => __('Reset Password Form ID', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
-                'placeholder' => 'np. reset-form-456',
-                'description' => __('ID formularza resetowania hasła (używane do pokazania). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name).', 'alex-efpp'),
+                'placeholder' => __('e.g. reset-form-456', 'alex-efpp'),
+                'description' => __('Reset password form ID (used for showing). Enter the ID from Elementor form settings (Form ID) or the form name (Form Name).', 'alex-efpp'),
                 'condition' => [
                     'efpp_login_show_reset_link' => 'yes',
                 ],
@@ -111,8 +111,8 @@ class EFPP_Form_Action_Login extends Action_Base {
             [
                 'label' => __('Reset Password Link Text', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
-                'default' => __('Zapomniałeś hasła?', 'alex-efpp'),
-                'placeholder' => __('Zapomniałeś hasła?', 'alex-efpp'),
+                'default' => __('Forgot password?', 'alex-efpp'),
+                'placeholder' => __('Forgot password?', 'alex-efpp'),
                 'condition' => [
                     'efpp_login_show_reset_link' => 'yes',
                 ],
@@ -165,6 +165,24 @@ class EFPP_Form_Action_Login extends Action_Base {
         );
 
         $widget->add_responsive_control(
+            'efpp_remember_font_size',
+            [
+                'label' => __('Font Size', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => ['px', 'em', 'rem'],
+                'range' => [
+                    'px' => [
+                        'min' => 10,
+                        'max' => 32,
+                    ],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-remember-me-checkbox + span' => 'font-size: {{SIZE}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $widget->add_responsive_control(
             'efpp_remember_spacing',
             [
                 'label' => __('Spacing', 'alex-efpp'),
@@ -185,7 +203,7 @@ class EFPP_Form_Action_Login extends Action_Base {
         $widget->add_responsive_control(
             'efpp_remember_alignment',
             [
-                'label' => __('Alignment', 'alex-efpp'),
+                'label' => __('Text Alignment', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::CHOOSE,
                 'options' => [
                     'left' => [
@@ -275,6 +293,24 @@ class EFPP_Form_Action_Login extends Action_Base {
         $widget->end_controls_tabs();
 
         $widget->add_responsive_control(
+            'efpp_reset_link_font_size',
+            [
+                'label' => __('Font Size', 'alex-efpp'),
+                'type' => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => ['px', 'em', 'rem'],
+                'range' => [
+                    'px' => [
+                        'min' => 10,
+                        'max' => 32,
+                    ],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .efpp-switch-to-reset-link' => 'font-size: {{SIZE}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $widget->add_responsive_control(
             'efpp_reset_link_spacing',
             [
                 'label' => __('Spacing', 'alex-efpp'),
@@ -287,7 +323,7 @@ class EFPP_Form_Action_Login extends Action_Base {
                     ],
                 ],
                 'selectors' => [
-                    '{{WRAPPER}} .efpp-switch-to-reset-link' => 'margin-top: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .efpp-reset-link-wrapper' => 'margin-top: {{SIZE}}{{UNIT}};',
                 ],
             ]
         );
@@ -295,7 +331,7 @@ class EFPP_Form_Action_Login extends Action_Base {
         $widget->add_responsive_control(
             'efpp_reset_link_alignment',
             [
-                'label' => __('Alignment', 'alex-efpp'),
+                'label' => __('Text Alignment', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::CHOOSE,
                 'options' => [
                     'left' => [
@@ -312,7 +348,7 @@ class EFPP_Form_Action_Login extends Action_Base {
                     ],
                 ],
                 'selectors' => [
-                    '{{WRAPPER}} .efpp-switch-to-reset-link' => 'text-align: {{VALUE}};',
+                    '{{WRAPPER}} .efpp-reset-link-wrapper' => 'text-align: {{VALUE}};',
                 ],
             ]
         );
@@ -321,7 +357,7 @@ class EFPP_Form_Action_Login extends Action_Base {
     }
 
     /**
-     * Wyciąga rzeczywiste ID pola z różnych formatów
+     * Extracts the actual field ID from various formats.
      */
     private function extract_field_id($field_setting, $available_fields = []) {
         if (empty($field_setting)) {
@@ -367,16 +403,15 @@ class EFPP_Form_Action_Login extends Action_Base {
         $password_field = $this->extract_field_id($password_field_raw, $available_fields);
 
         if (empty($identifier_field_raw)) {
-            $ajax_handler->add_error_message('Pole login/email nie jest skonfigurowane w ustawieniach formularza.');
+            $ajax_handler->add_error_message(__('The login/email field is not configured in the form settings.', 'alex-efpp'));
             return;
         }
 
         if (empty($password_field_raw)) {
-            $ajax_handler->add_error_message('Pole hasła nie jest skonfigurowane w ustawieniach formularza.');
+            $ajax_handler->add_error_message(__('The password field is not configured in the form settings.', 'alex-efpp'));
             return;
         }
 
-        // Pobierz wartości z pól
         $identifier = '';
         $password = '';
 
@@ -391,22 +426,20 @@ class EFPP_Form_Action_Login extends Action_Base {
         }
 
         if (empty($identifier)) {
-            $ajax_handler->add_error_message('Login/Email jest wymagany.');
+            $ajax_handler->add_error_message(__('Login or email is required.', 'alex-efpp'));
             return;
         }
 
         if (empty($password)) {
-            $ajax_handler->add_error_message('Hasło jest wymagane.');
+            $ajax_handler->add_error_message(__('Password is required.', 'alex-efpp'));
             return;
         }
 
-        // Sprawdź czy użytkownik jest już zalogowany
         if (is_user_logged_in()) {
-            $ajax_handler->add_error_message('Jesteś już zalogowany.');
+            $ajax_handler->add_error_message(__('You are already logged in.', 'alex-efpp'));
             return;
         }
 
-        // Znajdź użytkownika (może być login lub email)
         $user = null;
         if (is_email($identifier)) {
             $user = get_user_by('email', $identifier);
@@ -417,27 +450,23 @@ class EFPP_Form_Action_Login extends Action_Base {
         }
 
         if (!$user) {
-            $ajax_handler->add_error_message('Nieprawidłowy login lub email.');
+            $ajax_handler->add_error_message(__('Invalid username or email.', 'alex-efpp'));
             return;
         }
 
-        // Sprawdź hasło
         if (!wp_check_password($password, $user->user_pass, $user->ID)) {
-            $ajax_handler->add_error_message('Nieprawidłowe hasło.');
+            $ajax_handler->add_error_message(__('Incorrect password.', 'alex-efpp'));
             return;
         }
 
-        // Sprawdź czy użytkownik zaznaczył "Zapamiętaj mnie"
         $remember = false;
-        
-        // Najpierw sprawdź wartość z checkboxa w formularzu
+
         if (isset($fields['efpp_remember_me'])) {
             $remember_field = $fields['efpp_remember_me'];
             $remember_value = $remember_field['value'] ?? $remember_field['raw_value'] ?? '';
             $remember = !empty($remember_value) && ($remember_value === '1' || $remember_value === 1 || $remember_value === true);
         }
-        
-        // Jeśli checkbox nie istnieje, użyj wartości z ustawień (backward compatibility)
+
         if (!isset($fields['efpp_remember_me'])) {
             $remember = !empty($settings['efpp_login_remember']);
         }
@@ -445,13 +474,12 @@ class EFPP_Form_Action_Login extends Action_Base {
         wp_clear_auth_cookie();
         wp_set_current_user($user->ID);
         wp_set_auth_cookie($user->ID, $remember);
-        
-        // Aktualizuj czas ostatniego logowania
+
         update_user_meta($user->ID, 'last_login', current_time('mysql'));
 
         $redirect_url = $settings['efpp_login_redirect'] ?? '';
         
-        $ajax_handler->add_success_message('Zostałeś pomyślnie zalogowany.');
+        $ajax_handler->add_success_message(__('You have been successfully logged in.', 'alex-efpp'));
 
         if (!empty($redirect_url) && filter_var($redirect_url, FILTER_VALIDATE_URL)) {
             $ajax_handler->add_response_data('redirect_url', esc_url_raw($redirect_url));

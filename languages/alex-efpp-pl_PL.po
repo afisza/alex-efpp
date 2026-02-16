@@ -1,0 +1,601 @@
+# Polish translation for Alex EFPP
+# Copyright (C) 2025
+# This file is distributed under the same license as the Alex EFPP package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Alex EFPP\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-09 12:00+0000\n"
+"PO-Revision-Date: 2025-02-09 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Polish\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: alex-efpp.php
+msgid "Remember me"
+msgstr "Zapamiętaj mnie"
+
+#: alex-efpp.php
+msgid "Forgot password?"
+msgstr "Zapomniałeś hasła?"
+
+#: alex-efpp.php
+msgid "Back to login"
+msgstr "Wróć do logowania"
+
+#: alex-efpp.php
+msgid "Check for updates"
+msgstr "Sprawdź aktualizacje"
+
+#: alex-efpp.php
+msgid "Security check failed"
+msgstr "Sprawdzenie bezpieczeństwa nie powiodło się"
+
+#: alex-efpp.php
+msgid "You do not have permission to update plugins."
+msgstr "Nie masz uprawnień do aktualizacji wtyczek."
+
+#: alex-efpp.php
+msgid "Alex EFPP:"
+msgstr "Alex EFPP:"
+
+#: alex-efpp.php
+msgid "Update check completed. If an update is available, you will see it above."
+msgstr "Sprawdzanie aktualizacji zakończone. Jeśli jest dostępna aktualizacja, zobaczysz ją powyżej."
+
+#: includes/form-action-login.php
+msgid "EFPP – Login User"
+msgstr "EFPP – Logowanie użytkownika"
+
+#: includes/form-action-login.php
+msgid "Login/Email (field ID)"
+msgstr "Login/e-mail (ID pola)"
+
+#: includes/form-action-login.php
+msgid "e.g. email or login"
+msgstr "np. email lub login"
+
+#: includes/form-action-login.php
+msgid "Form field ID containing the user login or email."
+msgstr "ID pola formularza zawierającego login lub e-mail użytkownika."
+
+#: includes/form-action-login.php
+msgid "Password (field ID)"
+msgstr "Hasło (ID pola)"
+
+#: includes/form-action-login.php
+msgid "e.g. password"
+msgstr "np. hasło"
+
+#: includes/form-action-login.php
+msgid "Form field ID containing the password."
+msgstr "ID pola formularza zawierającego hasło."
+
+#: includes/form-action-login.php
+msgid "Show \"Remember me\" checkbox"
+msgstr "Pokaż checkbox \"Zapamiętaj mnie\""
+
+#: includes/form-action-login.php
+msgid "Yes"
+msgstr "Tak"
+
+#: includes/form-action-login.php
+msgid "No"
+msgstr "Nie"
+
+#: includes/form-action-login.php
+msgid "Shows the \"Remember me\" checkbox before the submit button. The user can choose whether to stay logged in."
+msgstr "Pokazuje checkbox \"Zapamiętaj mnie\" przed przyciskiem wysyłania. Użytkownik może zaznaczyć, czy chce być zapamiętany."
+
+#: includes/form-action-login.php
+msgid "Redirect to URL"
+msgstr "Przekierowanie do adresu URL"
+
+#: includes/form-action-login.php
+msgid "URL to redirect to after login. Leave empty to stay on the same page."
+msgstr "Adres URL do przekierowania po zalogowaniu. Zostaw puste, aby pozostać na tej samej stronie."
+
+#: includes/form-action-login.php
+msgid "Show Reset Password link"
+msgstr "Pokaż link Resetowanie hasła"
+
+#: includes/form-action-login.php
+msgid "Shows a link to the password reset form. On click, this form is hidden and the reset form is shown."
+msgstr "Pokazuje link do formularza resetowania hasła. Po kliknięciu ten formularz jest ukrywany i pokazywany jest formularz resetowania."
+
+#: includes/form-action-login.php
+msgid "Login Form ID"
+msgstr "ID formularza logowania"
+
+#: includes/form-action-login.php
+msgid "e.g. login-form-123"
+msgstr "np. login-form-123"
+
+#: includes/form-action-login.php
+msgid "Login form ID (used for hiding). Enter the ID from Elementor form settings (Form ID) or the form name (Form Name)."
+msgstr "ID formularza logowania (do ukrywania). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name)."
+
+#: includes/form-action-login.php includes/form-action-reset-password.php
+msgid "Reset Password Form ID"
+msgstr "ID formularza resetowania hasła"
+
+#: includes/form-action-login.php
+msgid "e.g. reset-form-456"
+msgstr "np. reset-form-456"
+
+#: includes/form-action-login.php
+msgid "Reset password form ID (used for showing). Enter the ID from Elementor form settings (Form ID) or the form name (Form Name)."
+msgstr "ID formularza resetowania hasła (do pokazania). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name)."
+
+#: includes/form-action-login.php
+msgid "Reset Password Link Text"
+msgstr "Tekst linku Resetowanie hasła"
+
+#: includes/form-action-login.php
+msgid "Remember Me Checkbox"
+msgstr "Checkbox Zapamiętaj mnie"
+
+#: includes/form-action-login.php
+msgid "Checkbox Color"
+msgstr "Kolor checkboxa"
+
+#: includes/form-action-login.php
+msgid "Text Typography"
+msgstr "Typografia tekstu"
+
+#: includes/form-action-login.php
+msgid "Text Color"
+msgstr "Kolor tekstu"
+
+#: includes/form-action-login.php
+msgid "Spacing"
+msgstr "Odstępy"
+
+#: includes/form-action-login.php
+msgid "Alignment"
+msgstr "Wyrównanie"
+
+#: includes/form-action-login.php
+msgid "Left"
+msgstr "Lewo"
+
+#: includes/form-action-login.php
+msgid "Center"
+msgstr "Środek"
+
+#: includes/form-action-login.php
+msgid "Right"
+msgstr "Prawo"
+
+#: includes/form-action-login.php
+msgid "Reset Password Link"
+msgstr "Link resetowania hasła"
+
+#: includes/form-action-login.php
+msgid "Typography"
+msgstr "Typografia"
+
+#: includes/form-action-login.php
+msgid "Normal"
+msgstr "Normalny"
+
+#: includes/form-action-login.php
+msgid "Color"
+msgstr "Kolor"
+
+#: includes/form-action-login.php
+msgid "Hover"
+msgstr "Najazd"
+
+#: includes/form-action-login.php
+msgid "The login/email field is not configured in the form settings."
+msgstr "Pole login/e-mail nie jest skonfigurowane w ustawieniach formularza."
+
+#: includes/form-action-login.php
+msgid "The password field is not configured in the form settings."
+msgstr "Pole hasła nie jest skonfigurowane w ustawieniach formularza."
+
+#: includes/form-action-login.php
+msgid "Login or email is required."
+msgstr "Wymagany jest login lub e-mail."
+
+#: includes/form-action-login.php
+msgid "Password is required."
+msgstr "Hasło jest wymagane."
+
+#: includes/form-action-login.php
+msgid "You are already logged in."
+msgstr "Jesteś już zalogowany."
+
+#: includes/form-action-login.php
+msgid "Invalid username or email."
+msgstr "Nieprawidłowa nazwa użytkownika lub e-mail."
+
+#: includes/form-action-login.php
+msgid "Incorrect password."
+msgstr "Nieprawidłowe hasło."
+
+#: includes/form-action-login.php
+msgid "You have been successfully logged in."
+msgstr "Zostałeś pomyślnie zalogowany."
+
+#: includes/class-form-action-post.php
+msgid "EFPP – Create/Update Post"
+msgstr "EFPP – Utwórz/aktualizuj wpis"
+
+#: includes/class-form-action-post.php
+msgid "EFPP – Publish Settings"
+msgstr "EFPP – Ustawienia publikacji"
+
+#: includes/class-form-action-post.php
+msgid "Guest (not logged in)"
+msgstr "Gość (niezalogowany)"
+
+#: includes/class-form-action-post.php
+msgid "Allowed Role"
+msgstr "Dozwolona rola"
+
+#: includes/class-form-action-post.php
+msgid "Action"
+msgstr "Akcja"
+
+#: includes/class-form-action-post.php
+msgid "Create Post"
+msgstr "Utwórz wpis"
+
+#: includes/class-form-action-post.php
+msgid "Update Post"
+msgstr "Aktualizuj wpis"
+
+#: includes/class-form-action-post.php
+msgid "Redirect to post after submit"
+msgstr "Przekieruj do wpisu po wysłaniu"
+
+#: includes/class-form-action-post.php
+msgid "Post Type"
+msgstr "Typ wpisu"
+
+#: includes/class-form-action-post.php
+msgid "Product Type"
+msgstr "Typ produktu"
+
+#: includes/class-form-action-post.php
+msgid "Simple"
+msgstr "Prosty"
+
+#: includes/class-form-action-post.php
+msgid "Grouped"
+msgstr "Grupowany"
+
+#: includes/class-form-action-post.php
+msgid "External/Affiliate"
+msgstr "Zewnętrzny/partnerski"
+
+#: includes/class-form-action-post.php
+msgid "Variable"
+msgstr "Wariable"
+
+#: includes/class-form-action-post.php
+msgid "Post Status"
+msgstr "Status wpisu"
+
+#: includes/class-form-action-post.php
+msgid "Draft"
+msgstr "Szkic"
+
+#: includes/class-form-action-post.php
+msgid "Published"
+msgstr "Opublikowany"
+
+#: includes/class-form-action-post.php
+msgid "Scheduled"
+msgstr "Zaplanowany"
+
+#: includes/class-form-action-post.php
+msgid "Pending Review"
+msgstr "Oczekuje na recenzję"
+
+#: includes/class-form-action-post.php
+msgid "Redirect After Submit"
+msgstr "Przekierowanie po wysłaniu"
+
+#: includes/class-form-action-post.php
+msgid "None"
+msgstr "Brak"
+
+#: includes/class-form-action-post.php
+msgid "Redirect to new post"
+msgstr "Przekieruj do nowego wpisu"
+
+#: includes/class-form-action-post.php
+msgid "Redirect to custom URL"
+msgstr "Przekieruj do niestandardowego adresu URL"
+
+#: includes/class-form-action-post.php
+msgid "Custom Redirect URL"
+msgstr "Niestandardowy adres URL przekierowania"
+
+#: includes/class-form-action-post.php
+msgid "Post ID Field"
+msgstr "Pole ID wpisu"
+
+#: includes/class-form-action-post.php
+msgid "Post Title"
+msgstr "Tytuł wpisu"
+
+#: includes/class-form-action-post.php
+msgid "Post Content"
+msgstr "Treść wpisu"
+
+#: includes/class-form-action-post.php
+msgid "Featured Image (URL)"
+msgstr "Obrazek wyróżniający (URL)"
+
+#: includes/class-form-action-post.php
+msgid "WooCommerce Price"
+msgstr "Cena WooCommerce"
+
+#: includes/class-form-action-post.php
+msgid "Post Date (Y-m-d)"
+msgstr "Data wpisu (Y-m-d)"
+
+#: includes/class-form-action-post.php
+msgid "Post Time (H:i)"
+msgstr "Godzina wpisu (H:i)"
+
+#: includes/class-form-action-post.php
+msgid "Custom Field"
+msgstr "Pole niestandardowe"
+
+#: includes/class-form-action-post.php
+msgid "Gallery Field"
+msgstr "Pole galerii"
+
+#: includes/class-form-action-post.php
+msgid "Taxonomy (term_id)"
+msgstr "Taksonomia (term_id)"
+
+#: includes/class-form-action-post.php
+msgid "Post Field Mapping"
+msgstr "Mapowanie pól wpisu"
+
+#: includes/class-form-action-post.php
+msgid "Form Field ID"
+msgstr "ID pola formularza"
+
+#: includes/class-form-action-post.php
+msgid "Meta Key (for custom field)"
+msgstr "Klucz meta (dla pola niestandardowego)"
+
+#: includes/class-form-action-post.php
+msgid "Meta Key"
+msgstr "Klucz meta"
+
+#: includes/class-form-action-post.php
+msgid "Taxonomy Slug"
+msgstr "Slug taksonomii"
+
+#: includes/class-form-action-post.php
+msgid "Max images count"
+msgstr "Maks. liczba obrazków"
+
+#: includes/class-form-action-post.php
+msgid "Max file size (MB)"
+msgstr "Maks. rozmiar pliku (MB)"
+
+#: includes/class-form-action-post.php
+msgid "Allowed file types (comma separated)"
+msgstr "Dozwolone typy plików (oddzielone przecinkami)"
+
+#: includes/class-form-action-post.php
+msgid "You must be logged in to submit."
+msgstr "Musisz być zalogowany, aby wysłać."
+
+#: includes/class-form-action-post.php
+msgid "You do not have permission to submit. Allowed roles: %s"
+msgstr "Nie masz uprawnień do wysłania. Dozwolone role: %s"
+
+#: includes/class-form-action-post.php
+msgid "Post ID is missing or invalid."
+msgstr "Brak lub nieprawidłowe ID wpisu."
+
+#: includes/class-form-action-post.php
+msgid "Error saving post."
+msgstr "Błąd zapisywania wpisu."
+
+#: includes/class-form-action-post.php
+msgid "Updated entry successfully."
+msgstr "Wpis został pomyślnie zaktualizowany."
+
+#: includes/class-form-action-post.php
+msgid "POST added successfully."
+msgstr "Wpis został pomyślnie dodany."
+
+#: includes/form-action-reset-password.php
+msgid "Show Login link"
+msgstr "Pokaż link Logowanie"
+
+#: includes/form-action-reset-password.php
+msgid "Shows a link to the login form. On click, this form is hidden and the login form is shown."
+msgstr "Pokazuje link do formularza logowania. Po kliknięciu ten formularz jest ukrywany i pokazywany jest formularz logowania."
+
+#: includes/form-action-reset-password.php
+msgid "Login form ID (used for showing). Enter the ID from Elementor form settings (Form ID) or the form name (Form Name)."
+msgstr "ID formularza logowania (do pokazania). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name)."
+
+#: includes/form-action-reset-password.php
+msgid "This reset password form ID (used for hiding). If empty, the ID from Elementor form settings (Form ID) will be used. Enter the ID from Elementor form settings (Form ID) or this form's name (Form Name)."
+msgstr "ID tego formularza resetowania hasła (do ukrywania). Jeśli puste, zostanie użyte ID z ustawień formularza Elementor (Form ID). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę tego formularza (Form Name)."
+
+#: includes/form-action-reset-password.php
+msgid "Login Link Text"
+msgstr "Tekst linku logowania"
+
+#: includes/form-action-reset-password.php
+msgid "Login Link"
+msgstr "Link logowania"
+
+#: includes/form-action-reset-password.php
+msgid "Someone requested a password reset for the following account:"
+msgstr "Ktoś poprosił o reset hasła dla następującego konta:"
+
+#: includes/form-action-reset-password.php
+msgid "Username: %s"
+msgstr "Nazwa użytkownika: %s"
+
+#: includes/form-action-reset-password.php
+msgid "If this was a mistake, ignore this email and the password will remain unchanged."
+msgstr "Jeśli to pomyłka, zignoruj tę wiadomość, a hasło pozostanie bez zmian."
+
+#: includes/form-action-reset-password.php
+msgid "To reset your password, visit the following address:"
+msgstr "Aby zresetować hasło, przejdź do następującego adresu:"
+
+#: includes/form-action-reset-password.php
+msgid "[%s] Password reset"
+msgstr "[%s] Reset hasła"
+
+#: includes/class-github-updater.php
+msgid "You do not have permission to check for updates."
+msgstr "Nie masz uprawnień do sprawdzania aktualizacji."
+
+#: includes/class-github-updater.php
+msgid "Failed to check for updates. Verify the GitHub repository configuration."
+msgstr "Nie udało się sprawdzić aktualizacji. Sprawdź konfigurację repozytorium GitHub."
+
+#: includes/class-github-updater.php
+msgid "A new version is available: %s (current: %s). Refresh the page to see the update button."
+msgstr "Dostępna jest nowa wersja: %s (aktualna: %s). Odśwież stronę, aby zobaczyć przycisk aktualizacji."
+
+#: includes/class-github-updater.php
+msgid "The plugin is up to date. Current version: %s"
+msgstr "Wtyczka jest aktualna. Aktualna wersja: %s"
+
+#: includes/form-field-logout-link.php
+msgid "Logout Link Text"
+msgstr "Tekst linku wylogowania"
+
+#: includes/efpp-style-controls.php
+msgid "EFPP Style Settings"
+msgstr "Ustawienia stylu EFPP"
+
+#: includes/efpp-style-controls.php
+msgid "Label Padding"
+msgstr "Wypełnienie etykiety"
+
+#: includes/efpp-style-controls.php
+msgid "Horizontal Gap"
+msgstr "Odstęp poziomy"
+
+#: includes/efpp-style-controls.php
+msgid "Vertical Gap"
+msgstr "Odstęp pionowy"
+
+#: includes/efpp-style-controls.php
+msgid "Label Typography"
+msgstr "Typografia etykiety"
+
+#: includes/efpp-style-controls.php
+msgid "Icon Spacing"
+msgstr "Odstęp ikony"
+
+#: includes/efpp-style-controls.php
+msgid "Icon Size"
+msgstr "Rozmiar ikony"
+
+#: includes/efpp-style-controls.php
+msgid "Hide Radio/Checkbox Inputs"
+msgstr "Ukryj pola radio/checkbox"
+
+#: includes/efpp-style-controls.php
+msgid "Normal Icon"
+msgstr "Ikona normalna"
+
+#: includes/efpp-style-controls.php
+msgid "Background Color"
+msgstr "Kolor tła"
+
+#: includes/efpp-style-controls.php
+msgid "Border Radius"
+msgstr "Zaokrąglenie obramowania"
+
+#: includes/efpp-style-controls.php
+msgid "Background Hover"
+msgstr "Tło przy najechaniu"
+
+#: includes/efpp-style-controls.php
+msgid "Text Hover"
+msgstr "Tekst przy najechaniu"
+
+#: includes/efpp-style-controls.php
+msgid "Border Hover Color"
+msgstr "Kolor obramowania przy najechaniu"
+
+#: includes/efpp-style-controls.php
+msgid "Border Radius (Hover)"
+msgstr "Zaokrąglenie obramowania (najazd)"
+
+#: includes/efpp-style-controls.php
+msgid "Checked"
+msgstr "Zaznaczony"
+
+#: includes/efpp-style-controls.php
+msgid "Checked Icon"
+msgstr "Ikona zaznaczenia"
+
+#: includes/efpp-style-controls.php
+msgid "Checked Background"
+msgstr "Tło zaznaczenia"
+
+#: includes/efpp-style-controls.php
+msgid "Checked Text Color"
+msgstr "Kolor tekstu zaznaczenia"
+
+#: includes/efpp-style-controls.php
+msgid "Checked Border Color"
+msgstr "Kolor obramowania zaznaczenia"
+
+#: includes/efpp-style-controls.php
+msgid "Border Radius (Checked)"
+msgstr "Zaokrąglenie obramowania (zaznaczony)"
+
+#: includes/efpp-style-controls.php
+msgid "Logout Link Styles"
+msgstr "Style linku wylogowania"
+
+#: includes/efpp-style-controls.php
+msgid "User Info Typography"
+msgstr "Typografia informacji o użytkowniku"
+
+#: includes/efpp-style-controls.php
+msgid "User Info Color"
+msgstr "Kolor informacji o użytkowniku"
+
+#: includes/efpp-style-controls.php
+msgid "User Info Spacing"
+msgstr "Odstępy informacji o użytkowniku"
+
+#: includes/efpp-style-controls.php
+msgid "List Style (Flex)"
+msgstr "Styl listy (flex)"
+
+#: includes/efpp-style-controls.php
+msgid "Gap Between Items"
+msgstr "Odstęp między elementami"
+
+#: includes/efpp-style-controls.php
+msgid "Direction"
+msgstr "Kierunek"
+
+#: includes/efpp-style-controls.php
+msgid "Column (Vertical)"
+msgstr "Kolumna (pionowo)"
+
+#: includes/efpp-style-controls.php
+msgid "Row (Horizontal)"
+msgstr "Wiersz (poziomo)"

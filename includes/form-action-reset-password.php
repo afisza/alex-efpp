@@ -64,7 +64,7 @@ class EFPP_Form_Action_Reset_Password extends Action_Base {
                 'label_off' => __('No', 'alex-efpp'),
                 'default' => 'no',
                 'separator' => 'before',
-                'description' => __('Pokazuje link do formularza logowania. Po kliknięciu ukryje ten formularz i pokaże formularz logowania.', 'alex-efpp'),
+                'description' => __('Shows a link to the login form. On click, this form is hidden and the login form is shown.', 'alex-efpp'),
             ]
         );
 
@@ -74,7 +74,7 @@ class EFPP_Form_Action_Reset_Password extends Action_Base {
                 'label' => __('Login Form ID', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
                 'placeholder' => 'np. login_form',
-                'description' => __('ID formularza logowania (używane do pokazania). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name).', 'alex-efpp'),
+                'description' => __('Login form ID (used for showing). Enter the ID from Elementor form settings (Form ID) or the form name (Form Name).', 'alex-efpp'),
                 'condition' => [
                     'efpp_reset_show_login_link' => 'yes',
                 ],
@@ -87,7 +87,7 @@ class EFPP_Form_Action_Reset_Password extends Action_Base {
                 'label' => __('Reset Password Form ID', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
                 'placeholder' => 'np. reset_form',
-                'description' => __('ID tego formularza resetowania hasła (używane do ukrywania). Jeśli puste, zostanie użyte ID z ustawień formularza Elementor (Form ID). Wpisz ID z ustawień formularza Elementor (Form ID) lub nazwę formularza (Form Name) tego formularza resetowania.', 'alex-efpp'),
+                'description' => __('This reset password form ID (used for hiding). If empty, the ID from Elementor form settings (Form ID) will be used. Enter the ID from Elementor form settings (Form ID) or this form\'s name (Form Name).', 'alex-efpp'),
                 'condition' => [
                     'efpp_reset_show_login_link' => 'yes',
                 ],
@@ -100,8 +100,8 @@ class EFPP_Form_Action_Reset_Password extends Action_Base {
             [
                 'label' => __('Login Link Text', 'alex-efpp'),
                 'type' => \Elementor\Controls_Manager::TEXT,
-                'default' => __('Wróć do logowania', 'alex-efpp'),
-                'placeholder' => __('Wróć do logowania', 'alex-efpp'),
+                'default' => __('Back to login', 'alex-efpp'),
+                'placeholder' => __('Back to login', 'alex-efpp'),
                 'condition' => [
                     'efpp_reset_show_login_link' => 'yes',
                 ],
@@ -300,15 +300,15 @@ class EFPP_Form_Action_Reset_Password extends Action_Base {
 
             if (!is_wp_error($key)) {
                 // Wyślij email z linkiem resetującym
-                $message = __('Ktoś poprosił o reset hasła dla następującego konta:') . "\r\n\r\n";
+                $message = __('Someone requested a password reset for the following account:', 'alex-efpp') . "\r\n\r\n";
                 $message .= network_home_url('/') . "\r\n\r\n";
-                $message .= sprintf(__('Nazwa użytkownika: %s'), $user->user_login) . "\r\n\r\n";
-                $message .= __('Jeśli to pomyłka, zignoruj tę wiadomość, a hasło pozostanie bez zmian.') . "\r\n\r\n";
-                $message .= __('Aby zresetować hasło, przejdź do następującego adresu:') . "\r\n\r\n";
+                $message .= sprintf(__('Username: %s', 'alex-efpp'), $user->user_login) . "\r\n\r\n";
+                $message .= __('If this was a mistake, ignore this email and the password will remain unchanged.', 'alex-efpp') . "\r\n\r\n";
+                $message .= __('To reset your password, visit the following address:', 'alex-efpp') . "\r\n\r\n";
                 $message .= network_site_url("wp-login.php?action=rp&key=$key&login=" . rawurlencode($user->user_login), 'login') . "\r\n";
 
                 $blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
-                $title = sprintf(__('[%s] Reset hasła'), $blogname);
+                $title = sprintf(__('[%s] Password reset', 'alex-efpp'), $blogname);
 
                 $headers = array('Content-Type: text/html; charset=UTF-8');
                 

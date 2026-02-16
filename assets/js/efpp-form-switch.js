@@ -95,9 +95,11 @@
                 'data-reset-form-id': resetFormId,
                 'text': linkText
             });
-            
+            // Wrapper for alignment (left/center/right)
+            var $wrapper = $('<div>', { 'class': 'efpp-reset-link-wrapper' }).append($link);
+
             // Insert after submit button
-            $submitContainer.after($link);
+            $submitContainer.after($wrapper);
             if (window.location.search.indexOf('efpp_debug=1') !== -1) {
                 console.log('EFPP Form Switch: Added reset password link to login form');
             }

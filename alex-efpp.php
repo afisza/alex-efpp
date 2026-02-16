@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT. Includes user registration, login, logout, and password reset actions.
-Version: 2.0.0
+Version: 2.0.1
 Author: Alex Shram
 Plugin URI: https://github.com/afisza/alex-efpp
 */
@@ -24,7 +24,7 @@ class Alex_EFPP {
     public function __construct() {
         // Pobierz wersję z nagłówka pluginu
         $plugin_data = get_file_data(__FILE__, ['Version' => 'Version'], 'plugin');
-        $this->version = $plugin_data['Version'] ?? '2.0.0';
+        $this->version = $plugin_data['Version'] ?? '2.0.1';
         add_action('plugins_loaded', [$this, 'load_textdomain']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_action']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_user_action']);
@@ -241,7 +241,7 @@ class Alex_EFPP {
         
         // Pass translated text to JavaScript
         wp_localize_script('efpp-remember-me', 'efppRememberMe', [
-            'text' => __('Zapamiętaj mnie', 'alex-efpp'),
+            'text' => __('Remember me', 'alex-efpp'),
         ]);
     }
 
@@ -263,7 +263,7 @@ class Alex_EFPP {
             if ($show_reset_link) {
                 $login_form_id = $settings['efpp_login_form_id'] ?? '';
                 $reset_form_id = $settings['efpp_login_reset_password_form_id'] ?? '';
-                $link_text = $settings['efpp_reset_password_link_text'] ?? __('Zapomniałeś hasła?', 'alex-efpp');
+                $link_text = $settings['efpp_reset_password_link_text'] ?? __('Forgot password?', 'alex-efpp');
                 
                 if (!empty($login_form_id) && !empty($reset_form_id)) {
                     $widget->add_render_attribute('_wrapper', 'data-efpp-login-form-id', esc_attr($login_form_id));
@@ -283,7 +283,7 @@ class Alex_EFPP {
             if ($show_login_link) {
                 $login_form_id = $settings['efpp_reset_login_form_id'] ?? '';
                 $reset_form_id = $settings['efpp_reset_password_form_id'] ?? '';
-                $link_text = $settings['efpp_reset_login_link_text'] ?? __('Wróć do logowania', 'alex-efpp');
+                $link_text = $settings['efpp_reset_login_link_text'] ?? __('Back to login', 'alex-efpp');
                 
                 // Always try to get reset form ID from form settings (this is the current form's ID)
                 // Priority: efpp_reset_password_form_id > form_id > form_name
