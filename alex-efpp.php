@@ -2,7 +2,7 @@
 /*
 Plugin Name: Alex EFPP - Elementor Form Publish Post/Register User
 Description: Publishes content from the Elementor form as a post or CPT. Includes user registration, login, logout, and password reset actions.
-Version: 2.0.1
+Version: 2.0.2
 Author: Alex Shram
 Plugin URI: https://github.com/afisza/alex-efpp
 */
@@ -24,7 +24,7 @@ class Alex_EFPP {
     public function __construct() {
         // Pobierz wersję z nagłówka pluginu
         $plugin_data = get_file_data(__FILE__, ['Version' => 'Version'], 'plugin');
-        $this->version = $plugin_data['Version'] ?? '2.0.1';
+        $this->version = $plugin_data['Version'] ?? '2.0.2';
         add_action('plugins_loaded', [$this, 'load_textdomain']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_action']);
         add_action('elementor_pro/forms/actions/register', [$this, 'register_user_action']);
@@ -423,6 +423,24 @@ class Alex_EFPP {
             }
         } else {
             error_log('Alex EFPP: File not found: ' . $file_path);
+        }
+
+        // Remember Me (native field – visible in Elementor editor)
+        $file_path = plugin_dir_path(__FILE__) . 'includes/form-field-remember-me.php';
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            if (class_exists('\EFPP_Remember_Me_Field')) {
+                $fields_manager->register(new \EFPP_Remember_Me_Field());
+            }
+        }
+
+        // Forgot Password Link (native field – visible in Elementor editor)
+        $file_path = plugin_dir_path(__FILE__) . 'includes/form-field-reset-password-link.php';
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            if (class_exists('\EFPP_Reset_Password_Link_Field')) {
+                $fields_manager->register(new \EFPP_Reset_Password_Link_Field());
+            }
         }
 
         // Logout Link - zakomentowane na razie
