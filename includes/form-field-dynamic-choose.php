@@ -175,7 +175,7 @@ class Dynamic_Choose_Field extends Field_Base {
                         data-field-type="efpp-dynamic-choose">
                     ';
 
-                    echo '<option value="">Wybierz</option>';
+                    echo '<option value="">' . esc_html__( 'Select', 'alex-efpp' ) . '</option>';
                         foreach ( $options as $value => $label ) {
                             echo '<option value="' . esc_attr($value) . '">' . esc_html($label) . '</option>';
                         }
@@ -500,7 +500,11 @@ class Dynamic_Choose_Field extends Field_Base {
             foreach ( $meta_boxes as $meta_box_name => $meta_box_fields ) {
                 foreach( $meta_box_fields as $field ) {
                     if ( in_array( $field['type'], $types ) ) {
-                        $options[ $meta_box_name ]['label'] = $post_types[ $meta_box_name ]->labels->name;
+                        // JetEngine registers meta groups for non-CPT objects too (users, taxonomies, etc.).
+                        // For those $post_types[$meta_box_name] is null — fall back to the group key as label.
+                        $options[ $meta_box_name ]['label'] = isset( $post_types[ $meta_box_name ] )
+                            ? $post_types[ $meta_box_name ]->labels->name
+                            : $meta_box_name;
 
                         $option_value = $meta_box_name . '|' . $field['name'];
                         $option_label = $field['title'];
@@ -516,25 +520,154 @@ class Dynamic_Choose_Field extends Field_Base {
         return $options;
     }
 
-    private function get_jet_engine_meta_field_options( $jet_engine_field ) {
-        $jet_engine_field_args = explode( '|', $jet_engine_field, 2 );
-        $meta_fields_group_name = $jet_engine_field_args[0];
-        $meta_field_name = $jet_engine_field_args[1];
-        $options = array();
+    private function resolve_jet_query_options( $field ) {
 
-        if (function_exists('jet_engine') && jet_engine()->meta_boxes) {
+        $result = array();
 
-            $meta_boxes = jet_engine()->meta_boxes->get_registered_fields();
-            $meta_fields_group = $meta_boxes[ $meta_fields_group_name ];
+        $query_id = ! empty( $field['query_id'] ) ? $field['query_id'] : false;
 
-            foreach( $meta_fields_group as $meta_field ) {
-                if ( $meta_field['name'] === $meta_field_name ) {
-                    $options = $meta_field['options'];
-                    break;
+        if ( ! $query_id ) {
+            return $result;
+        }
+
+        $query = \Jet_Engine\Query_Builder\Manager::instance()->get_query_by_id( $query_id );
+
+        if ( ! $query ) {
+            return $result;
+        }
+
+        $items = $query->get_items();
+
+        if ( empty( $items ) || ! is_array( $items ) ) {
+            return $result;
+        }
+
+        // Explicit mapping from the field settings wins; otherwise pick sensible
+        // defaults per object type returned by the query.
+        $value_field = ! empty( $field['query_value_field'] ) ? $field['query_value_field'] : null;
+        $label_field = ! empty( $field['query_label_field'] ) ? $field['query_label_field'] : null;
+
+        foreach ( $items as $item ) {
+
+            if ( is_object( $item ) ) {
+
+                if ( $item instanceof \WP_Term ) {
+                    $v = $value_field ?: 'term_id';
+                    $l = $label_field ?: 'name';
+                } elseif ( $item instanceof \WP_User ) {
+                    $v = $value_field ?: 'ID';
+                    $l = $label_field ?: 'display_name';
+                } elseif ( $item instanceof \WP_Post ) {
+                    $v = $value_field ?: 'ID';
+                    $l = $label_field ?: 'post_title';
+                } else {
+                    $v = $value_field ?: 'id';
+                    $l = $label_field ?: 'name';
                 }
+
+                $value = isset( $item->$v ) ? $item->$v : null;
+                $label = isset( $item->$l ) ? $item->$l : $value;
+
+            } elseif ( is_array( $item ) ) {
+
+                $v = $value_field ?: 'id';
+                $l = $label_field ?: 'name';
+                $value = isset( $item[ $v ] ) ? $item[ $v ] : null;
+                $label = isset( $item[ $l ] ) ? $item[ $l ] : $value;
+
+            } else {
+                $value = $item;
+                $label = $item;
             }
-            
-            $options = array_column( $options, 'value', 'key' );
+
+            if ( null === $value || '' === $value ) {
+                continue;
+            }
+
+            $result[ $value ] = array( 'label' => $label );
+        }
+
+        return $result;
+    }
+
+    private function get_jet_engine_meta_field_options( $jet_engine_field ) {
+
+        $jet_engine_field_args  = explode( '|', $jet_engine_field, 2 );
+        $meta_fields_group_name = $jet_engine_field_args[0];
+        $meta_field_name        = isset( $jet_engine_field_args[1] ) ? $jet_engine_field_args[1] : '';
+        $options                = array();
+
+        if ( ! function_exists( 'jet_engine' ) || ! jet_engine()->meta_boxes ) {
+            return $options;
+        }
+
+        $meta_boxes = jet_engine()->meta_boxes->get_registered_fields();
+
+        if ( empty( $meta_boxes[ $meta_fields_group_name ] ) ) {
+            return $options;
+        }
+
+        $target_field = null;
+
+        foreach ( $meta_boxes[ $meta_fields_group_name ] as $meta_field ) {
+            if ( isset( $meta_field['name'] ) && $meta_field['name'] === $meta_field_name ) {
+                $target_field = $meta_field;
+                break;
+            }
+        }
+
+        if ( ! $target_field ) {
+            return $options;
+        }
+
+        // Resolve options through JetEngine's own source pipeline. Reading
+        // $field['options'] directly only ever works for the legacy "manual"
+        // source - glossary, taxonomy, bulk and Query Builder fields store no
+        // options on the field itself and must go through this filter.
+        $raw = apply_filters( 'jet-engine/meta-fields/field-options', array(), $target_field );
+
+        // The Query Builder source returns a lazy callback instead of an array.
+        if ( is_callable( $raw ) ) {
+            $raw = call_user_func( $raw );
+        }
+
+        // JetEngine's Query Builder option source maps only post fields
+        // (ID / post_title) by default. For terms/users queries with no explicit
+        // Value/Label Field mapping it drops every item, so resolve the query
+        // ourselves with object-type-aware value/label detection.
+        if ( ( empty( $raw ) || ! is_array( $raw ) )
+             && isset( $target_field['options_source'] )
+             && 'query' === $target_field['options_source']
+             && class_exists( '\Jet_Engine\Query_Builder\Manager' ) ) {
+            $raw = $this->resolve_jet_query_options( $target_field );
+        }
+
+        if ( empty( $raw ) || ! is_array( $raw ) ) {
+            return $options;
+        }
+
+        foreach ( $raw as $index => $option ) {
+
+            if ( is_array( $option ) && isset( $option['key'] ) ) {
+                // manual / manual_bulk / taxonomy / glossary
+                $key   = $option['key'];
+                $label = isset( $option['value'] ) ? $option['value'] : $option['key'];
+            } elseif ( is_array( $option ) && isset( $option['label'] ) ) {
+                // query builder: [ value => [ 'label' => ... ] ]
+                $key   = $index;
+                $label = $option['label'];
+            } elseif ( is_array( $option ) ) {
+                continue;
+            } else {
+                $key   = $index;
+                $label = $option;
+            }
+
+            if ( '' === $key && '' === (string) $label ) {
+                continue;
+            }
+
+            $options[ $key ] = apply_filters( 'jet-engine/compatibility/translate-string', $label );
         }
 
         return $options;
